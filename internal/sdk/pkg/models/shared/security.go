@@ -2,6 +2,12 @@
 
 package shared
 
+type SchemeBasicAuth struct {
+	Password string `security:"name=password"`
+	Username string `security:"name=username"`
+}
+
 type Security struct {
-	APIKey string `security:"scheme,type=apiKey,subtype=header,name=x-api-key"`
+	BasicAuth  *SchemeBasicAuth `security:"scheme,type=http,subtype=basic"`
+	BearerAuth *string          `security:"scheme,type=http,subtype=bearer,name=Authorization"`
 }

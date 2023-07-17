@@ -25,8 +25,10 @@ type HashicupsProvider struct {
 
 // HashicupsProviderModel describes the provider data model.
 type HashicupsProviderModel struct {
-	ServerURL types.String `tfsdk:"server_url"`
-	APIKey    types.String `tfsdk:"api_key"`
+	ServerURL  types.String `tfsdk:"server_url"`
+	Password   types.String `tfsdk:"password"`
+	Username   types.String `tfsdk:"username"`
+	BearerAuth types.String `tfsdk:"bearer_auth"`
 }
 
 func (p *HashicupsProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -36,14 +38,21 @@ func (p *HashicupsProvider) Metadata(ctx context.Context, req provider.MetadataR
 
 func (p *HashicupsProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: `Hashicups: Example Hashicups through Speakeasy`,
 		Attributes: map[string]schema.Attribute{
 			"server_url": schema.StringAttribute{
-				MarkdownDescription: "Server URL (defaults to https://example.com)",
+				MarkdownDescription: "Server URL (defaults to https://api.hookdeck.com/{version})",
 				Optional:            true,
 				Required:            false,
 			},
-			"api_key": schema.StringAttribute{
+			"password": schema.StringAttribute{
+				Optional:  true,
+				Sensitive: true,
+			},
+			"username": schema.StringAttribute{
+				Optional:  true,
+				Sensitive: true,
+			},
+			"bearer_auth": schema.StringAttribute{
 				Optional:  true,
 				Sensitive: true,
 			},
@@ -63,12 +72,25 @@ func (p *HashicupsProvider) Configure(ctx context.Context, req provider.Configur
 	ServerURL := data.ServerURL.ValueString()
 
 	if ServerURL == "" {
-		ServerURL = "https://example.com"
+		ServerURL = "https://api.hookdeck.com/{version}"
 	}
 
-	apiKey := data.APIKey.ValueString()
+	var basicAuth *shared.SchemeBasicAuth
+	password := data.Password.ValueString()
+	username := data.Username.ValueString()
+	basicAuth = &shared.SchemeBasicAuth{
+		Password: password,
+		Username: username,
+	}
+	bearerAuth := new(string)
+	if !data.BearerAuth.IsUnknown() && !data.BearerAuth.IsNull() {
+		*bearerAuth = data.BearerAuth.ValueString()
+	} else {
+		bearerAuth = nil
+	}
 	security := shared.Security{
-		APIKey: apiKey,
+		BasicAuth:  basicAuth,
+		BearerAuth: bearerAuth,
 	}
 
 	opts := []sdk.SDKOption{
@@ -83,7 +105,7 @@ func (p *HashicupsProvider) Configure(ctx context.Context, req provider.Configur
 
 func (p *HashicupsProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		NewOrderResource,
+		NewConnectionResource,
 	}
 }
 

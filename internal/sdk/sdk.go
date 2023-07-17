@@ -3,6 +3,7 @@
 package sdk
 
 import (
+	"encoding/json"
 	"fmt"
 	"hashicups/internal/sdk/pkg/models/shared"
 	"hashicups/internal/sdk/pkg/utils"
@@ -12,7 +13,8 @@ import (
 
 // ServerList contains the list of servers available to the SDK
 var ServerList = []string{
-	"https://example.com",
+	// Production API
+	"https://api.hookdeck.com/{version}",
 }
 
 // HTTPClient provides an interface for suplying the SDK with a custom HTTP client
@@ -44,6 +46,7 @@ type sdkConfiguration struct {
 	Security          *shared.Security
 	ServerURL         string
 	ServerIndex       int
+	ServerDefaults    []map[string]string
 	Language          string
 	OpenAPIDocVersion string
 	SDKVersion        string
@@ -55,13 +58,62 @@ func (c *sdkConfiguration) GetServerDetails() (string, map[string]string) {
 		return c.ServerURL, nil
 	}
 
-	return ServerList[c.ServerIndex], nil
+	return ServerList[c.ServerIndex], c.ServerDefaults[c.ServerIndex]
 }
 
-// SDK - Hashicups: Example Hashicups through Speakeasy
-// https://docs.speakeasyapi.dev - The Speakeasy Platform Documentation
+// SDK
 type SDK struct {
-	Order *order
+	Attempt *attempt
+	// Attempts - An attempt is any request that Hookdeck makes on behalf of an event.
+	Attempts *attempts
+	Bookmark *bookmark
+	// Bookmarks - A bookmark lets you conveniently store and replay a specific request.
+	Bookmarks              *bookmarks
+	BulkRetryEvent         *bulkRetryEvent
+	BulkRetryIgnoredEvent  *bulkRetryIgnoredEvent
+	BulkRetryIgnoredEvents *bulkRetryIgnoredEvents
+	BulkRetryRequests      *bulkRetryRequests
+	Connection             *connection
+	ConnectionNumberUpdate *connectionNumberUpdate
+	// Connections - A connection lets you route webhooks from a source to a destination, using a ruleset.
+	Connections   *connections
+	CustomDomain  *customDomain
+	CustomDomains *customDomains
+	Destination   *destination
+	// Destinations - A destination is any endpoint to which your webhooks can be routed.
+	Destinations *destinations
+	Event        *event
+	EventRawBody *eventRawBody
+	// Events - An event is any request that Hookdeck receives from a source.
+	Events      *events
+	Integration *integration
+	// Integrations - An integration configures platform-specific behaviors, such as signature verification.
+	Integrations  *integrations
+	Issue         *issue
+	IssueTrigger  *issueTrigger
+	IssueTriggers *issueTriggers
+	// Issues - Issues lets you track problems in your workspace and communicate resolution steps with your team.
+	Issues               *issues
+	IssuesCount          *issuesCount
+	Request              *request
+	RequestBulkRetry     *requestBulkRetry
+	RequestEvents        *requestEvents
+	RequestIgnoredEvents *requestIgnoredEvents
+	RequestRawBody       *requestRawBody
+	// Requests - A request represent a webhook received by Hookdeck.
+	Requests *requests
+	Ruleset  *ruleset
+	// Rulesets - A ruleset defines a group of rules that can be used across many connections.
+	Rulesets *rulesets
+	Source   *source
+	// Sources - A source represents any third party that sends webhooks to Hookdeck.
+	Sources                  *sources
+	Transformation           *transformation
+	TransformationExecution  *transformationExecution
+	TransformationExecutions *transformationExecutions
+	// Transformations - A transformation represents JavaScript code that will be executed on a connection's requests. Transformations are applied to connections using Rules.
+	Transformations      *transformations
+	WebhookNotifications *webhookNotifications
 
 	sdkConfiguration sdkConfiguration
 }
@@ -97,6 +149,61 @@ func WithServerIndex(serverIndex int) SDKOption {
 	}
 }
 
+type ServerVersion string
+
+const (
+	ServerVersionTwoThousandAndTwentyThree0101 ServerVersion = "2023-01-01"
+	ServerVersionTwoThousandAndTwentyTwo1101   ServerVersion = "2022-11-01"
+	ServerVersionTwoThousandAndTwentyTwo1001   ServerVersion = "2022-10-01"
+	ServerVersionTwoThousandAndTwentyTwo0701   ServerVersion = "2022-07-01"
+	ServerVersionTwoThousandAndTwentyTwo0301   ServerVersion = "2022-03-01"
+	ServerVersionTwoThousandAndTwentyOne0801   ServerVersion = "2021-08-01"
+	ServerVersionTwoThousandAndTwenty0101      ServerVersion = "2020-01-01"
+)
+
+func (e ServerVersion) ToPointer() *ServerVersion {
+	return &e
+}
+
+func (e *ServerVersion) UnmarshalJSON(data []byte) error {
+	var v string
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+	switch v {
+	case "2023-01-01":
+		fallthrough
+	case "2022-11-01":
+		fallthrough
+	case "2022-10-01":
+		fallthrough
+	case "2022-07-01":
+		fallthrough
+	case "2022-03-01":
+		fallthrough
+	case "2021-08-01":
+		fallthrough
+	case "2020-01-01":
+		*e = ServerVersion(v)
+		return nil
+	default:
+		return fmt.Errorf("invalid value for ServerVersion: %v", v)
+	}
+}
+
+// WithVersion allows setting the $name variable for url substitution
+func WithVersion(version ServerVersion) SDKOption {
+	return func(sdk *SDK) {
+		for idx := range sdk.sdkConfiguration.ServerDefaults {
+			if _, ok := sdk.sdkConfiguration.ServerDefaults[idx]["version"]; !ok {
+				continue
+			}
+
+			sdk.sdkConfiguration.ServerDefaults[idx]["version"] = fmt.Sprintf("%v", version)
+		}
+	}
+}
+
 // WithClient allows the overriding of the default HTTP client used by the SDK
 func WithClient(client HTTPClient) SDKOption {
 	return func(sdk *SDK) {
@@ -116,9 +223,14 @@ func New(opts ...SDKOption) *SDK {
 	sdk := &SDK{
 		sdkConfiguration: sdkConfiguration{
 			Language:          "terraform",
-			OpenAPIDocVersion: "0.0.1",
+			OpenAPIDocVersion: "1.0.0",
 			SDKVersion:        "0.0.1",
-			GenVersion:        "2.62.1",
+			GenVersion:        "2.58.2",
+			ServerDefaults: []map[string]string{
+				{
+					"version": "2023-01-01",
+				},
+			},
 		},
 	}
 	for _, opt := range opts {
@@ -137,7 +249,85 @@ func New(opts ...SDKOption) *SDK {
 		}
 	}
 
-	sdk.Order = newOrder(sdk.sdkConfiguration)
+	sdk.Attempt = newAttempt(sdk.sdkConfiguration)
+
+	sdk.Attempts = newAttempts(sdk.sdkConfiguration)
+
+	sdk.Bookmark = newBookmark(sdk.sdkConfiguration)
+
+	sdk.Bookmarks = newBookmarks(sdk.sdkConfiguration)
+
+	sdk.BulkRetryEvent = newBulkRetryEvent(sdk.sdkConfiguration)
+
+	sdk.BulkRetryIgnoredEvent = newBulkRetryIgnoredEvent(sdk.sdkConfiguration)
+
+	sdk.BulkRetryIgnoredEvents = newBulkRetryIgnoredEvents(sdk.sdkConfiguration)
+
+	sdk.BulkRetryRequests = newBulkRetryRequests(sdk.sdkConfiguration)
+
+	sdk.Connection = newConnection(sdk.sdkConfiguration)
+
+	sdk.ConnectionNumberUpdate = newConnectionNumberUpdate(sdk.sdkConfiguration)
+
+	sdk.Connections = newConnections(sdk.sdkConfiguration)
+
+	sdk.CustomDomain = newCustomDomain(sdk.sdkConfiguration)
+
+	sdk.CustomDomains = newCustomDomains(sdk.sdkConfiguration)
+
+	sdk.Destination = newDestination(sdk.sdkConfiguration)
+
+	sdk.Destinations = newDestinations(sdk.sdkConfiguration)
+
+	sdk.Event = newEvent(sdk.sdkConfiguration)
+
+	sdk.EventRawBody = newEventRawBody(sdk.sdkConfiguration)
+
+	sdk.Events = newEvents(sdk.sdkConfiguration)
+
+	sdk.Integration = newIntegration(sdk.sdkConfiguration)
+
+	sdk.Integrations = newIntegrations(sdk.sdkConfiguration)
+
+	sdk.Issue = newIssue(sdk.sdkConfiguration)
+
+	sdk.IssueTrigger = newIssueTrigger(sdk.sdkConfiguration)
+
+	sdk.IssueTriggers = newIssueTriggers(sdk.sdkConfiguration)
+
+	sdk.Issues = newIssues(sdk.sdkConfiguration)
+
+	sdk.IssuesCount = newIssuesCount(sdk.sdkConfiguration)
+
+	sdk.Request = newRequest(sdk.sdkConfiguration)
+
+	sdk.RequestBulkRetry = newRequestBulkRetry(sdk.sdkConfiguration)
+
+	sdk.RequestEvents = newRequestEvents(sdk.sdkConfiguration)
+
+	sdk.RequestIgnoredEvents = newRequestIgnoredEvents(sdk.sdkConfiguration)
+
+	sdk.RequestRawBody = newRequestRawBody(sdk.sdkConfiguration)
+
+	sdk.Requests = newRequests(sdk.sdkConfiguration)
+
+	sdk.Ruleset = newRuleset(sdk.sdkConfiguration)
+
+	sdk.Rulesets = newRulesets(sdk.sdkConfiguration)
+
+	sdk.Source = newSource(sdk.sdkConfiguration)
+
+	sdk.Sources = newSources(sdk.sdkConfiguration)
+
+	sdk.Transformation = newTransformation(sdk.sdkConfiguration)
+
+	sdk.TransformationExecution = newTransformationExecution(sdk.sdkConfiguration)
+
+	sdk.TransformationExecutions = newTransformationExecutions(sdk.sdkConfiguration)
+
+	sdk.Transformations = newTransformations(sdk.sdkConfiguration)
+
+	sdk.WebhookNotifications = newWebhookNotifications(sdk.sdkConfiguration)
 
 	return sdk
 }
