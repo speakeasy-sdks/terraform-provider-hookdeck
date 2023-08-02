@@ -16,7 +16,7 @@ jobs:
     with:
       speakeasy_version: latest
       openapi_docs: |
-        - ./hashicups.yaml # Local path or stable URL
+        - https://raw.githubusercontent.com/speakeasy-sdks/hookdeck-oas/main/openapi.yaml
       languages: |
         - terraform
       create_release: true
