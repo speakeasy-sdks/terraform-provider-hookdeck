@@ -23,8 +23,8 @@ func newRequest(sdkConfig sdkConfiguration) *request {
 	}
 }
 
-// Get - Get a request
-func (s *request) Get(ctx context.Context, request operations.GetRequestRequest) (*operations.GetRequestResponse, error) {
+// GetRequest - Get a request
+func (s *request) GetRequest(ctx context.Context, request operations.GetRequestRequest) (*operations.GetRequestResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/requests/{id}", request, nil)
 	if err != nil {
@@ -35,7 +35,7 @@ func (s *request) Get(ctx context.Context, request operations.GetRequestRequest)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	client := s.sdkConfiguration.SecurityClient
@@ -88,8 +88,8 @@ func (s *request) Get(ctx context.Context, request operations.GetRequestRequest)
 	return res, nil
 }
 
-// Retry - Retry a request
-func (s *request) Retry(ctx context.Context, request operations.RetryRequestRequest) (*operations.RetryRequestResponse, error) {
+// RetryRequest - Retry a request
+func (s *request) RetryRequest(ctx context.Context, request operations.RetryRequestRequest) (*operations.RetryRequestResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/requests/{id}/retry", request, nil)
 	if err != nil {
@@ -108,7 +108,7 @@ func (s *request) Retry(ctx context.Context, request operations.RetryRequestRequ
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	req.Header.Set("Content-Type", reqContentType)

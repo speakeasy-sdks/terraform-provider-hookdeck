@@ -3,9 +3,9 @@
 package provider
 
 type Rule1 struct {
-	Any        *Any1        `tfsdk:"any"`
-	AlertRule  *AlertRule1  `tfsdk:"alert_rule"`
-	DelayRule  *DelayRule1  `tfsdk:"delay_rule"`
-	FilterRule *FilterRule1 `tfsdk:"filter_rule"`
-	RetryRule  *RetryRule1  `tfsdk:"retry_rule"`
+	AlertRule     *AlertRule     `tfsdk:"alert_rule"`
+	DelayRule     *DelayRule     `tfsdk:"delay_rule"`
+	FilterRule    *FilterRule1   `tfsdk:"filter_rule"`
+	RetryRule     *RetryRule     `tfsdk:"retry_rule"`
+	TransformRule *TransformRule `tfsdk:"transform_rule"`
 }

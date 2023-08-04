@@ -24,8 +24,8 @@ func newWebhookNotifications(sdkConfig sdkConfiguration) *webhookNotifications {
 	}
 }
 
-// Toggle - Toggle webhook notifications for the workspace
-func (s *webhookNotifications) Toggle(ctx context.Context, request operations.ToggleWebhookNotificationsRequestBody) (*operations.ToggleWebhookNotificationsResponse, error) {
+// ToggleWebhookNotifications - Toggle webhook notifications for the workspace
+func (s *webhookNotifications) ToggleWebhookNotifications(ctx context.Context, request operations.ToggleWebhookNotificationsRequestBody) (*operations.ToggleWebhookNotificationsResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url := strings.TrimSuffix(baseURL, "/") + "/notifications/webhooks"
 

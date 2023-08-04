@@ -25,9 +25,9 @@ func newEvents(sdkConfig sdkConfiguration) *events {
 	}
 }
 
-// Get - Get Events
+// GetEvents - Get Events
 // Retrieve a list of requests that Hookdeck receives from a source.
-func (s *events) Get(ctx context.Context, request operations.GetEventsRequest) (*operations.GetEventsResponse, error) {
+func (s *events) GetEvents(ctx context.Context, request operations.GetEventsRequest) (*operations.GetEventsResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url := strings.TrimSuffix(baseURL, "/") + "/events"
 
@@ -35,7 +35,7 @@ func (s *events) Get(ctx context.Context, request operations.GetEventsRequest) (
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	if err := utils.PopulateQueryParams(ctx, req, request, nil); err != nil {
