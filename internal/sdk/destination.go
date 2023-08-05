@@ -24,9 +24,9 @@ func newDestination(sdkConfig sdkConfiguration) *destination {
 	}
 }
 
-// Archive - Archive a Destination
+// ArchiveDestination - Archive a Destination
 // Archive an unused endpoint.
-func (s *destination) Archive(ctx context.Context, request operations.ArchiveDestinationRequest) (*operations.ArchiveDestinationResponse, error) {
+func (s *destination) ArchiveDestination(ctx context.Context, request operations.ArchiveDestinationRequest) (*operations.ArchiveDestinationResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/destinations/{id}/archive", request, nil)
 	if err != nil {
@@ -37,7 +37,7 @@ func (s *destination) Archive(ctx context.Context, request operations.ArchiveDes
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	client := s.sdkConfiguration.SecurityClient
@@ -90,9 +90,9 @@ func (s *destination) Archive(ctx context.Context, request operations.ArchiveDes
 	return res, nil
 }
 
-// Create - Create a Destination
+// CreateDestination - Create a Destination
 // Create a new endpoint to which your webhooks can be routed.
-func (s *destination) Create(ctx context.Context, request operations.CreateDestinationRequestBody) (*operations.CreateDestinationResponse, error) {
+func (s *destination) CreateDestination(ctx context.Context, request operations.CreateDestinationRequestBody) (*operations.CreateDestinationResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url := strings.TrimSuffix(baseURL, "/") + "/destinations"
 
@@ -108,7 +108,7 @@ func (s *destination) Create(ctx context.Context, request operations.CreateDesti
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	req.Header.Set("Content-Type", reqContentType)
@@ -165,9 +165,9 @@ func (s *destination) Create(ctx context.Context, request operations.CreateDesti
 	return res, nil
 }
 
-// Delete - Delete a Destination
+// DeleteDestination - Delete a Destination
 // Delete an endpoint to which your webhooks can be routed.
-func (s *destination) Delete(ctx context.Context, request operations.DeleteDestinationRequest) (*operations.DeleteDestinationResponse, error) {
+func (s *destination) DeleteDestination(ctx context.Context, request operations.DeleteDestinationRequest) (*operations.DeleteDestinationResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/destinations/{id}", request, nil)
 	if err != nil {
@@ -178,7 +178,7 @@ func (s *destination) Delete(ctx context.Context, request operations.DeleteDesti
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	client := s.sdkConfiguration.SecurityClient
@@ -231,9 +231,9 @@ func (s *destination) Delete(ctx context.Context, request operations.DeleteDesti
 	return res, nil
 }
 
-// Get - Get a Destination
+// GetDestination - Get a Destination
 // Retrieve an endpoint to which your webhooks can be routed.
-func (s *destination) Get(ctx context.Context, request operations.GetDestinationRequest) (*operations.GetDestinationResponse, error) {
+func (s *destination) GetDestination(ctx context.Context, request operations.GetDestinationRequest) (*operations.GetDestinationResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/destinations/{id}", request, nil)
 	if err != nil {
@@ -244,7 +244,7 @@ func (s *destination) Get(ctx context.Context, request operations.GetDestination
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	client := s.sdkConfiguration.SecurityClient
@@ -299,9 +299,9 @@ func (s *destination) Get(ctx context.Context, request operations.GetDestination
 	return res, nil
 }
 
-// Unarchive - Unarchive a Destination
+// UnarchiveDestination - Unarchive a Destination
 // Unarchive an endpoint.
-func (s *destination) Unarchive(ctx context.Context, request operations.UnarchiveDestinationRequest) (*operations.UnarchiveDestinationResponse, error) {
+func (s *destination) UnarchiveDestination(ctx context.Context, request operations.UnarchiveDestinationRequest) (*operations.UnarchiveDestinationResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/destinations/{id}/unarchive", request, nil)
 	if err != nil {
@@ -312,7 +312,7 @@ func (s *destination) Unarchive(ctx context.Context, request operations.Unarchiv
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	client := s.sdkConfiguration.SecurityClient
@@ -365,9 +365,9 @@ func (s *destination) Unarchive(ctx context.Context, request operations.Unarchiv
 	return res, nil
 }
 
-// Update - Update a Destination
+// UpdateDestination - Update a Destination
 // Update an existing endpoint to which your webhooks can be routed.
-func (s *destination) Update(ctx context.Context, request operations.UpdateDestinationRequest) (*operations.UpdateDestinationResponse, error) {
+func (s *destination) UpdateDestination(ctx context.Context, request operations.UpdateDestinationRequest) (*operations.UpdateDestinationResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/destinations/{id}", request, nil)
 	if err != nil {
@@ -386,7 +386,7 @@ func (s *destination) Update(ctx context.Context, request operations.UpdateDesti
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	req.Header.Set("Content-Type", reqContentType)
@@ -445,9 +445,9 @@ func (s *destination) Update(ctx context.Context, request operations.UpdateDesti
 	return res, nil
 }
 
-// Upsert - Update or Create a Destination
+// UpsertDestination - Update or Create a Destination
 // Update or create a new endpoint to which your webhooks can be routed.
-func (s *destination) Upsert(ctx context.Context, request operations.UpsertDestinationRequestBody) (*operations.UpsertDestinationResponse, error) {
+func (s *destination) UpsertDestination(ctx context.Context, request operations.UpsertDestinationRequestBody) (*operations.UpsertDestinationResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url := strings.TrimSuffix(baseURL, "/") + "/destinations"
 
@@ -463,7 +463,7 @@ func (s *destination) Upsert(ctx context.Context, request operations.UpsertDesti
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	req.Header.Set("Content-Type", reqContentType)

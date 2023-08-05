@@ -5,8 +5,8 @@ package provider
 import "github.com/hashicorp/terraform-plugin-framework/types"
 
 type ConnectionFilterProperty5 struct {
-	Str                       types.String                `tfsdk:"str"`
-	Float32                   types.Number                `tfsdk:"float32"`
-	Boolean                   types.Bool                  `tfsdk:"boolean"`
-	ConnectionFilterProperty4 *ConnectionFilterProperty41 `tfsdk:"connection_filter_property_4"`
+	Str                       types.String               `tfsdk:"str"`
+	Float32                   types.Number               `tfsdk:"float32"`
+	Boolean                   types.Bool                 `tfsdk:"boolean"`
+	ConnectionFilterProperty4 *ConnectionFilterProperty4 `tfsdk:"connection_filter_property_4"`
 }
