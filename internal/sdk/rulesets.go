@@ -25,8 +25,8 @@ func newRulesets(sdkConfig sdkConfiguration) *rulesets {
 	}
 }
 
-// Get - Get rulesets
-func (s *rulesets) Get(ctx context.Context, request operations.GetRulesetsRequest) (*operations.GetRulesetsResponse, error) {
+// GetRulesets - Get rulesets
+func (s *rulesets) GetRulesets(ctx context.Context, request operations.GetRulesetsRequest) (*operations.GetRulesetsResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url := strings.TrimSuffix(baseURL, "/") + "/rulesets"
 
@@ -34,7 +34,7 @@ func (s *rulesets) Get(ctx context.Context, request operations.GetRulesetsReques
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	if err := utils.PopulateQueryParams(ctx, req, request, nil); err != nil {

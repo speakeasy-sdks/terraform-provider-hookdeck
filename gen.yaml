@@ -1,10 +1,15 @@
 configVersion: 1.0.0
+management:
+  docChecksum: d830a406b2443ec8c3f767c5da86b8c3
+  docVersion: 1.0.0
+  speakeasyVersion: 1.68.3
+  generationVersion: 2.81.1
 generation:
   sdkClassName: SDK
   sdkFlattening: true
   singleTagPerOp: false
   telemetryEnabled: false
 terraform:
-  version: 0.0.1
+  version: 1.0.0
   author: speakeasy
   packageName: hashicups

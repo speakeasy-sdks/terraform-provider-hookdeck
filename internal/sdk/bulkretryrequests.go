@@ -24,8 +24,8 @@ func newBulkRetryRequests(sdkConfig sdkConfiguration) *bulkRetryRequests {
 	}
 }
 
-// Create - Create a requests bulk retry
-func (s *bulkRetryRequests) Create(ctx context.Context, request operations.CreateRequestBulkRetryRequestBody) (*operations.CreateRequestBulkRetryResponse, error) {
+// CreateRequestBulkRetry - Create a requests bulk retry
+func (s *bulkRetryRequests) CreateRequestBulkRetry(ctx context.Context, request operations.CreateRequestBulkRetryRequestBody) (*operations.CreateRequestBulkRetryResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url := strings.TrimSuffix(baseURL, "/") + "/bulk/requests/retry"
 
@@ -41,7 +41,7 @@ func (s *bulkRetryRequests) Create(ctx context.Context, request operations.Creat
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	req.Header.Set("Content-Type", reqContentType)
