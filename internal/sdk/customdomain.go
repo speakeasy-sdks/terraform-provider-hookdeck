@@ -23,8 +23,8 @@ func newCustomDomain(sdkConfig sdkConfiguration) *customDomain {
 	}
 }
 
-// Add - Add a custom domain to the workspace
-func (s *customDomain) Add(ctx context.Context, request operations.AddCustomDomainRequest) (*operations.AddCustomDomainResponse, error) {
+// AddCustomDomain - Add a custom domain to the workspace
+func (s *customDomain) AddCustomDomain(ctx context.Context, request operations.AddCustomDomainRequest) (*operations.AddCustomDomainResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/teams/{team_id}/custom_domains", request, nil)
 	if err != nil {
@@ -88,8 +88,8 @@ func (s *customDomain) Add(ctx context.Context, request operations.AddCustomDoma
 	return res, nil
 }
 
-// Delete - Removes a custom domain from the workspace
-func (s *customDomain) Delete(ctx context.Context, request operations.DeleteCustomDomainRequest) (*operations.DeleteCustomDomainResponse, error) {
+// DeleteCustomDomain - Removes a custom domain from the workspace
+func (s *customDomain) DeleteCustomDomain(ctx context.Context, request operations.DeleteCustomDomainRequest) (*operations.DeleteCustomDomainResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/teams/{team_id}/custom_domains/{domain_id}", request, nil)
 	if err != nil {

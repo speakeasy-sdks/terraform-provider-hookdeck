@@ -36,7 +36,7 @@ func (s *integration) AttachIntegrationToSource(ctx context.Context, request ope
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	client := s.sdkConfiguration.SecurityClient
@@ -91,8 +91,8 @@ func (s *integration) AttachIntegrationToSource(ctx context.Context, request ope
 	return res, nil
 }
 
-// Create - Create an integration
-func (s *integration) Create(ctx context.Context, request operations.CreateIntegrationRequestBody) (*operations.CreateIntegrationResponse, error) {
+// CreateIntegration - Create an integration
+func (s *integration) CreateIntegration(ctx context.Context, request operations.CreateIntegrationRequestBody) (*operations.CreateIntegrationResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url := strings.TrimSuffix(baseURL, "/") + "/integrations"
 
@@ -108,7 +108,7 @@ func (s *integration) Create(ctx context.Context, request operations.CreateInteg
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	req.Header.Set("Content-Type", reqContentType)
@@ -165,8 +165,8 @@ func (s *integration) Create(ctx context.Context, request operations.CreateInteg
 	return res, nil
 }
 
-// Delete - Delete an integration
-func (s *integration) Delete(ctx context.Context, request operations.DeleteIntegrationRequest) (*operations.DeleteIntegrationResponse, error) {
+// DeleteIntegration - Delete an integration
+func (s *integration) DeleteIntegration(ctx context.Context, request operations.DeleteIntegrationRequest) (*operations.DeleteIntegrationResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/integrations/{id}", request, nil)
 	if err != nil {
@@ -177,7 +177,7 @@ func (s *integration) Delete(ctx context.Context, request operations.DeleteInteg
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	client := s.sdkConfiguration.SecurityClient
@@ -242,7 +242,7 @@ func (s *integration) DetachIntegrationToSource(ctx context.Context, request ope
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	client := s.sdkConfiguration.SecurityClient
@@ -297,8 +297,8 @@ func (s *integration) DetachIntegrationToSource(ctx context.Context, request ope
 	return res, nil
 }
 
-// Get - Get an integration
-func (s *integration) Get(ctx context.Context, request operations.GetIntegrationRequest) (*operations.GetIntegrationResponse, error) {
+// GetIntegration - Get an integration
+func (s *integration) GetIntegration(ctx context.Context, request operations.GetIntegrationRequest) (*operations.GetIntegrationResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/integrations/{id}", request, nil)
 	if err != nil {
@@ -309,7 +309,7 @@ func (s *integration) Get(ctx context.Context, request operations.GetIntegration
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	client := s.sdkConfiguration.SecurityClient
@@ -362,8 +362,8 @@ func (s *integration) Get(ctx context.Context, request operations.GetIntegration
 	return res, nil
 }
 
-// Update - Update an integration
-func (s *integration) Update(ctx context.Context, request operations.UpdateIntegrationRequest) (*operations.UpdateIntegrationResponse, error) {
+// UpdateIntegration - Update an integration
+func (s *integration) UpdateIntegration(ctx context.Context, request operations.UpdateIntegrationRequest) (*operations.UpdateIntegrationResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/integrations/{id}", request, nil)
 	if err != nil {
@@ -382,7 +382,7 @@ func (s *integration) Update(ctx context.Context, request operations.UpdateInteg
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	req.Header.Set("Content-Type", reqContentType)
