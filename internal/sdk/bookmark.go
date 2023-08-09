@@ -24,9 +24,9 @@ func newBookmark(sdkConfig sdkConfiguration) *bookmark {
 	}
 }
 
-// Create - Create a Bookmark
+// CreateBookmark - Create a Bookmark
 // Create a new bookmark.
-func (s *bookmark) Create(ctx context.Context, request operations.CreateBookmarkRequestBody) (*operations.CreateBookmarkResponse, error) {
+func (s *bookmark) CreateBookmark(ctx context.Context, request operations.CreateBookmarkRequestBody) (*operations.CreateBookmarkResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url := strings.TrimSuffix(baseURL, "/") + "/bookmarks"
 
@@ -42,7 +42,7 @@ func (s *bookmark) Create(ctx context.Context, request operations.CreateBookmark
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	req.Header.Set("Content-Type", reqContentType)
@@ -99,9 +99,9 @@ func (s *bookmark) Create(ctx context.Context, request operations.CreateBookmark
 	return res, nil
 }
 
-// Delete - Delete a Bookmark
+// DeleteBookmark - Delete a Bookmark
 // Delete an existing bookmark
-func (s *bookmark) Delete(ctx context.Context, request operations.DeleteBookmarkRequest) (*operations.DeleteBookmarkResponse, error) {
+func (s *bookmark) DeleteBookmark(ctx context.Context, request operations.DeleteBookmarkRequest) (*operations.DeleteBookmarkResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/bookmarks/{id}", request, nil)
 	if err != nil {
@@ -112,7 +112,7 @@ func (s *bookmark) Delete(ctx context.Context, request operations.DeleteBookmark
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	client := s.sdkConfiguration.SecurityClient
@@ -165,9 +165,9 @@ func (s *bookmark) Delete(ctx context.Context, request operations.DeleteBookmark
 	return res, nil
 }
 
-// Get - Get a Single Bookmark
+// GetBookmark - Get a Single Bookmark
 // Retrieve an existing bookmark details.
-func (s *bookmark) Get(ctx context.Context, request operations.GetBookmarkRequest) (*operations.GetBookmarkResponse, error) {
+func (s *bookmark) GetBookmark(ctx context.Context, request operations.GetBookmarkRequest) (*operations.GetBookmarkResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/bookmarks/{id}", request, nil)
 	if err != nil {
@@ -178,7 +178,7 @@ func (s *bookmark) Get(ctx context.Context, request operations.GetBookmarkReques
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	client := s.sdkConfiguration.SecurityClient
@@ -231,9 +231,9 @@ func (s *bookmark) Get(ctx context.Context, request operations.GetBookmarkReques
 	return res, nil
 }
 
-// Trigger - Trigger a Bookmark
+// TriggerBookmark - Trigger a Bookmark
 // Trigger a bookmark operation to store and replay a specific request.
-func (s *bookmark) Trigger(ctx context.Context, request operations.TriggerBookmarkRequest) (*operations.TriggerBookmarkResponse, error) {
+func (s *bookmark) TriggerBookmark(ctx context.Context, request operations.TriggerBookmarkRequest) (*operations.TriggerBookmarkResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/bookmarks/{id}/trigger", request, nil)
 	if err != nil {
@@ -252,7 +252,7 @@ func (s *bookmark) Trigger(ctx context.Context, request operations.TriggerBookma
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	req.Header.Set("Content-Type", reqContentType)
@@ -311,9 +311,9 @@ func (s *bookmark) Trigger(ctx context.Context, request operations.TriggerBookma
 	return res, nil
 }
 
-// Update - Update a Bookmark
+// UpdateBookmark - Update a Bookmark
 // Update an existing bookmark information.
-func (s *bookmark) Update(ctx context.Context, request operations.UpdateBookmarkRequest) (*operations.UpdateBookmarkResponse, error) {
+func (s *bookmark) UpdateBookmark(ctx context.Context, request operations.UpdateBookmarkRequest) (*operations.UpdateBookmarkResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/bookmarks/{id}", request, nil)
 	if err != nil {
@@ -332,7 +332,7 @@ func (s *bookmark) Update(ctx context.Context, request operations.UpdateBookmark
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	req.Header.Set("Content-Type", reqContentType)
