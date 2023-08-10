@@ -3,16 +3,111 @@
 package operations
 
 import (
+	"bytes"
+	"encoding/json"
+	"errors"
 	"hashicups/internal/sdk/pkg/models/shared"
 	"net/http"
 	"time"
 )
 
+type UpdateIssueTriggerRequestBodyConfigsType string
+
+const (
+	UpdateIssueTriggerRequestBodyConfigsTypeIssueTriggerDeliveryConfigs       UpdateIssueTriggerRequestBodyConfigsType = "IssueTriggerDeliveryConfigs"
+	UpdateIssueTriggerRequestBodyConfigsTypeIssueTriggerTransformationConfigs UpdateIssueTriggerRequestBodyConfigsType = "IssueTriggerTransformationConfigs"
+	UpdateIssueTriggerRequestBodyConfigsTypeIssueTriggerBackpressureConfigs   UpdateIssueTriggerRequestBodyConfigsType = "IssueTriggerBackpressureConfigs"
+)
+
+type UpdateIssueTriggerRequestBodyConfigs struct {
+	IssueTriggerDeliveryConfigs       *shared.IssueTriggerDeliveryConfigs
+	IssueTriggerTransformationConfigs *shared.IssueTriggerTransformationConfigs
+	IssueTriggerBackpressureConfigs   *shared.IssueTriggerBackpressureConfigs
+
+	Type UpdateIssueTriggerRequestBodyConfigsType
+}
+
+func CreateUpdateIssueTriggerRequestBodyConfigsIssueTriggerDeliveryConfigs(issueTriggerDeliveryConfigs shared.IssueTriggerDeliveryConfigs) UpdateIssueTriggerRequestBodyConfigs {
+	typ := UpdateIssueTriggerRequestBodyConfigsTypeIssueTriggerDeliveryConfigs
+
+	return UpdateIssueTriggerRequestBodyConfigs{
+		IssueTriggerDeliveryConfigs: &issueTriggerDeliveryConfigs,
+		Type:                        typ,
+	}
+}
+
+func CreateUpdateIssueTriggerRequestBodyConfigsIssueTriggerTransformationConfigs(issueTriggerTransformationConfigs shared.IssueTriggerTransformationConfigs) UpdateIssueTriggerRequestBodyConfigs {
+	typ := UpdateIssueTriggerRequestBodyConfigsTypeIssueTriggerTransformationConfigs
+
+	return UpdateIssueTriggerRequestBodyConfigs{
+		IssueTriggerTransformationConfigs: &issueTriggerTransformationConfigs,
+		Type:                              typ,
+	}
+}
+
+func CreateUpdateIssueTriggerRequestBodyConfigsIssueTriggerBackpressureConfigs(issueTriggerBackpressureConfigs shared.IssueTriggerBackpressureConfigs) UpdateIssueTriggerRequestBodyConfigs {
+	typ := UpdateIssueTriggerRequestBodyConfigsTypeIssueTriggerBackpressureConfigs
+
+	return UpdateIssueTriggerRequestBodyConfigs{
+		IssueTriggerBackpressureConfigs: &issueTriggerBackpressureConfigs,
+		Type:                            typ,
+	}
+}
+
+func (u *UpdateIssueTriggerRequestBodyConfigs) UnmarshalJSON(data []byte) error {
+	var d *json.Decoder
+
+	issueTriggerDeliveryConfigs := new(shared.IssueTriggerDeliveryConfigs)
+	d = json.NewDecoder(bytes.NewReader(data))
+	d.DisallowUnknownFields()
+	if err := d.Decode(&issueTriggerDeliveryConfigs); err == nil {
+		u.IssueTriggerDeliveryConfigs = issueTriggerDeliveryConfigs
+		u.Type = UpdateIssueTriggerRequestBodyConfigsTypeIssueTriggerDeliveryConfigs
+		return nil
+	}
+
+	issueTriggerTransformationConfigs := new(shared.IssueTriggerTransformationConfigs)
+	d = json.NewDecoder(bytes.NewReader(data))
+	d.DisallowUnknownFields()
+	if err := d.Decode(&issueTriggerTransformationConfigs); err == nil {
+		u.IssueTriggerTransformationConfigs = issueTriggerTransformationConfigs
+		u.Type = UpdateIssueTriggerRequestBodyConfigsTypeIssueTriggerTransformationConfigs
+		return nil
+	}
+
+	issueTriggerBackpressureConfigs := new(shared.IssueTriggerBackpressureConfigs)
+	d = json.NewDecoder(bytes.NewReader(data))
+	d.DisallowUnknownFields()
+	if err := d.Decode(&issueTriggerBackpressureConfigs); err == nil {
+		u.IssueTriggerBackpressureConfigs = issueTriggerBackpressureConfigs
+		u.Type = UpdateIssueTriggerRequestBodyConfigsTypeIssueTriggerBackpressureConfigs
+		return nil
+	}
+
+	return errors.New("could not unmarshal into supported union types")
+}
+
+func (u UpdateIssueTriggerRequestBodyConfigs) MarshalJSON() ([]byte, error) {
+	if u.IssueTriggerDeliveryConfigs != nil {
+		return json.Marshal(u.IssueTriggerDeliveryConfigs)
+	}
+
+	if u.IssueTriggerTransformationConfigs != nil {
+		return json.Marshal(u.IssueTriggerTransformationConfigs)
+	}
+
+	if u.IssueTriggerBackpressureConfigs != nil {
+		return json.Marshal(u.IssueTriggerBackpressureConfigs)
+	}
+
+	return nil, nil
+}
+
 type UpdateIssueTriggerRequestBody struct {
 	// Notification channels object for the specific channel type
 	Channels *shared.IssueTriggerChannels `json:"channels,omitempty"`
 	// Configuration object for the specific issue type selected
-	Configs interface{} `json:"configs,omitempty"`
+	Configs *UpdateIssueTriggerRequestBodyConfigs `json:"configs,omitempty"`
 	// Date when the issue trigger was disabled
 	DisabledAt *time.Time `json:"disabled_at,omitempty"`
 	// Optional unique name to use as reference when using the API

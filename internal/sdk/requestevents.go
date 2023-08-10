@@ -23,8 +23,8 @@ func newRequestEvents(sdkConfig sdkConfiguration) *requestEvents {
 	}
 }
 
-// Get - Get request events
-func (s *requestEvents) Get(ctx context.Context, request operations.GetRequestEventsRequest) (*operations.GetRequestEventsResponse, error) {
+// GetRequestEvents - Get request events
+func (s *requestEvents) GetRequestEvents(ctx context.Context, request operations.GetRequestEventsRequest) (*operations.GetRequestEventsResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/requests/{id}/events", request, nil)
 	if err != nil {
@@ -35,7 +35,7 @@ func (s *requestEvents) Get(ctx context.Context, request operations.GetRequestEv
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	if err := utils.PopulateQueryParams(ctx, req, request, nil); err != nil {

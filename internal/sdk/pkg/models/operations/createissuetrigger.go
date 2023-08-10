@@ -3,15 +3,110 @@
 package operations
 
 import (
+	"bytes"
+	"encoding/json"
+	"errors"
 	"hashicups/internal/sdk/pkg/models/shared"
 	"net/http"
 )
+
+type CreateIssueTriggerRequestBodyConfigsType string
+
+const (
+	CreateIssueTriggerRequestBodyConfigsTypeIssueTriggerDeliveryConfigs       CreateIssueTriggerRequestBodyConfigsType = "IssueTriggerDeliveryConfigs"
+	CreateIssueTriggerRequestBodyConfigsTypeIssueTriggerTransformationConfigs CreateIssueTriggerRequestBodyConfigsType = "IssueTriggerTransformationConfigs"
+	CreateIssueTriggerRequestBodyConfigsTypeIssueTriggerBackpressureConfigs   CreateIssueTriggerRequestBodyConfigsType = "IssueTriggerBackpressureConfigs"
+)
+
+type CreateIssueTriggerRequestBodyConfigs struct {
+	IssueTriggerDeliveryConfigs       *shared.IssueTriggerDeliveryConfigs
+	IssueTriggerTransformationConfigs *shared.IssueTriggerTransformationConfigs
+	IssueTriggerBackpressureConfigs   *shared.IssueTriggerBackpressureConfigs
+
+	Type CreateIssueTriggerRequestBodyConfigsType
+}
+
+func CreateCreateIssueTriggerRequestBodyConfigsIssueTriggerDeliveryConfigs(issueTriggerDeliveryConfigs shared.IssueTriggerDeliveryConfigs) CreateIssueTriggerRequestBodyConfigs {
+	typ := CreateIssueTriggerRequestBodyConfigsTypeIssueTriggerDeliveryConfigs
+
+	return CreateIssueTriggerRequestBodyConfigs{
+		IssueTriggerDeliveryConfigs: &issueTriggerDeliveryConfigs,
+		Type:                        typ,
+	}
+}
+
+func CreateCreateIssueTriggerRequestBodyConfigsIssueTriggerTransformationConfigs(issueTriggerTransformationConfigs shared.IssueTriggerTransformationConfigs) CreateIssueTriggerRequestBodyConfigs {
+	typ := CreateIssueTriggerRequestBodyConfigsTypeIssueTriggerTransformationConfigs
+
+	return CreateIssueTriggerRequestBodyConfigs{
+		IssueTriggerTransformationConfigs: &issueTriggerTransformationConfigs,
+		Type:                              typ,
+	}
+}
+
+func CreateCreateIssueTriggerRequestBodyConfigsIssueTriggerBackpressureConfigs(issueTriggerBackpressureConfigs shared.IssueTriggerBackpressureConfigs) CreateIssueTriggerRequestBodyConfigs {
+	typ := CreateIssueTriggerRequestBodyConfigsTypeIssueTriggerBackpressureConfigs
+
+	return CreateIssueTriggerRequestBodyConfigs{
+		IssueTriggerBackpressureConfigs: &issueTriggerBackpressureConfigs,
+		Type:                            typ,
+	}
+}
+
+func (u *CreateIssueTriggerRequestBodyConfigs) UnmarshalJSON(data []byte) error {
+	var d *json.Decoder
+
+	issueTriggerDeliveryConfigs := new(shared.IssueTriggerDeliveryConfigs)
+	d = json.NewDecoder(bytes.NewReader(data))
+	d.DisallowUnknownFields()
+	if err := d.Decode(&issueTriggerDeliveryConfigs); err == nil {
+		u.IssueTriggerDeliveryConfigs = issueTriggerDeliveryConfigs
+		u.Type = CreateIssueTriggerRequestBodyConfigsTypeIssueTriggerDeliveryConfigs
+		return nil
+	}
+
+	issueTriggerTransformationConfigs := new(shared.IssueTriggerTransformationConfigs)
+	d = json.NewDecoder(bytes.NewReader(data))
+	d.DisallowUnknownFields()
+	if err := d.Decode(&issueTriggerTransformationConfigs); err == nil {
+		u.IssueTriggerTransformationConfigs = issueTriggerTransformationConfigs
+		u.Type = CreateIssueTriggerRequestBodyConfigsTypeIssueTriggerTransformationConfigs
+		return nil
+	}
+
+	issueTriggerBackpressureConfigs := new(shared.IssueTriggerBackpressureConfigs)
+	d = json.NewDecoder(bytes.NewReader(data))
+	d.DisallowUnknownFields()
+	if err := d.Decode(&issueTriggerBackpressureConfigs); err == nil {
+		u.IssueTriggerBackpressureConfigs = issueTriggerBackpressureConfigs
+		u.Type = CreateIssueTriggerRequestBodyConfigsTypeIssueTriggerBackpressureConfigs
+		return nil
+	}
+
+	return errors.New("could not unmarshal into supported union types")
+}
+
+func (u CreateIssueTriggerRequestBodyConfigs) MarshalJSON() ([]byte, error) {
+	if u.IssueTriggerDeliveryConfigs != nil {
+		return json.Marshal(u.IssueTriggerDeliveryConfigs)
+	}
+
+	if u.IssueTriggerTransformationConfigs != nil {
+		return json.Marshal(u.IssueTriggerTransformationConfigs)
+	}
+
+	if u.IssueTriggerBackpressureConfigs != nil {
+		return json.Marshal(u.IssueTriggerBackpressureConfigs)
+	}
+
+	return nil, nil
+}
 
 type CreateIssueTriggerRequestBody struct {
 	// Notification channels object for the specific channel type
 	Channels shared.IssueTriggerChannels `json:"channels"`
 	// Configuration object for the specific issue type selected
-	Configs interface{} `json:"configs,omitempty"`
+	Configs *CreateIssueTriggerRequestBodyConfigs `json:"configs,omitempty"`
 	// Optional unique name to use as reference when using the API
 	Name *string `json:"name,omitempty"`
 	// Issue type
