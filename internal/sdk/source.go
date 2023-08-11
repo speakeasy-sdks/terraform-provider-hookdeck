@@ -24,8 +24,8 @@ func newSource(sdkConfig sdkConfiguration) *source {
 	}
 }
 
-// Archive - Archive a source
-func (s *source) Archive(ctx context.Context, request operations.ArchiveSourceRequest) (*operations.ArchiveSourceResponse, error) {
+// ArchiveSource - Archive a source
+func (s *source) ArchiveSource(ctx context.Context, request operations.ArchiveSourceRequest) (*operations.ArchiveSourceResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/sources/{id}/archive", request, nil)
 	if err != nil {
@@ -36,7 +36,7 @@ func (s *source) Archive(ctx context.Context, request operations.ArchiveSourceRe
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	client := s.sdkConfiguration.SecurityClient
@@ -89,8 +89,8 @@ func (s *source) Archive(ctx context.Context, request operations.ArchiveSourceRe
 	return res, nil
 }
 
-// Create - Create a source
-func (s *source) Create(ctx context.Context, request operations.CreateSourceRequestBody) (*operations.CreateSourceResponse, error) {
+// CreateSource - Create a source
+func (s *source) CreateSource(ctx context.Context, request operations.CreateSourceRequestBody) (*operations.CreateSourceResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url := strings.TrimSuffix(baseURL, "/") + "/sources"
 
@@ -106,7 +106,7 @@ func (s *source) Create(ctx context.Context, request operations.CreateSourceRequ
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	req.Header.Set("Content-Type", reqContentType)
@@ -163,8 +163,8 @@ func (s *source) Create(ctx context.Context, request operations.CreateSourceRequ
 	return res, nil
 }
 
-// Delete - Delete a source
-func (s *source) Delete(ctx context.Context, request operations.DeleteSourceRequest) (*operations.DeleteSourceResponse, error) {
+// DeleteSource - Delete a source
+func (s *source) DeleteSource(ctx context.Context, request operations.DeleteSourceRequest) (*operations.DeleteSourceResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/sources/{id}", request, nil)
 	if err != nil {
@@ -175,7 +175,7 @@ func (s *source) Delete(ctx context.Context, request operations.DeleteSourceRequ
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	client := s.sdkConfiguration.SecurityClient
@@ -228,8 +228,8 @@ func (s *source) Delete(ctx context.Context, request operations.DeleteSourceRequ
 	return res, nil
 }
 
-// Get - Get a source
-func (s *source) Get(ctx context.Context, request operations.GetSourceRequest) (*operations.GetSourceResponse, error) {
+// GetSource - Get a source
+func (s *source) GetSource(ctx context.Context, request operations.GetSourceRequest) (*operations.GetSourceResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/sources/{id}", request, nil)
 	if err != nil {
@@ -240,7 +240,7 @@ func (s *source) Get(ctx context.Context, request operations.GetSourceRequest) (
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	client := s.sdkConfiguration.SecurityClient
@@ -293,8 +293,8 @@ func (s *source) Get(ctx context.Context, request operations.GetSourceRequest) (
 	return res, nil
 }
 
-// Unarchive - Unarchive a source
-func (s *source) Unarchive(ctx context.Context, request operations.UnarchiveSourceRequest) (*operations.UnarchiveSourceResponse, error) {
+// UnarchiveSource - Unarchive a source
+func (s *source) UnarchiveSource(ctx context.Context, request operations.UnarchiveSourceRequest) (*operations.UnarchiveSourceResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/sources/{id}/unarchive", request, nil)
 	if err != nil {
@@ -305,7 +305,7 @@ func (s *source) Unarchive(ctx context.Context, request operations.UnarchiveSour
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	client := s.sdkConfiguration.SecurityClient
@@ -358,8 +358,8 @@ func (s *source) Unarchive(ctx context.Context, request operations.UnarchiveSour
 	return res, nil
 }
 
-// Update - Update a source
-func (s *source) Update(ctx context.Context, request operations.UpdateSourceRequest) (*operations.UpdateSourceResponse, error) {
+// UpdateSource - Update a source
+func (s *source) UpdateSource(ctx context.Context, request operations.UpdateSourceRequest) (*operations.UpdateSourceResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/sources/{id}", request, nil)
 	if err != nil {
@@ -378,7 +378,7 @@ func (s *source) Update(ctx context.Context, request operations.UpdateSourceRequ
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	req.Header.Set("Content-Type", reqContentType)
@@ -437,8 +437,8 @@ func (s *source) Update(ctx context.Context, request operations.UpdateSourceRequ
 	return res, nil
 }
 
-// Upsert - Update or create a source
-func (s *source) Upsert(ctx context.Context, request operations.UpsertSourceRequestBody) (*operations.UpsertSourceResponse, error) {
+// UpsertSource - Update or create a source
+func (s *source) UpsertSource(ctx context.Context, request operations.UpsertSourceRequestBody) (*operations.UpsertSourceResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url := strings.TrimSuffix(baseURL, "/") + "/sources"
 
@@ -454,7 +454,7 @@ func (s *source) Upsert(ctx context.Context, request operations.UpsertSourceRequ
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	req.Header.Set("Content-Type", reqContentType)

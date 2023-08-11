@@ -24,9 +24,9 @@ func newIssueTriggers(sdkConfig sdkConfiguration) *issueTriggers {
 	}
 }
 
-// Get - Get Issue Triggers
+// GetIssueTriggers - Get Issue Triggers
 // Retrieve a list of issue triggers.
-func (s *issueTriggers) Get(ctx context.Context, request operations.GetIssueTriggersRequest) (*operations.GetIssueTriggersResponse, error) {
+func (s *issueTriggers) GetIssueTriggers(ctx context.Context, request operations.GetIssueTriggersRequest) (*operations.GetIssueTriggersResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url := strings.TrimSuffix(baseURL, "/") + "/issue-triggers"
 
@@ -34,7 +34,7 @@ func (s *issueTriggers) Get(ctx context.Context, request operations.GetIssueTrig
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	if err := utils.PopulateQueryParams(ctx, req, request, nil); err != nil {

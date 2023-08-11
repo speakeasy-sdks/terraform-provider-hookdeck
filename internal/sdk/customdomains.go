@@ -23,8 +23,8 @@ func newCustomDomains(sdkConfig sdkConfiguration) *customDomains {
 	}
 }
 
-// List - List all custom domains and their verification statuses for the workspace
-func (s *customDomains) List(ctx context.Context, request operations.ListCustomDomainsRequest) (*operations.ListCustomDomainsResponse, error) {
+// ListCustomDomains - List all custom domains and their verification statuses for the workspace
+func (s *customDomains) ListCustomDomains(ctx context.Context, request operations.ListCustomDomainsRequest) (*operations.ListCustomDomainsResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/teams/{team_id}/custom_domains", request, nil)
 	if err != nil {
