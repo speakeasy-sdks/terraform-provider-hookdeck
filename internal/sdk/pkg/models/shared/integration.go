@@ -3,6 +3,9 @@
 package shared
 
 import (
+	"bytes"
+	"encoding/json"
+	"errors"
 	"time"
 )
 
@@ -10,10 +13,174 @@ import (
 type IntegrationConfigs1 struct {
 }
 
+type IntegrationConfigsType string
+
+const (
+	IntegrationConfigsTypeIntegrationConfigs1         IntegrationConfigsType = "Integration_configs_1"
+	IntegrationConfigsTypeHMACIntegrationConfigs      IntegrationConfigsType = "HMACIntegrationConfigs"
+	IntegrationConfigsTypeAPIKeyIntegrationConfigs    IntegrationConfigsType = "APIKeyIntegrationConfigs"
+	IntegrationConfigsTypeHandledHMACConfigs          IntegrationConfigsType = "HandledHMACConfigs"
+	IntegrationConfigsTypeBasicAuthIntegrationConfigs IntegrationConfigsType = "BasicAuthIntegrationConfigs"
+	IntegrationConfigsTypeShopifyIntegrationConfigs   IntegrationConfigsType = "ShopifyIntegrationConfigs"
+)
+
+type IntegrationConfigs struct {
+	IntegrationConfigs1         *IntegrationConfigs1
+	HMACIntegrationConfigs      *HMACIntegrationConfigs
+	APIKeyIntegrationConfigs    *APIKeyIntegrationConfigs
+	HandledHMACConfigs          *HandledHMACConfigs
+	BasicAuthIntegrationConfigs *BasicAuthIntegrationConfigs
+	ShopifyIntegrationConfigs   *ShopifyIntegrationConfigs
+
+	Type IntegrationConfigsType
+}
+
+func CreateIntegrationConfigsIntegrationConfigs1(integrationConfigs1 IntegrationConfigs1) IntegrationConfigs {
+	typ := IntegrationConfigsTypeIntegrationConfigs1
+
+	return IntegrationConfigs{
+		IntegrationConfigs1: &integrationConfigs1,
+		Type:                typ,
+	}
+}
+
+func CreateIntegrationConfigsHMACIntegrationConfigs(hmacIntegrationConfigs HMACIntegrationConfigs) IntegrationConfigs {
+	typ := IntegrationConfigsTypeHMACIntegrationConfigs
+
+	return IntegrationConfigs{
+		HMACIntegrationConfigs: &hmacIntegrationConfigs,
+		Type:                   typ,
+	}
+}
+
+func CreateIntegrationConfigsAPIKeyIntegrationConfigs(apiKeyIntegrationConfigs APIKeyIntegrationConfigs) IntegrationConfigs {
+	typ := IntegrationConfigsTypeAPIKeyIntegrationConfigs
+
+	return IntegrationConfigs{
+		APIKeyIntegrationConfigs: &apiKeyIntegrationConfigs,
+		Type:                     typ,
+	}
+}
+
+func CreateIntegrationConfigsHandledHMACConfigs(handledHMACConfigs HandledHMACConfigs) IntegrationConfigs {
+	typ := IntegrationConfigsTypeHandledHMACConfigs
+
+	return IntegrationConfigs{
+		HandledHMACConfigs: &handledHMACConfigs,
+		Type:               typ,
+	}
+}
+
+func CreateIntegrationConfigsBasicAuthIntegrationConfigs(basicAuthIntegrationConfigs BasicAuthIntegrationConfigs) IntegrationConfigs {
+	typ := IntegrationConfigsTypeBasicAuthIntegrationConfigs
+
+	return IntegrationConfigs{
+		BasicAuthIntegrationConfigs: &basicAuthIntegrationConfigs,
+		Type:                        typ,
+	}
+}
+
+func CreateIntegrationConfigsShopifyIntegrationConfigs(shopifyIntegrationConfigs ShopifyIntegrationConfigs) IntegrationConfigs {
+	typ := IntegrationConfigsTypeShopifyIntegrationConfigs
+
+	return IntegrationConfigs{
+		ShopifyIntegrationConfigs: &shopifyIntegrationConfigs,
+		Type:                      typ,
+	}
+}
+
+func (u *IntegrationConfigs) UnmarshalJSON(data []byte) error {
+	var d *json.Decoder
+
+	integrationConfigs1 := new(IntegrationConfigs1)
+	d = json.NewDecoder(bytes.NewReader(data))
+	d.DisallowUnknownFields()
+	if err := d.Decode(&integrationConfigs1); err == nil {
+		u.IntegrationConfigs1 = integrationConfigs1
+		u.Type = IntegrationConfigsTypeIntegrationConfigs1
+		return nil
+	}
+
+	hmacIntegrationConfigs := new(HMACIntegrationConfigs)
+	d = json.NewDecoder(bytes.NewReader(data))
+	d.DisallowUnknownFields()
+	if err := d.Decode(&hmacIntegrationConfigs); err == nil {
+		u.HMACIntegrationConfigs = hmacIntegrationConfigs
+		u.Type = IntegrationConfigsTypeHMACIntegrationConfigs
+		return nil
+	}
+
+	apiKeyIntegrationConfigs := new(APIKeyIntegrationConfigs)
+	d = json.NewDecoder(bytes.NewReader(data))
+	d.DisallowUnknownFields()
+	if err := d.Decode(&apiKeyIntegrationConfigs); err == nil {
+		u.APIKeyIntegrationConfigs = apiKeyIntegrationConfigs
+		u.Type = IntegrationConfigsTypeAPIKeyIntegrationConfigs
+		return nil
+	}
+
+	handledHMACConfigs := new(HandledHMACConfigs)
+	d = json.NewDecoder(bytes.NewReader(data))
+	d.DisallowUnknownFields()
+	if err := d.Decode(&handledHMACConfigs); err == nil {
+		u.HandledHMACConfigs = handledHMACConfigs
+		u.Type = IntegrationConfigsTypeHandledHMACConfigs
+		return nil
+	}
+
+	basicAuthIntegrationConfigs := new(BasicAuthIntegrationConfigs)
+	d = json.NewDecoder(bytes.NewReader(data))
+	d.DisallowUnknownFields()
+	if err := d.Decode(&basicAuthIntegrationConfigs); err == nil {
+		u.BasicAuthIntegrationConfigs = basicAuthIntegrationConfigs
+		u.Type = IntegrationConfigsTypeBasicAuthIntegrationConfigs
+		return nil
+	}
+
+	shopifyIntegrationConfigs := new(ShopifyIntegrationConfigs)
+	d = json.NewDecoder(bytes.NewReader(data))
+	d.DisallowUnknownFields()
+	if err := d.Decode(&shopifyIntegrationConfigs); err == nil {
+		u.ShopifyIntegrationConfigs = shopifyIntegrationConfigs
+		u.Type = IntegrationConfigsTypeShopifyIntegrationConfigs
+		return nil
+	}
+
+	return errors.New("could not unmarshal into supported union types")
+}
+
+func (u IntegrationConfigs) MarshalJSON() ([]byte, error) {
+	if u.IntegrationConfigs1 != nil {
+		return json.Marshal(u.IntegrationConfigs1)
+	}
+
+	if u.HMACIntegrationConfigs != nil {
+		return json.Marshal(u.HMACIntegrationConfigs)
+	}
+
+	if u.APIKeyIntegrationConfigs != nil {
+		return json.Marshal(u.APIKeyIntegrationConfigs)
+	}
+
+	if u.HandledHMACConfigs != nil {
+		return json.Marshal(u.HandledHMACConfigs)
+	}
+
+	if u.BasicAuthIntegrationConfigs != nil {
+		return json.Marshal(u.BasicAuthIntegrationConfigs)
+	}
+
+	if u.ShopifyIntegrationConfigs != nil {
+		return json.Marshal(u.ShopifyIntegrationConfigs)
+	}
+
+	return nil, nil
+}
+
 // Integration - A single integration
 type Integration struct {
 	// Decrypted Key/Value object of the associated configuration for that provider
-	Configs interface{} `json:"configs"`
+	Configs IntegrationConfigs `json:"configs"`
 	// Date the integration was created
 	CreatedAt time.Time `json:"created_at"`
 	// List of features to enable (see features list below)

@@ -5,6 +5,6 @@ package shared
 // IssueWithDataPaginatedResult - List of issues
 type IssueWithDataPaginatedResult struct {
 	Count      *int64          `json:"count,omitempty"`
-	Models     []interface{}   `json:"models,omitempty"`
+	Models     []IssueWithData `json:"models,omitempty"`
 	Pagination *SeekPagination `json:"pagination,omitempty"`
 }
