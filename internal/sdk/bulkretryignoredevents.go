@@ -24,8 +24,8 @@ func newBulkRetryIgnoredEvents(sdkConfig sdkConfiguration) *bulkRetryIgnoredEven
 	}
 }
 
-// Get - Get ignored events bulk retries
-func (s *bulkRetryIgnoredEvents) Get(ctx context.Context, request operations.GetIgnoredEventBulkRetriesRequest) (*operations.GetIgnoredEventBulkRetriesResponse, error) {
+// GetIgnoredEventBulkRetries - Get ignored events bulk retries
+func (s *bulkRetryIgnoredEvents) GetIgnoredEventBulkRetries(ctx context.Context, request operations.GetIgnoredEventBulkRetriesRequest) (*operations.GetIgnoredEventBulkRetriesResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url := strings.TrimSuffix(baseURL, "/") + "/bulk/ignored-events/retry"
 
@@ -33,7 +33,7 @@ func (s *bulkRetryIgnoredEvents) Get(ctx context.Context, request operations.Get
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	if err := utils.PopulateQueryParams(ctx, req, request, nil); err != nil {
