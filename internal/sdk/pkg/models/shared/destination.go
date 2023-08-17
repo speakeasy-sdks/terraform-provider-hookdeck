@@ -11,7 +11,7 @@ type Destination struct {
 	// Date the destination was archived
 	ArchivedAt *time.Time `json:"archived_at,omitempty"`
 	// Config for the destination's auth method
-	AuthMethod interface{} `json:"auth_method,omitempty"`
+	AuthMethod *DestinationAuthMethodConfig `json:"auth_method,omitempty"`
 	// Path for the CLI destination
 	CliPath *string `json:"cli_path,omitempty"`
 	// Date the destination was created
