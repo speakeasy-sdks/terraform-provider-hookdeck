@@ -10,6 +10,7 @@ import (
 	"hashicups/internal/sdk/pkg/models/shared"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
@@ -41,32 +42,32 @@ type ConnectionResource struct {
 
 // ConnectionResourceModel describes the resource data model.
 type ConnectionResourceModel struct {
-	AllowedHTTPMethods     []types.String                          `tfsdk:"allowed_http_methods"`
-	ArchivedAt             types.String                            `tfsdk:"archived_at"`
-	AuthMethod             *AuthMethod                             `tfsdk:"auth_method"`
-	Body                   types.String                            `tfsdk:"body"`
-	CliPath                types.String                            `tfsdk:"cli_path"`
-	ContentType            types.String                            `tfsdk:"content_type"`
-	CreatedAt              types.String                            `tfsdk:"created_at"`
-	Destination            *CreateConnectionRequestBodyDestination `tfsdk:"destination"`
-	DestinationID          types.String                            `tfsdk:"destination_id"`
-	HTTPMethod             types.String                            `tfsdk:"http_method"`
-	ID                     types.String                            `tfsdk:"id"`
-	IsTeamDefault          types.Bool                              `tfsdk:"is_team_default"`
-	Name                   types.String                            `tfsdk:"name"`
-	PathForwardingDisabled types.Bool                              `tfsdk:"path_forwarding_disabled"`
-	PausedAt               types.String                            `tfsdk:"paused_at"`
-	RateLimit              *RateLimit                              `tfsdk:"rate_limit"`
-	RateLimitPeriod        types.String                            `tfsdk:"rate_limit_period"`
-	ResolvedRules          []Rule                                  `tfsdk:"resolved_rules"`
-	Rules                  []Rule1                                 `tfsdk:"rules"`
-	Ruleset                *CreateConnectionRequestBodyRuleset     `tfsdk:"ruleset"`
-	RulesetID              types.String                            `tfsdk:"ruleset_id"`
-	Source                 *CreateConnectionRequestBodySource      `tfsdk:"source"`
-	SourceID               types.String                            `tfsdk:"source_id"`
-	TeamID                 types.String                            `tfsdk:"team_id"`
-	UpdatedAt              types.String                            `tfsdk:"updated_at"`
-	URL                    types.String                            `tfsdk:"url"`
+	AllowedHTTPMethods     []types.String               `tfsdk:"allowed_http_methods"`
+	ArchivedAt             types.String                 `tfsdk:"archived_at"`
+	AuthMethod             *DestinationAuthMethodConfig `tfsdk:"auth_method"`
+	Body                   types.String                 `tfsdk:"body"`
+	CliPath                types.String                 `tfsdk:"cli_path"`
+	ContentType            types.String                 `tfsdk:"content_type"`
+	CreatedAt              types.String                 `tfsdk:"created_at"`
+	Destination            Destination                  `tfsdk:"destination"`
+	DestinationID          types.String                 `tfsdk:"destination_id"`
+	HTTPMethod             types.String                 `tfsdk:"http_method"`
+	ID                     types.String                 `tfsdk:"id"`
+	IsTeamDefault          types.Bool                   `tfsdk:"is_team_default"`
+	Name                   types.String                 `tfsdk:"name"`
+	PathForwardingDisabled types.Bool                   `tfsdk:"path_forwarding_disabled"`
+	PausedAt               types.String                 `tfsdk:"paused_at"`
+	RateLimit              *RateLimit                   `tfsdk:"rate_limit"`
+	RateLimitPeriod        types.String                 `tfsdk:"rate_limit_period"`
+	ResolvedRules          []Rule                       `tfsdk:"resolved_rules"`
+	Rules                  []Rule                       `tfsdk:"rules"`
+	Ruleset                *Ruleset                     `tfsdk:"ruleset"`
+	RulesetID              types.String                 `tfsdk:"ruleset_id"`
+	Source                 Source                       `tfsdk:"source"`
+	SourceID               types.String                 `tfsdk:"source_id"`
+	TeamID                 types.String                 `tfsdk:"team_id"`
+	UpdatedAt              types.String                 `tfsdk:"updated_at"`
+	URL                    types.String                 `tfsdk:"url"`
 }
 
 func (r *ConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -93,9 +94,9 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 				},
 				Description: `Date the connection was archived`,
 			},
-			"auth_method": schema.StringAttribute{
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
+			"auth_method": schema.SingleNestedAttribute{
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.RequiresReplace(),
 				},
 				Optional: true,
 				Attributes: map[string]schema.Attribute{
@@ -123,7 +124,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 										"HOOKDECK_SIGNATURE",
 									),
 								},
-								MarkdownDescription: `must be one of [HOOKDECK_SIGNATURE]` + "\n" +
+								MarkdownDescription: `must be one of ["HOOKDECK_SIGNATURE"]` + "\n" +
 									`Type of auth method`,
 							},
 						},
@@ -168,7 +169,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 										"BASIC_AUTH",
 									),
 								},
-								MarkdownDescription: `must be one of [BASIC_AUTH]` + "\n" +
+								MarkdownDescription: `must be one of ["BASIC_AUTH"]` + "\n" +
 									`Type of auth method`,
 							},
 						},
@@ -211,7 +212,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 												"query",
 											),
 										},
-										MarkdownDescription: `must be one of [header, query]` + "\n" +
+										MarkdownDescription: `must be one of ["header", "query"]` + "\n" +
 											`Whether the API key should be sent as a header or a query parameter`,
 									},
 								},
@@ -227,7 +228,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 										"API_KEY",
 									),
 								},
-								MarkdownDescription: `must be one of [API_KEY]` + "\n" +
+								MarkdownDescription: `must be one of ["API_KEY"]` + "\n" +
 									`Type of auth method`,
 							},
 						},
@@ -265,7 +266,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 										"BEARER_TOKEN",
 									),
 								},
-								MarkdownDescription: `must be one of [BEARER_TOKEN]` + "\n" +
+								MarkdownDescription: `must be one of ["BEARER_TOKEN"]` + "\n" +
 									`Type of auth method`,
 							},
 						},
@@ -310,7 +311,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 										"CUSTOM_SIGNATURE",
 									),
 								},
-								MarkdownDescription: `must be one of [CUSTOM_SIGNATURE]` + "\n" +
+								MarkdownDescription: `must be one of ["CUSTOM_SIGNATURE"]` + "\n" +
 									`Type of auth method`,
 							},
 						},
@@ -320,11 +321,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 				Validators: []validator.Object{
 					validators.ExactlyOneChild(),
 				},
-				Validators: []validator.String{
-					validators.IsValidJSON(),
-				},
-				MarkdownDescription: `Parsed as JSON.` + "\n" +
-					`Config for the destination's auth method`,
+				Description: `Config for the destination's auth method`,
 			},
 			"body": schema.StringAttribute{
 				PlanModifiers: []planmodifier.String{
@@ -352,7 +349,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 						"xml",
 					),
 				},
-				MarkdownDescription: `must be one of [json, text, xml]` + "\n" +
+				MarkdownDescription: `must be one of ["json", "text", "xml"]` + "\n" +
 					`Content type of the custom response`,
 			},
 			"created_at": schema.StringAttribute{
@@ -372,7 +369,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 						},
 						Description: `Date the destination was archived`,
 					},
-					"auth_method": schema.StringAttribute{
+					"auth_method": schema.SingleNestedAttribute{
 						Computed: true,
 						Attributes: map[string]schema.Attribute{
 							"api_key": schema.SingleNestedAttribute{
@@ -397,7 +394,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 														"query",
 													),
 												},
-												MarkdownDescription: `must be one of [header, query]` + "\n" +
+												MarkdownDescription: `must be one of ["header", "query"]` + "\n" +
 													`Whether the API key should be sent as a header or a query parameter`,
 											},
 										},
@@ -410,7 +407,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 												"API_KEY",
 											),
 										},
-										MarkdownDescription: `must be one of [API_KEY]` + "\n" +
+										MarkdownDescription: `must be one of ["API_KEY"]` + "\n" +
 											`Type of auth method`,
 									},
 								},
@@ -440,7 +437,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 												"BASIC_AUTH",
 											),
 										},
-										MarkdownDescription: `must be one of [BASIC_AUTH]` + "\n" +
+										MarkdownDescription: `must be one of ["BASIC_AUTH"]` + "\n" +
 											`Type of auth method`,
 									},
 								},
@@ -466,7 +463,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 												"BEARER_TOKEN",
 											),
 										},
-										MarkdownDescription: `must be one of [BEARER_TOKEN]` + "\n" +
+										MarkdownDescription: `must be one of ["BEARER_TOKEN"]` + "\n" +
 											`Type of auth method`,
 									},
 								},
@@ -496,7 +493,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 												"CUSTOM_SIGNATURE",
 											),
 										},
-										MarkdownDescription: `must be one of [CUSTOM_SIGNATURE]` + "\n" +
+										MarkdownDescription: `must be one of ["CUSTOM_SIGNATURE"]` + "\n" +
 											`Type of auth method`,
 									},
 								},
@@ -517,7 +514,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 												"HOOKDECK_SIGNATURE",
 											),
 										},
-										MarkdownDescription: `must be one of [HOOKDECK_SIGNATURE]` + "\n" +
+										MarkdownDescription: `must be one of ["HOOKDECK_SIGNATURE"]` + "\n" +
 											`Type of auth method`,
 									},
 								},
@@ -527,11 +524,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 						Validators: []validator.Object{
 							validators.ExactlyOneChild(),
 						},
-						Validators: []validator.String{
-							validators.IsValidJSON(),
-						},
-						MarkdownDescription: `Parsed as JSON.` + "\n" +
-							`Config for the destination's auth method`,
+						Description: `Config for the destination's auth method`,
 					},
 					"cli_path": schema.StringAttribute{
 						Computed:    true,
@@ -556,7 +549,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 								"DELETE",
 							),
 						},
-						MarkdownDescription: `must be one of [<nil>, GET, POST, PUT, PATCH, DELETE]` + "\n" +
+						MarkdownDescription: `must be one of ["<nil>", "GET", "POST", "PUT", "PATCH", "DELETE"]` + "\n" +
 							`HTTP method used on requests sent to the destination, overrides the method used on requests sent to the source.`,
 					},
 					"id": schema.StringAttribute{
@@ -584,7 +577,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 								"hour",
 							),
 						},
-						MarkdownDescription: `must be one of [<nil>, second, minute, hour]` + "\n" +
+						MarkdownDescription: `must be one of ["<nil>", "second", "minute", "hour"]` + "\n" +
 							`Period to rate limit attempts`,
 					},
 					"team_id": schema.StringAttribute{
@@ -627,7 +620,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 						"DELETE",
 					),
 				},
-				MarkdownDescription: `must be one of [<nil>, GET, POST, PUT, PATCH, DELETE]` + "\n" +
+				MarkdownDescription: `must be one of ["<nil>", "GET", "POST", "PUT", "PATCH", "DELETE"]` + "\n" +
 					`HTTP method used on requests sent to the destination, overrides the method used on requests sent to the source.`,
 			},
 			"id": schema.StringAttribute{
@@ -706,82 +699,13 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 						"hour",
 					),
 				},
-				MarkdownDescription: `must be one of [second, minute, hour]` + "\n" +
+				MarkdownDescription: `must be one of ["second", "minute", "hour"]` + "\n" +
 					`Period to rate limit attempts`,
 			},
 			"resolved_rules": schema.ListNestedAttribute{
 				Computed: true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"any": schema.StringAttribute{
-							Computed: true,
-							Attributes: map[string]schema.Attribute{
-								"transform_full": schema.SingleNestedAttribute{
-									Computed: true,
-									Attributes: map[string]schema.Attribute{
-										"transformation": schema.SingleNestedAttribute{
-											Computed: true,
-											Attributes: map[string]schema.Attribute{
-												"code": schema.StringAttribute{
-													Computed:    true,
-													Description: `A string representation of your JavaScript (ES6) code to run`,
-												},
-												"env": schema.MapAttribute{
-													Computed:    true,
-													ElementType: types.StringType,
-													Description: `A key-value object of environment variables to encrypt and expose to your transformation code`,
-												},
-												"name": schema.StringAttribute{
-													Computed:    true,
-													Description: `The unique name of the transformation`,
-												},
-											},
-											Description: `You can optionally define a new transformation while creating a transform rule`,
-										},
-										"transformation_id": schema.StringAttribute{
-											Computed:    true,
-											Description: `ID of the attached transformation object. Optional input, always set once the rule is defined`,
-										},
-										"type": schema.StringAttribute{
-											Computed: true,
-											Validators: []validator.String{
-												stringvalidator.OneOf(
-													"transform",
-												),
-											},
-											MarkdownDescription: `must be one of [transform]` + "\n" +
-												`A transformation rule must be of type ` + "`" + `transformation` + "`" + ``,
-										},
-									},
-								},
-								"transform_reference": schema.SingleNestedAttribute{
-									Computed: true,
-									Attributes: map[string]schema.Attribute{
-										"transformation_id": schema.StringAttribute{
-											Computed:    true,
-											Description: `ID of the attached transformation object. Optional input, always set once the rule is defined`,
-										},
-										"type": schema.StringAttribute{
-											Computed: true,
-											Validators: []validator.String{
-												stringvalidator.OneOf(
-													"transform",
-												),
-											},
-											MarkdownDescription: `must be one of [transform]` + "\n" +
-												`A transformation rule must be of type ` + "`" + `transformation` + "`" + ``,
-										},
-									},
-								},
-							},
-							Validators: []validator.Object{
-								validators.ExactlyOneChild(),
-							},
-							Validators: []validator.String{
-								validators.IsValidJSON(),
-							},
-							Description: `Parsed as JSON.`,
-						},
 						"alert_rule": schema.SingleNestedAttribute{
 							Computed: true,
 							Attributes: map[string]schema.Attribute{
@@ -793,7 +717,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 											"last_attempt",
 										),
 									},
-									MarkdownDescription: `must be one of [each_attempt, last_attempt]` + "\n" +
+									MarkdownDescription: `must be one of ["each_attempt", "last_attempt"]` + "\n" +
 										`Alert strategy to use`,
 								},
 								"type": schema.StringAttribute{
@@ -803,7 +727,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 											"alert",
 										),
 									},
-									MarkdownDescription: `must be one of [alert]` + "\n" +
+									MarkdownDescription: `must be one of ["alert"]` + "\n" +
 										`An alert rule must be of type ` + "`" + `alert` + "`" + ``,
 								},
 							},
@@ -822,7 +746,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 											"delay",
 										),
 									},
-									MarkdownDescription: `must be one of [delay]` + "\n" +
+									MarkdownDescription: `must be one of ["delay"]` + "\n" +
 										`A delay rule must be of type ` + "`" + `delay` + "`" + ``,
 								},
 							},
@@ -929,7 +853,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 											"filter",
 										),
 									},
-									MarkdownDescription: `must be one of [filter]` + "\n" +
+									MarkdownDescription: `must be one of ["filter"]` + "\n" +
 										`A filter rule must be of type ` + "`" + `filter` + "`" + ``,
 								},
 							},
@@ -953,7 +877,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 											"exponential",
 										),
 									},
-									MarkdownDescription: `must be one of [linear, exponential]` + "\n" +
+									MarkdownDescription: `must be one of ["linear", "exponential"]` + "\n" +
 										`Algorithm to use when calculating delay between retries`,
 								},
 								"type": schema.StringAttribute{
@@ -963,9 +887,74 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 											"retry",
 										),
 									},
-									MarkdownDescription: `must be one of [retry]` + "\n" +
+									MarkdownDescription: `must be one of ["retry"]` + "\n" +
 										`A retry rule must be of type ` + "`" + `retry` + "`" + ``,
 								},
+							},
+						},
+						"transform_rule": schema.SingleNestedAttribute{
+							Computed: true,
+							Attributes: map[string]schema.Attribute{
+								"transform_full": schema.SingleNestedAttribute{
+									Computed: true,
+									Attributes: map[string]schema.Attribute{
+										"transformation": schema.SingleNestedAttribute{
+											Computed: true,
+											Attributes: map[string]schema.Attribute{
+												"code": schema.StringAttribute{
+													Computed:    true,
+													Description: `A string representation of your JavaScript (ES6) code to run`,
+												},
+												"env": schema.MapAttribute{
+													Computed:    true,
+													ElementType: types.StringType,
+													Description: `A key-value object of environment variables to encrypt and expose to your transformation code`,
+												},
+												"name": schema.StringAttribute{
+													Computed:    true,
+													Description: `The unique name of the transformation`,
+												},
+											},
+											Description: `You can optionally define a new transformation while creating a transform rule`,
+										},
+										"transformation_id": schema.StringAttribute{
+											Computed:    true,
+											Description: `ID of the attached transformation object. Optional input, always set once the rule is defined`,
+										},
+										"type": schema.StringAttribute{
+											Computed: true,
+											Validators: []validator.String{
+												stringvalidator.OneOf(
+													"transform",
+												),
+											},
+											MarkdownDescription: `must be one of ["transform"]` + "\n" +
+												`A transformation rule must be of type ` + "`" + `transformation` + "`" + ``,
+										},
+									},
+								},
+								"transform_reference": schema.SingleNestedAttribute{
+									Computed: true,
+									Attributes: map[string]schema.Attribute{
+										"transformation_id": schema.StringAttribute{
+											Computed:    true,
+											Description: `ID of the attached transformation object. Optional input, always set once the rule is defined`,
+										},
+										"type": schema.StringAttribute{
+											Computed: true,
+											Validators: []validator.String{
+												stringvalidator.OneOf(
+													"transform",
+												),
+											},
+											MarkdownDescription: `must be one of ["transform"]` + "\n" +
+												`A transformation rule must be of type ` + "`" + `transformation` + "`" + ``,
+										},
+									},
+								},
+							},
+							Validators: []validator.Object{
+								validators.ExactlyOneChild(),
 							},
 						},
 					},
@@ -983,10 +972,313 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 				Optional: true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"any": schema.StringAttribute{
+						"alert_rule": schema.SingleNestedAttribute{
 							Computed: true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.RequiresReplace(),
+							PlanModifiers: []planmodifier.Object{
+								objectplanmodifier.RequiresReplace(),
+							},
+							Optional: true,
+							Attributes: map[string]schema.Attribute{
+								"strategy": schema.StringAttribute{
+									PlanModifiers: []planmodifier.String{
+										stringplanmodifier.RequiresReplace(),
+									},
+									Required: true,
+									Validators: []validator.String{
+										stringvalidator.OneOf(
+											"each_attempt",
+											"last_attempt",
+										),
+									},
+									MarkdownDescription: `must be one of ["each_attempt", "last_attempt"]` + "\n" +
+										`Alert strategy to use`,
+								},
+								"type": schema.StringAttribute{
+									PlanModifiers: []planmodifier.String{
+										stringplanmodifier.RequiresReplace(),
+									},
+									Required: true,
+									Validators: []validator.String{
+										stringvalidator.OneOf(
+											"alert",
+										),
+									},
+									MarkdownDescription: `must be one of ["alert"]` + "\n" +
+										`An alert rule must be of type ` + "`" + `alert` + "`" + ``,
+								},
+							},
+						},
+						"delay_rule": schema.SingleNestedAttribute{
+							Computed: true,
+							PlanModifiers: []planmodifier.Object{
+								objectplanmodifier.RequiresReplace(),
+							},
+							Optional: true,
+							Attributes: map[string]schema.Attribute{
+								"delay": schema.Int64Attribute{
+									PlanModifiers: []planmodifier.Int64{
+										int64planmodifier.RequiresReplace(),
+									},
+									Required:    true,
+									Description: `Delay to introduce in MS`,
+								},
+								"type": schema.StringAttribute{
+									PlanModifiers: []planmodifier.String{
+										stringplanmodifier.RequiresReplace(),
+									},
+									Required: true,
+									Validators: []validator.String{
+										stringvalidator.OneOf(
+											"delay",
+										),
+									},
+									MarkdownDescription: `must be one of ["delay"]` + "\n" +
+										`A delay rule must be of type ` + "`" + `delay` + "`" + ``,
+								},
+							},
+						},
+						"filter_rule": schema.SingleNestedAttribute{
+							Computed: true,
+							PlanModifiers: []planmodifier.Object{
+								objectplanmodifier.RequiresReplace(),
+							},
+							Optional: true,
+							Attributes: map[string]schema.Attribute{
+								"body": schema.SingleNestedAttribute{
+									Computed: true,
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.RequiresReplace(),
+									},
+									Optional: true,
+									Attributes: map[string]schema.Attribute{
+										"str": schema.StringAttribute{
+											Computed: true,
+											PlanModifiers: []planmodifier.String{
+												stringplanmodifier.RequiresReplace(),
+											},
+											Optional: true,
+										},
+										"float32": schema.NumberAttribute{
+											PlanModifiers: []planmodifier.Number{
+												numberplanmodifier.RequiresReplace(),
+											},
+											Optional: true,
+										},
+										"boolean": schema.BoolAttribute{
+											PlanModifiers: []planmodifier.Bool{
+												boolplanmodifier.RequiresReplace(),
+											},
+											Optional: true,
+										},
+										"connection_filter_property_4": schema.SingleNestedAttribute{
+											Computed: true,
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.RequiresReplace(),
+											},
+											Optional:    true,
+											Attributes:  map[string]schema.Attribute{},
+											Description: `JSON using our filter syntax to filter on request headers`,
+										},
+									},
+									Validators: []validator.Object{
+										validators.ExactlyOneChild(),
+									},
+									Description: `JSON using our filter syntax to filter on request headers`,
+								},
+								"headers": schema.SingleNestedAttribute{
+									Computed: true,
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.RequiresReplace(),
+									},
+									Optional: true,
+									Attributes: map[string]schema.Attribute{
+										"str": schema.StringAttribute{
+											Computed: true,
+											PlanModifiers: []planmodifier.String{
+												stringplanmodifier.RequiresReplace(),
+											},
+											Optional: true,
+										},
+										"float32": schema.NumberAttribute{
+											PlanModifiers: []planmodifier.Number{
+												numberplanmodifier.RequiresReplace(),
+											},
+											Optional: true,
+										},
+										"boolean": schema.BoolAttribute{
+											PlanModifiers: []planmodifier.Bool{
+												boolplanmodifier.RequiresReplace(),
+											},
+											Optional: true,
+										},
+										"connection_filter_property_4": schema.SingleNestedAttribute{
+											Computed: true,
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.RequiresReplace(),
+											},
+											Optional:    true,
+											Attributes:  map[string]schema.Attribute{},
+											Description: `JSON using our filter syntax to filter on request headers`,
+										},
+									},
+									Validators: []validator.Object{
+										validators.ExactlyOneChild(),
+									},
+									Description: `JSON using our filter syntax to filter on request headers`,
+								},
+								"path": schema.SingleNestedAttribute{
+									Computed: true,
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.RequiresReplace(),
+									},
+									Optional: true,
+									Attributes: map[string]schema.Attribute{
+										"str": schema.StringAttribute{
+											Computed: true,
+											PlanModifiers: []planmodifier.String{
+												stringplanmodifier.RequiresReplace(),
+											},
+											Optional: true,
+										},
+										"float32": schema.NumberAttribute{
+											PlanModifiers: []planmodifier.Number{
+												numberplanmodifier.RequiresReplace(),
+											},
+											Optional: true,
+										},
+										"boolean": schema.BoolAttribute{
+											PlanModifiers: []planmodifier.Bool{
+												boolplanmodifier.RequiresReplace(),
+											},
+											Optional: true,
+										},
+										"connection_filter_property_4": schema.SingleNestedAttribute{
+											Computed: true,
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.RequiresReplace(),
+											},
+											Optional:    true,
+											Attributes:  map[string]schema.Attribute{},
+											Description: `JSON using our filter syntax to filter on request headers`,
+										},
+									},
+									Validators: []validator.Object{
+										validators.ExactlyOneChild(),
+									},
+									Description: `JSON using our filter syntax to filter on request headers`,
+								},
+								"query": schema.SingleNestedAttribute{
+									Computed: true,
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.RequiresReplace(),
+									},
+									Optional: true,
+									Attributes: map[string]schema.Attribute{
+										"str": schema.StringAttribute{
+											Computed: true,
+											PlanModifiers: []planmodifier.String{
+												stringplanmodifier.RequiresReplace(),
+											},
+											Optional: true,
+										},
+										"float32": schema.NumberAttribute{
+											PlanModifiers: []planmodifier.Number{
+												numberplanmodifier.RequiresReplace(),
+											},
+											Optional: true,
+										},
+										"boolean": schema.BoolAttribute{
+											PlanModifiers: []planmodifier.Bool{
+												boolplanmodifier.RequiresReplace(),
+											},
+											Optional: true,
+										},
+										"connection_filter_property_4": schema.SingleNestedAttribute{
+											Computed: true,
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.RequiresReplace(),
+											},
+											Optional:    true,
+											Attributes:  map[string]schema.Attribute{},
+											Description: `JSON using our filter syntax to filter on request headers`,
+										},
+									},
+									Validators: []validator.Object{
+										validators.ExactlyOneChild(),
+									},
+									Description: `JSON using our filter syntax to filter on request headers`,
+								},
+								"type": schema.StringAttribute{
+									PlanModifiers: []planmodifier.String{
+										stringplanmodifier.RequiresReplace(),
+									},
+									Required: true,
+									Validators: []validator.String{
+										stringvalidator.OneOf(
+											"filter",
+										),
+									},
+									MarkdownDescription: `must be one of ["filter"]` + "\n" +
+										`A filter rule must be of type ` + "`" + `filter` + "`" + ``,
+								},
+							},
+						},
+						"retry_rule": schema.SingleNestedAttribute{
+							Computed: true,
+							PlanModifiers: []planmodifier.Object{
+								objectplanmodifier.RequiresReplace(),
+							},
+							Optional: true,
+							Attributes: map[string]schema.Attribute{
+								"count": schema.Int64Attribute{
+									Computed: true,
+									PlanModifiers: []planmodifier.Int64{
+										int64planmodifier.RequiresReplace(),
+									},
+									Optional:    true,
+									Description: `Maximum number of retries to attempt`,
+								},
+								"interval": schema.Int64Attribute{
+									Computed: true,
+									PlanModifiers: []planmodifier.Int64{
+										int64planmodifier.RequiresReplace(),
+									},
+									Optional:    true,
+									Description: `Time in MS between each retry`,
+								},
+								"strategy": schema.StringAttribute{
+									PlanModifiers: []planmodifier.String{
+										stringplanmodifier.RequiresReplace(),
+									},
+									Required: true,
+									Validators: []validator.String{
+										stringvalidator.OneOf(
+											"linear",
+											"exponential",
+										),
+									},
+									MarkdownDescription: `must be one of ["linear", "exponential"]` + "\n" +
+										`Algorithm to use when calculating delay between retries`,
+								},
+								"type": schema.StringAttribute{
+									PlanModifiers: []planmodifier.String{
+										stringplanmodifier.RequiresReplace(),
+									},
+									Required: true,
+									Validators: []validator.String{
+										stringvalidator.OneOf(
+											"retry",
+										),
+									},
+									MarkdownDescription: `must be one of ["retry"]` + "\n" +
+										`A retry rule must be of type ` + "`" + `retry` + "`" + ``,
+								},
+							},
+						},
+						"transform_rule": schema.SingleNestedAttribute{
+							Computed: true,
+							PlanModifiers: []planmodifier.Object{
+								objectplanmodifier.RequiresReplace(),
 							},
 							Optional: true,
 							Attributes: map[string]schema.Attribute{
@@ -1048,7 +1340,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 													"transform",
 												),
 											},
-											MarkdownDescription: `must be one of [transform]` + "\n" +
+											MarkdownDescription: `must be one of ["transform"]` + "\n" +
 												`A transformation rule must be of type ` + "`" + `transformation` + "`" + ``,
 										},
 									},
@@ -1077,7 +1369,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 													"transform",
 												),
 											},
-											MarkdownDescription: `must be one of [transform]` + "\n" +
+											MarkdownDescription: `must be one of ["transform"]` + "\n" +
 												`A transformation rule must be of type ` + "`" + `transformation` + "`" + ``,
 										},
 									},
@@ -1085,313 +1377,6 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 							},
 							Validators: []validator.Object{
 								validators.ExactlyOneChild(),
-							},
-							Validators: []validator.String{
-								validators.IsValidJSON(),
-							},
-							Description: `Parsed as JSON.`,
-						},
-						"alert_rule": schema.SingleNestedAttribute{
-							Computed: true,
-							PlanModifiers: []planmodifier.Object{
-								objectplanmodifier.RequiresReplace(),
-							},
-							Optional: true,
-							Attributes: map[string]schema.Attribute{
-								"strategy": schema.StringAttribute{
-									PlanModifiers: []planmodifier.String{
-										stringplanmodifier.RequiresReplace(),
-									},
-									Required: true,
-									Validators: []validator.String{
-										stringvalidator.OneOf(
-											"each_attempt",
-											"last_attempt",
-										),
-									},
-									MarkdownDescription: `must be one of [each_attempt, last_attempt]` + "\n" +
-										`Alert strategy to use`,
-								},
-								"type": schema.StringAttribute{
-									PlanModifiers: []planmodifier.String{
-										stringplanmodifier.RequiresReplace(),
-									},
-									Required: true,
-									Validators: []validator.String{
-										stringvalidator.OneOf(
-											"alert",
-										),
-									},
-									MarkdownDescription: `must be one of [alert]` + "\n" +
-										`An alert rule must be of type ` + "`" + `alert` + "`" + ``,
-								},
-							},
-						},
-						"delay_rule": schema.SingleNestedAttribute{
-							Computed: true,
-							PlanModifiers: []planmodifier.Object{
-								objectplanmodifier.RequiresReplace(),
-							},
-							Optional: true,
-							Attributes: map[string]schema.Attribute{
-								"delay": schema.Int64Attribute{
-									PlanModifiers: []planmodifier.Int64{
-										int64planmodifier.RequiresReplace(),
-									},
-									Required:    true,
-									Description: `Delay to introduce in MS`,
-								},
-								"type": schema.StringAttribute{
-									PlanModifiers: []planmodifier.String{
-										stringplanmodifier.RequiresReplace(),
-									},
-									Required: true,
-									Validators: []validator.String{
-										stringvalidator.OneOf(
-											"delay",
-										),
-									},
-									MarkdownDescription: `must be one of [delay]` + "\n" +
-										`A delay rule must be of type ` + "`" + `delay` + "`" + ``,
-								},
-							},
-						},
-						"filter_rule": schema.SingleNestedAttribute{
-							Computed: true,
-							PlanModifiers: []planmodifier.Object{
-								objectplanmodifier.RequiresReplace(),
-							},
-							Optional: true,
-							Attributes: map[string]schema.Attribute{
-								"body": schema.SingleNestedAttribute{
-									Computed: true,
-									PlanModifiers: []planmodifier.Object{
-										objectplanmodifier.RequiresReplace(),
-									},
-									Optional: true,
-									Attributes: map[string]schema.Attribute{
-										"str": schema.StringAttribute{
-											Computed: true,
-											PlanModifiers: []planmodifier.String{
-												stringplanmodifier.RequiresReplace(),
-											},
-											Optional: true,
-										},
-										"float32": schema.NumberAttribute{
-											PlanModifiers: []planmodifier.Number{
-												numberplanmodifier.RequiresReplace(),
-											},
-											Optional: true,
-										},
-										"boolean": schema.BoolAttribute{
-											PlanModifiers: []planmodifier.Bool{
-												boolplanmodifier.RequiresReplace(),
-											},
-											Optional: true,
-										},
-										"connection_filter_property_4": schema.SingleNestedAttribute{
-											Computed: true,
-											PlanModifiers: []planmodifier.Object{
-												objectplanmodifier.RequiresReplace(),
-											},
-											Optional:    true,
-											Attributes:  map[string]schema.Attribute{},
-											Description: `JSON using our filter syntax to filter on request headers`,
-										},
-									},
-									Validators: []validator.Object{
-										validators.ExactlyOneChild(),
-									},
-									Description: `JSON using our filter syntax to filter on request headers`,
-								},
-								"headers": schema.SingleNestedAttribute{
-									Computed: true,
-									PlanModifiers: []planmodifier.Object{
-										objectplanmodifier.RequiresReplace(),
-									},
-									Optional: true,
-									Attributes: map[string]schema.Attribute{
-										"str": schema.StringAttribute{
-											Computed: true,
-											PlanModifiers: []planmodifier.String{
-												stringplanmodifier.RequiresReplace(),
-											},
-											Optional: true,
-										},
-										"float32": schema.NumberAttribute{
-											PlanModifiers: []planmodifier.Number{
-												numberplanmodifier.RequiresReplace(),
-											},
-											Optional: true,
-										},
-										"boolean": schema.BoolAttribute{
-											PlanModifiers: []planmodifier.Bool{
-												boolplanmodifier.RequiresReplace(),
-											},
-											Optional: true,
-										},
-										"connection_filter_property_4": schema.SingleNestedAttribute{
-											Computed: true,
-											PlanModifiers: []planmodifier.Object{
-												objectplanmodifier.RequiresReplace(),
-											},
-											Optional:    true,
-											Attributes:  map[string]schema.Attribute{},
-											Description: `JSON using our filter syntax to filter on request headers`,
-										},
-									},
-									Validators: []validator.Object{
-										validators.ExactlyOneChild(),
-									},
-									Description: `JSON using our filter syntax to filter on request headers`,
-								},
-								"path": schema.SingleNestedAttribute{
-									Computed: true,
-									PlanModifiers: []planmodifier.Object{
-										objectplanmodifier.RequiresReplace(),
-									},
-									Optional: true,
-									Attributes: map[string]schema.Attribute{
-										"str": schema.StringAttribute{
-											Computed: true,
-											PlanModifiers: []planmodifier.String{
-												stringplanmodifier.RequiresReplace(),
-											},
-											Optional: true,
-										},
-										"float32": schema.NumberAttribute{
-											PlanModifiers: []planmodifier.Number{
-												numberplanmodifier.RequiresReplace(),
-											},
-											Optional: true,
-										},
-										"boolean": schema.BoolAttribute{
-											PlanModifiers: []planmodifier.Bool{
-												boolplanmodifier.RequiresReplace(),
-											},
-											Optional: true,
-										},
-										"connection_filter_property_4": schema.SingleNestedAttribute{
-											Computed: true,
-											PlanModifiers: []planmodifier.Object{
-												objectplanmodifier.RequiresReplace(),
-											},
-											Optional:    true,
-											Attributes:  map[string]schema.Attribute{},
-											Description: `JSON using our filter syntax to filter on request headers`,
-										},
-									},
-									Validators: []validator.Object{
-										validators.ExactlyOneChild(),
-									},
-									Description: `JSON using our filter syntax to filter on request headers`,
-								},
-								"query": schema.SingleNestedAttribute{
-									Computed: true,
-									PlanModifiers: []planmodifier.Object{
-										objectplanmodifier.RequiresReplace(),
-									},
-									Optional: true,
-									Attributes: map[string]schema.Attribute{
-										"str": schema.StringAttribute{
-											Computed: true,
-											PlanModifiers: []planmodifier.String{
-												stringplanmodifier.RequiresReplace(),
-											},
-											Optional: true,
-										},
-										"float32": schema.NumberAttribute{
-											PlanModifiers: []planmodifier.Number{
-												numberplanmodifier.RequiresReplace(),
-											},
-											Optional: true,
-										},
-										"boolean": schema.BoolAttribute{
-											PlanModifiers: []planmodifier.Bool{
-												boolplanmodifier.RequiresReplace(),
-											},
-											Optional: true,
-										},
-										"connection_filter_property_4": schema.SingleNestedAttribute{
-											Computed: true,
-											PlanModifiers: []planmodifier.Object{
-												objectplanmodifier.RequiresReplace(),
-											},
-											Optional:    true,
-											Attributes:  map[string]schema.Attribute{},
-											Description: `JSON using our filter syntax to filter on request headers`,
-										},
-									},
-									Validators: []validator.Object{
-										validators.ExactlyOneChild(),
-									},
-									Description: `JSON using our filter syntax to filter on request headers`,
-								},
-								"type": schema.StringAttribute{
-									PlanModifiers: []planmodifier.String{
-										stringplanmodifier.RequiresReplace(),
-									},
-									Required: true,
-									Validators: []validator.String{
-										stringvalidator.OneOf(
-											"filter",
-										),
-									},
-									MarkdownDescription: `must be one of [filter]` + "\n" +
-										`A filter rule must be of type ` + "`" + `filter` + "`" + ``,
-								},
-							},
-						},
-						"retry_rule": schema.SingleNestedAttribute{
-							Computed: true,
-							PlanModifiers: []planmodifier.Object{
-								objectplanmodifier.RequiresReplace(),
-							},
-							Optional: true,
-							Attributes: map[string]schema.Attribute{
-								"count": schema.Int64Attribute{
-									Computed: true,
-									PlanModifiers: []planmodifier.Int64{
-										int64planmodifier.RequiresReplace(),
-									},
-									Optional:    true,
-									Description: `Maximum number of retries to attempt`,
-								},
-								"interval": schema.Int64Attribute{
-									Computed: true,
-									PlanModifiers: []planmodifier.Int64{
-										int64planmodifier.RequiresReplace(),
-									},
-									Optional:    true,
-									Description: `Time in MS between each retry`,
-								},
-								"strategy": schema.StringAttribute{
-									PlanModifiers: []planmodifier.String{
-										stringplanmodifier.RequiresReplace(),
-									},
-									Required: true,
-									Validators: []validator.String{
-										stringvalidator.OneOf(
-											"linear",
-											"exponential",
-										),
-									},
-									MarkdownDescription: `must be one of [linear, exponential]` + "\n" +
-										`Algorithm to use when calculating delay between retries`,
-								},
-								"type": schema.StringAttribute{
-									PlanModifiers: []planmodifier.String{
-										stringplanmodifier.RequiresReplace(),
-									},
-									Required: true,
-									Validators: []validator.String{
-										stringvalidator.OneOf(
-											"retry",
-										),
-									},
-									MarkdownDescription: `must be one of [retry]` + "\n" +
-										`A retry rule must be of type ` + "`" + `retry` + "`" + ``,
-								},
 							},
 						},
 					},
@@ -1434,75 +1419,6 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 						Computed: true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
-								"any": schema.StringAttribute{
-									Computed: true,
-									Attributes: map[string]schema.Attribute{
-										"transform_full": schema.SingleNestedAttribute{
-											Computed: true,
-											Attributes: map[string]schema.Attribute{
-												"transformation": schema.SingleNestedAttribute{
-													Computed: true,
-													Attributes: map[string]schema.Attribute{
-														"code": schema.StringAttribute{
-															Computed:    true,
-															Description: `A string representation of your JavaScript (ES6) code to run`,
-														},
-														"env": schema.MapAttribute{
-															Computed:    true,
-															ElementType: types.StringType,
-															Description: `A key-value object of environment variables to encrypt and expose to your transformation code`,
-														},
-														"name": schema.StringAttribute{
-															Computed:    true,
-															Description: `The unique name of the transformation`,
-														},
-													},
-													Description: `You can optionally define a new transformation while creating a transform rule`,
-												},
-												"transformation_id": schema.StringAttribute{
-													Computed:    true,
-													Description: `ID of the attached transformation object. Optional input, always set once the rule is defined`,
-												},
-												"type": schema.StringAttribute{
-													Computed: true,
-													Validators: []validator.String{
-														stringvalidator.OneOf(
-															"transform",
-														),
-													},
-													MarkdownDescription: `must be one of [transform]` + "\n" +
-														`A transformation rule must be of type ` + "`" + `transformation` + "`" + ``,
-												},
-											},
-										},
-										"transform_reference": schema.SingleNestedAttribute{
-											Computed: true,
-											Attributes: map[string]schema.Attribute{
-												"transformation_id": schema.StringAttribute{
-													Computed:    true,
-													Description: `ID of the attached transformation object. Optional input, always set once the rule is defined`,
-												},
-												"type": schema.StringAttribute{
-													Computed: true,
-													Validators: []validator.String{
-														stringvalidator.OneOf(
-															"transform",
-														),
-													},
-													MarkdownDescription: `must be one of [transform]` + "\n" +
-														`A transformation rule must be of type ` + "`" + `transformation` + "`" + ``,
-												},
-											},
-										},
-									},
-									Validators: []validator.Object{
-										validators.ExactlyOneChild(),
-									},
-									Validators: []validator.String{
-										validators.IsValidJSON(),
-									},
-									Description: `Parsed as JSON.`,
-								},
 								"alert_rule": schema.SingleNestedAttribute{
 									Computed: true,
 									Attributes: map[string]schema.Attribute{
@@ -1514,7 +1430,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 													"last_attempt",
 												),
 											},
-											MarkdownDescription: `must be one of [each_attempt, last_attempt]` + "\n" +
+											MarkdownDescription: `must be one of ["each_attempt", "last_attempt"]` + "\n" +
 												`Alert strategy to use`,
 										},
 										"type": schema.StringAttribute{
@@ -1524,7 +1440,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 													"alert",
 												),
 											},
-											MarkdownDescription: `must be one of [alert]` + "\n" +
+											MarkdownDescription: `must be one of ["alert"]` + "\n" +
 												`An alert rule must be of type ` + "`" + `alert` + "`" + ``,
 										},
 									},
@@ -1543,7 +1459,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 													"delay",
 												),
 											},
-											MarkdownDescription: `must be one of [delay]` + "\n" +
+											MarkdownDescription: `must be one of ["delay"]` + "\n" +
 												`A delay rule must be of type ` + "`" + `delay` + "`" + ``,
 										},
 									},
@@ -1650,7 +1566,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 													"filter",
 												),
 											},
-											MarkdownDescription: `must be one of [filter]` + "\n" +
+											MarkdownDescription: `must be one of ["filter"]` + "\n" +
 												`A filter rule must be of type ` + "`" + `filter` + "`" + ``,
 										},
 									},
@@ -1674,7 +1590,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 													"exponential",
 												),
 											},
-											MarkdownDescription: `must be one of [linear, exponential]` + "\n" +
+											MarkdownDescription: `must be one of ["linear", "exponential"]` + "\n" +
 												`Algorithm to use when calculating delay between retries`,
 										},
 										"type": schema.StringAttribute{
@@ -1684,9 +1600,74 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 													"retry",
 												),
 											},
-											MarkdownDescription: `must be one of [retry]` + "\n" +
+											MarkdownDescription: `must be one of ["retry"]` + "\n" +
 												`A retry rule must be of type ` + "`" + `retry` + "`" + ``,
 										},
+									},
+								},
+								"transform_rule": schema.SingleNestedAttribute{
+									Computed: true,
+									Attributes: map[string]schema.Attribute{
+										"transform_full": schema.SingleNestedAttribute{
+											Computed: true,
+											Attributes: map[string]schema.Attribute{
+												"transformation": schema.SingleNestedAttribute{
+													Computed: true,
+													Attributes: map[string]schema.Attribute{
+														"code": schema.StringAttribute{
+															Computed:    true,
+															Description: `A string representation of your JavaScript (ES6) code to run`,
+														},
+														"env": schema.MapAttribute{
+															Computed:    true,
+															ElementType: types.StringType,
+															Description: `A key-value object of environment variables to encrypt and expose to your transformation code`,
+														},
+														"name": schema.StringAttribute{
+															Computed:    true,
+															Description: `The unique name of the transformation`,
+														},
+													},
+													Description: `You can optionally define a new transformation while creating a transform rule`,
+												},
+												"transformation_id": schema.StringAttribute{
+													Computed:    true,
+													Description: `ID of the attached transformation object. Optional input, always set once the rule is defined`,
+												},
+												"type": schema.StringAttribute{
+													Computed: true,
+													Validators: []validator.String{
+														stringvalidator.OneOf(
+															"transform",
+														),
+													},
+													MarkdownDescription: `must be one of ["transform"]` + "\n" +
+														`A transformation rule must be of type ` + "`" + `transformation` + "`" + ``,
+												},
+											},
+										},
+										"transform_reference": schema.SingleNestedAttribute{
+											Computed: true,
+											Attributes: map[string]schema.Attribute{
+												"transformation_id": schema.StringAttribute{
+													Computed:    true,
+													Description: `ID of the attached transformation object. Optional input, always set once the rule is defined`,
+												},
+												"type": schema.StringAttribute{
+													Computed: true,
+													Validators: []validator.String{
+														stringvalidator.OneOf(
+															"transform",
+														),
+													},
+													MarkdownDescription: `must be one of ["transform"]` + "\n" +
+														`A transformation rule must be of type ` + "`" + `transformation` + "`" + ``,
+												},
+											},
+										},
+									},
+									Validators: []validator.Object{
+										validators.ExactlyOneChild(),
 									},
 								},
 							},
@@ -1755,7 +1736,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 										"xml",
 									),
 								},
-								MarkdownDescription: `must be one of [json, text, xml]` + "\n" +
+								MarkdownDescription: `must be one of ["json", "text", "xml"]` + "\n" +
 									`Content type of the custom response`,
 							},
 						},
@@ -1813,7 +1794,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 										"aws_sns",
 									),
 								},
-								MarkdownDescription: `must be one of [twitter, stripe, recharge, github, shopify, postmark, typeform, hmac, basic_auth, api_key, xero, svix, zoom, akeneo, adyen, gitlab, property-finder, woocommerce, oura, commercelayer, mailgun, pipedrive, sendgrid, workos, synctera, aws_sns]` + "\n" +
+								MarkdownDescription: `must be one of ["twitter", "stripe", "recharge", "github", "shopify", "postmark", "typeform", "hmac", "basic_auth", "api_key", "xero", "svix", "zoom", "akeneo", "adyen", "gitlab", "property-finder", "woocommerce", "oura", "commercelayer", "mailgun", "pipedrive", "sendgrid", "workos", "synctera", "aws_sns"]` + "\n" +
 									`The provider name`,
 							},
 						},
@@ -1913,22 +1894,24 @@ func (r *ConnectionResource) Create(ctx context.Context, req resource.CreateRequ
 	}
 
 	var destination *operations.CreateConnectionRequestBodyDestination
-	if data != nil {
-		var authMethod interface{}
+	var authMethod *shared.DestinationAuthMethodConfig
+	if data.AuthMethod != nil {
 		var hookdeckSignature *shared.HookdeckSignature
 		if data.AuthMethod != nil {
 			var config *shared.DestinationAuthMethodSignatureConfig
 			if data.AuthMethod != nil {
 				config = &shared.DestinationAuthMethodSignatureConfig{}
 			}
-			type1 := shared.HookdeckSignatureType(data.AuthMethod.Type.ValueString())
+			typeVar := shared.HookdeckSignatureType(data.AuthMethod.Type.ValueString())
 			hookdeckSignature = &shared.HookdeckSignature{
 				Config: config,
-				Type:   type1,
+				Type:   typeVar,
 			}
 		}
 		if hookdeckSignature != nil {
-			authMethod = hookdeckSignature
+			authMethod = &shared.DestinationAuthMethodConfig{
+				HookdeckSignature: hookdeckSignature,
+			}
 		}
 		var basicAuth *shared.BasicAuth
 		if data.AuthMethod != nil {
@@ -1941,24 +1924,26 @@ func (r *ConnectionResource) Create(ctx context.Context, req resource.CreateRequ
 					Username: username,
 				}
 			}
-			type2 := shared.BasicAuthType(data.AuthMethod.Type.ValueString())
+			typeVar1 := shared.BasicAuthType(data.AuthMethod.Type.ValueString())
 			basicAuth = &shared.BasicAuth{
 				Config: config1,
-				Type:   type2,
+				Type:   typeVar1,
 			}
 		}
 		if basicAuth != nil {
-			authMethod = basicAuth
+			authMethod = &shared.DestinationAuthMethodConfig{
+				BasicAuth: basicAuth,
+			}
 		}
 		var apiKey *shared.APIKey
 		if data.AuthMethod != nil {
 			var config2 *shared.DestinationAuthMethodAPIKeyConfig
 			if data.AuthMethod != nil {
-				apiKey1 := data.AuthMethod.Config.ValueString()
-				key := data.AuthMethod.Config.ValueString()
+				apiKey1 := data.AuthMethod.APIKey.ValueString()
+				key := data.AuthMethod.Key.ValueString()
 				to := new(shared.DestinationAuthMethodAPIKeyConfigTo)
-				if !data.AuthMethod.Config.IsUnknown() && !data.AuthMethod.Config.IsNull() {
-					*to = shared.DestinationAuthMethodAPIKeyConfigTo(data.AuthMethod.Config.ValueString())
+				if !data.AuthMethod.To.IsUnknown() && !data.AuthMethod.To.IsNull() {
+					*to = shared.DestinationAuthMethodAPIKeyConfigTo(data.AuthMethod.To.ValueString())
 				} else {
 					to = nil
 				}
@@ -1968,37 +1953,43 @@ func (r *ConnectionResource) Create(ctx context.Context, req resource.CreateRequ
 					To:     to,
 				}
 			}
-			type3 := shared.APIKeyType(data.AuthMethod.Type.ValueString())
+			typeVar2 := shared.APIKeyType(data.AuthMethod.Type.ValueString())
 			apiKey = &shared.APIKey{
 				Config: config2,
-				Type:   type3,
+				Type:   typeVar2,
 			}
 		}
 		if apiKey != nil {
-			authMethod = apiKey
+			authMethod = &shared.DestinationAuthMethodConfig{
+				APIKey: apiKey,
+			}
 		}
 		var bearerToken *shared.BearerToken
 		if data.AuthMethod != nil {
 			var config3 *shared.DestinationAuthMethodBearerTokenConfig
-			token := data.AuthMethod.Config.ValueString()
-			config3 = &shared.DestinationAuthMethodBearerTokenConfig{
-				Token: token,
+			if data.AuthMethod != nil {
+				token := data.AuthMethod.Token.ValueString()
+				config3 = &shared.DestinationAuthMethodBearerTokenConfig{
+					Token: token,
+				}
 			}
-			type4 := shared.BearerTokenType(data.AuthMethod.Type.ValueString())
+			typeVar3 := shared.BearerTokenType(data.AuthMethod.Type.ValueString())
 			bearerToken = &shared.BearerToken{
 				Config: config3,
-				Type:   type4,
+				Type:   typeVar3,
 			}
 		}
 		if bearerToken != nil {
-			authMethod = bearerToken
+			authMethod = &shared.DestinationAuthMethodConfig{
+				BearerToken: bearerToken,
+			}
 		}
 		var customSignature *shared.CustomSignature
 		if data.AuthMethod != nil {
-			key1 := data.AuthMethod.Config.ValueString()
+			key1 := data.AuthMethod.Key.ValueString()
 			signingSecret := new(string)
-			if !data.AuthMethod.Config.IsUnknown() && !data.AuthMethod.Config.IsNull() {
-				*signingSecret = data.AuthMethod.Config.ValueString()
+			if !data.AuthMethod.SigningSecret.IsUnknown() && !data.AuthMethod.SigningSecret.IsNull() {
+				*signingSecret = data.AuthMethod.SigningSecret.ValueString()
 			} else {
 				signingSecret = nil
 			}
@@ -2006,57 +1997,61 @@ func (r *ConnectionResource) Create(ctx context.Context, req resource.CreateRequ
 				Key:           key1,
 				SigningSecret: signingSecret,
 			}
-			type5 := shared.CustomSignatureType(data.AuthMethod.Type.ValueString())
+			typeVar4 := shared.CustomSignatureType(data.AuthMethod.Type.ValueString())
 			customSignature = &shared.CustomSignature{
 				Config: config4,
-				Type:   type5,
+				Type:   typeVar4,
 			}
 		}
 		if customSignature != nil {
-			authMethod = customSignature
+			authMethod = &shared.DestinationAuthMethodConfig{
+				CustomSignature: customSignature,
+			}
 		}
-		cliPath := new(string)
-		if !data.CliPath.IsUnknown() && !data.CliPath.IsNull() {
-			*cliPath = data.CliPath.ValueString()
-		} else {
-			cliPath = nil
-		}
-		httpMethod := new(shared.DestinationHTTPMethod)
-		if !data.HTTPMethod.IsUnknown() && !data.HTTPMethod.IsNull() {
-			*httpMethod = shared.DestinationHTTPMethod(data.HTTPMethod.ValueString())
-		} else {
-			httpMethod = nil
-		}
-		name := data.Name.ValueString()
-		pathForwardingDisabled := new(bool)
-		if !data.PathForwardingDisabled.IsUnknown() && !data.PathForwardingDisabled.IsNull() {
-			*pathForwardingDisabled = data.PathForwardingDisabled.ValueBool()
-		} else {
-			pathForwardingDisabled = nil
-		}
-		var rateLimit interface{}
-		rateLimitPeriod := new(operations.CreateConnectionRequestBodyDestinationRateLimitPeriod)
-		if !data.RateLimitPeriod.IsUnknown() && !data.RateLimitPeriod.IsNull() {
-			*rateLimitPeriod = operations.CreateConnectionRequestBodyDestinationRateLimitPeriod(data.RateLimitPeriod.ValueString())
-		} else {
-			rateLimitPeriod = nil
-		}
-		url := new(string)
-		if !data.URL.IsUnknown() && !data.URL.IsNull() {
-			*url = data.URL.ValueString()
-		} else {
-			url = nil
-		}
-		destination = &operations.CreateConnectionRequestBodyDestination{
-			AuthMethod:             authMethod,
-			CliPath:                cliPath,
-			HTTPMethod:             httpMethod,
-			Name:                   name,
-			PathForwardingDisabled: pathForwardingDisabled,
-			RateLimit:              rateLimit,
-			RateLimitPeriod:        rateLimitPeriod,
-			URL:                    url,
-		}
+	}
+	cliPath := new(string)
+	if !data.CliPath.IsUnknown() && !data.CliPath.IsNull() {
+		*cliPath = data.CliPath.ValueString()
+	} else {
+		cliPath = nil
+	}
+	httpMethod := new(shared.DestinationHTTPMethod)
+	if !data.HTTPMethod.IsUnknown() && !data.HTTPMethod.IsNull() {
+		*httpMethod = shared.DestinationHTTPMethod(data.HTTPMethod.ValueString())
+	} else {
+		httpMethod = nil
+	}
+	name := data.Name.ValueString()
+	pathForwardingDisabled := new(bool)
+	if !data.PathForwardingDisabled.IsUnknown() && !data.PathForwardingDisabled.IsNull() {
+		*pathForwardingDisabled = data.PathForwardingDisabled.ValueBool()
+	} else {
+		pathForwardingDisabled = nil
+	}
+	var rateLimit interface{}
+	if data.RateLimit != nil {
+	}
+	rateLimitPeriod := new(operations.CreateConnectionRequestBodyDestinationRateLimitPeriod)
+	if !data.RateLimitPeriod.IsUnknown() && !data.RateLimitPeriod.IsNull() {
+		*rateLimitPeriod = operations.CreateConnectionRequestBodyDestinationRateLimitPeriod(data.RateLimitPeriod.ValueString())
+	} else {
+		rateLimitPeriod = nil
+	}
+	url := new(string)
+	if !data.URL.IsUnknown() && !data.URL.IsNull() {
+		*url = data.URL.ValueString()
+	} else {
+		url = nil
+	}
+	destination = &operations.CreateConnectionRequestBodyDestination{
+		AuthMethod:             authMethod,
+		CliPath:                cliPath,
+		HTTPMethod:             httpMethod,
+		Name:                   name,
+		PathForwardingDisabled: pathForwardingDisabled,
+		RateLimit:              rateLimit,
+		RateLimitPeriod:        rateLimitPeriod,
+		URL:                    url,
 	}
 	destinationID := new(string)
 	if !data.DestinationID.IsUnknown() && !data.DestinationID.IsNull() {
@@ -2065,28 +2060,28 @@ func (r *ConnectionResource) Create(ctx context.Context, req resource.CreateRequ
 		destinationID = nil
 	}
 	name1 := data.Name.ValueString()
-	rules := make([]shared.Rule, 0)
+	var rules []shared.Rule = nil
 	for _, rulesItem := range data.Rules {
 		if rulesItem.RetryRule != nil {
 			count := new(int64)
-			if !rulesItem.Any.IsUnknown() && !rulesItem.Any.IsNull() {
-				*count = rulesItem.Any.ValueInt64()
+			if !rulesItem.Count.IsUnknown() && !rulesItem.Count.IsNull() {
+				*count = rulesItem.Count.ValueInt64()
 			} else {
 				count = nil
 			}
 			interval := new(int64)
-			if !rulesItem.Any.IsUnknown() && !rulesItem.Any.IsNull() {
-				*interval = rulesItem.Any.ValueInt64()
+			if !rulesItem.Interval.IsUnknown() && !rulesItem.Interval.IsNull() {
+				*interval = rulesItem.Interval.ValueInt64()
 			} else {
 				interval = nil
 			}
-			strategy := shared.RetryStrategy(rulesItem.Any.ValueString())
-			type6 := shared.RetryRuleType(rulesItem.Any.ValueString())
+			strategy := shared.RetryStrategy(rulesItem.Strategy.ValueString())
+			typeVar5 := shared.RetryRuleType(rulesItem.Type.ValueString())
 			retryRule := shared.RetryRule{
 				Count:    count,
 				Interval: interval,
 				Strategy: strategy,
-				Type:     type6,
+				Type:     typeVar5,
 			}
 			rules = append(rules, shared.Rule{
 				RetryRule: &retryRule,
@@ -2094,10 +2089,10 @@ func (r *ConnectionResource) Create(ctx context.Context, req resource.CreateRequ
 		}
 		if rulesItem.AlertRule != nil {
 			strategy1 := shared.AlertStrategy(rulesItem.Strategy.ValueString())
-			type7 := shared.AlertRuleType(rulesItem.Type.ValueString())
+			typeVar6 := shared.AlertRuleType(rulesItem.Type.ValueString())
 			alertRule := shared.AlertRule{
 				Strategy: strategy1,
-				Type:     type7,
+				Type:     typeVar6,
 			}
 			rules = append(rules, shared.Rule{
 				AlertRule: &alertRule,
@@ -2105,33 +2100,259 @@ func (r *ConnectionResource) Create(ctx context.Context, req resource.CreateRequ
 		}
 		if rulesItem.FilterRule != nil {
 			var body *shared.ConnectionFilterProperty
+			if rulesItem.Body != nil {
+				str := new(string)
+				if !rulesItem.Body.Str.IsUnknown() && !rulesItem.Body.Str.IsNull() {
+					*str = rulesItem.Body.Str.ValueString()
+				} else {
+					str = nil
+				}
+				if str != nil {
+					body = &shared.ConnectionFilterProperty{
+						Str: str,
+					}
+				}
+				float32Var := new(float32)
+				if !rulesItem.Body.Float32.IsUnknown() && !rulesItem.Body.Float32.IsNull() {
+					float32Tmp, _ := rulesItem.Body.Float32.ValueBigFloat().Float64()
+					*float32Var = float32(float32Tmp)
+				} else {
+					float32Var = nil
+				}
+				if float32Var != nil {
+					body = &shared.ConnectionFilterProperty{
+						Float32: float32Var,
+					}
+				}
+				boolean := new(bool)
+				if !rulesItem.Body.Boolean.IsUnknown() && !rulesItem.Body.Boolean.IsNull() {
+					*boolean = rulesItem.Body.Boolean.ValueBool()
+				} else {
+					boolean = nil
+				}
+				if boolean != nil {
+					body = &shared.ConnectionFilterProperty{
+						Boolean: boolean,
+					}
+				}
+				var connectionFilterProperty4 *shared.ConnectionFilterProperty4
+				if rulesItem.Body != nil {
+					connectionFilterProperty4 = &shared.ConnectionFilterProperty4{}
+				}
+				if connectionFilterProperty4 != nil {
+					body = &shared.ConnectionFilterProperty{
+						ConnectionFilterProperty4: connectionFilterProperty4,
+					}
+				}
+			}
 			var headers *shared.ConnectionFilterProperty
+			if rulesItem.Headers != nil {
+				str1 := new(string)
+				if !rulesItem.Headers.Str.IsUnknown() && !rulesItem.Headers.Str.IsNull() {
+					*str1 = rulesItem.Headers.Str.ValueString()
+				} else {
+					str1 = nil
+				}
+				if str1 != nil {
+					headers = &shared.ConnectionFilterProperty{
+						Str: str1,
+					}
+				}
+				float321 := new(float32)
+				if !rulesItem.Headers.Float32.IsUnknown() && !rulesItem.Headers.Float32.IsNull() {
+					float32Tmp1, _ := rulesItem.Headers.Float32.ValueBigFloat().Float64()
+					*float321 = float32(float32Tmp1)
+				} else {
+					float321 = nil
+				}
+				if float321 != nil {
+					headers = &shared.ConnectionFilterProperty{
+						Float32: float321,
+					}
+				}
+				boolean1 := new(bool)
+				if !rulesItem.Headers.Boolean.IsUnknown() && !rulesItem.Headers.Boolean.IsNull() {
+					*boolean1 = rulesItem.Headers.Boolean.ValueBool()
+				} else {
+					boolean1 = nil
+				}
+				if boolean1 != nil {
+					headers = &shared.ConnectionFilterProperty{
+						Boolean: boolean1,
+					}
+				}
+				var connectionFilterProperty41 *shared.ConnectionFilterProperty4
+				if rulesItem.Headers != nil {
+					connectionFilterProperty41 = &shared.ConnectionFilterProperty4{}
+				}
+				if connectionFilterProperty41 != nil {
+					headers = &shared.ConnectionFilterProperty{
+						ConnectionFilterProperty4: connectionFilterProperty41,
+					}
+				}
+			}
 			var path *shared.ConnectionFilterProperty
+			if rulesItem.Path != nil {
+				str2 := new(string)
+				if !rulesItem.Path.Str.IsUnknown() && !rulesItem.Path.Str.IsNull() {
+					*str2 = rulesItem.Path.Str.ValueString()
+				} else {
+					str2 = nil
+				}
+				if str2 != nil {
+					path = &shared.ConnectionFilterProperty{
+						Str: str2,
+					}
+				}
+				float322 := new(float32)
+				if !rulesItem.Path.Float32.IsUnknown() && !rulesItem.Path.Float32.IsNull() {
+					float32Tmp2, _ := rulesItem.Path.Float32.ValueBigFloat().Float64()
+					*float322 = float32(float32Tmp2)
+				} else {
+					float322 = nil
+				}
+				if float322 != nil {
+					path = &shared.ConnectionFilterProperty{
+						Float32: float322,
+					}
+				}
+				boolean2 := new(bool)
+				if !rulesItem.Path.Boolean.IsUnknown() && !rulesItem.Path.Boolean.IsNull() {
+					*boolean2 = rulesItem.Path.Boolean.ValueBool()
+				} else {
+					boolean2 = nil
+				}
+				if boolean2 != nil {
+					path = &shared.ConnectionFilterProperty{
+						Boolean: boolean2,
+					}
+				}
+				var connectionFilterProperty42 *shared.ConnectionFilterProperty4
+				if rulesItem.Path != nil {
+					connectionFilterProperty42 = &shared.ConnectionFilterProperty4{}
+				}
+				if connectionFilterProperty42 != nil {
+					path = &shared.ConnectionFilterProperty{
+						ConnectionFilterProperty4: connectionFilterProperty42,
+					}
+				}
+			}
 			var query *shared.ConnectionFilterProperty
-			type8 := shared.FilterRuleType(rulesItem.Type.ValueString())
+			if rulesItem.Query != nil {
+				str3 := new(string)
+				if !rulesItem.Query.Str.IsUnknown() && !rulesItem.Query.Str.IsNull() {
+					*str3 = rulesItem.Query.Str.ValueString()
+				} else {
+					str3 = nil
+				}
+				if str3 != nil {
+					query = &shared.ConnectionFilterProperty{
+						Str: str3,
+					}
+				}
+				float323 := new(float32)
+				if !rulesItem.Query.Float32.IsUnknown() && !rulesItem.Query.Float32.IsNull() {
+					float32Tmp3, _ := rulesItem.Query.Float32.ValueBigFloat().Float64()
+					*float323 = float32(float32Tmp3)
+				} else {
+					float323 = nil
+				}
+				if float323 != nil {
+					query = &shared.ConnectionFilterProperty{
+						Float32: float323,
+					}
+				}
+				boolean3 := new(bool)
+				if !rulesItem.Query.Boolean.IsUnknown() && !rulesItem.Query.Boolean.IsNull() {
+					*boolean3 = rulesItem.Query.Boolean.ValueBool()
+				} else {
+					boolean3 = nil
+				}
+				if boolean3 != nil {
+					query = &shared.ConnectionFilterProperty{
+						Boolean: boolean3,
+					}
+				}
+				var connectionFilterProperty43 *shared.ConnectionFilterProperty4
+				if rulesItem.Query != nil {
+					connectionFilterProperty43 = &shared.ConnectionFilterProperty4{}
+				}
+				if connectionFilterProperty43 != nil {
+					query = &shared.ConnectionFilterProperty{
+						ConnectionFilterProperty4: connectionFilterProperty43,
+					}
+				}
+			}
+			typeVar7 := shared.FilterRuleType(rulesItem.Type.ValueString())
 			filterRule := shared.FilterRule{
 				Body:    body,
 				Headers: headers,
 				Path:    path,
 				Query:   query,
-				Type:    type8,
+				Type:    typeVar7,
 			}
 			rules = append(rules, shared.Rule{
 				FilterRule: &filterRule,
 			})
 		}
-		if rulesItem.Any != nil {
-			var any interface{}
+		if rulesItem.TransformRule != nil {
+			var transformRule shared.TransformRule
+			var transformReference *shared.TransformReference
+			if rulesItem.TransformRule != nil {
+				transformationID := rulesItem.TransformRule.TransformationID.ValueString()
+				typeVar8 := shared.TransformReferenceType(rulesItem.TransformRule.Type.ValueString())
+				transformReference = &shared.TransformReference{
+					TransformationID: transformationID,
+					Type:             typeVar8,
+				}
+			}
+			if transformReference != nil {
+				transformRule = shared.TransformRule{
+					TransformReference: transformReference,
+				}
+			}
+			var transformFull *shared.TransformFull
+			if rulesItem.TransformRule != nil {
+				var transformation *shared.TransformFullTransformation
+				if rulesItem.TransformRule != nil {
+					code := rulesItem.TransformRule.Code.ValueString()
+					env := make(map[string]string)
+					// Warning. This is a map, but the source tf var is not a map. This might indicate a bug.
+					name2 := rulesItem.TransformRule.Name.ValueString()
+					transformation = &shared.TransformFullTransformation{
+						Code: code,
+						Env:  env,
+						Name: name2,
+					}
+				}
+				transformationId1 := new(string)
+				if !rulesItem.TransformRule.TransformationID.IsUnknown() && !rulesItem.TransformRule.TransformationID.IsNull() {
+					*transformationId1 = rulesItem.TransformRule.TransformationID.ValueString()
+				} else {
+					transformationId1 = nil
+				}
+				typeVar9 := shared.TransformFullType(rulesItem.TransformRule.Type.ValueString())
+				transformFull = &shared.TransformFull{
+					Transformation:   transformation,
+					TransformationID: transformationId1,
+					Type:             typeVar9,
+				}
+			}
+			if transformFull != nil {
+				transformRule = shared.TransformRule{
+					TransformFull: transformFull,
+				}
+			}
 			rules = append(rules, shared.Rule{
-				Any: &any,
+				TransformRule: &transformRule,
 			})
 		}
 		if rulesItem.DelayRule != nil {
-			delay := rulesItem.RetryRule.ValueInt64()
-			type9 := shared.DelayRuleType(rulesItem.Type.ValueString())
+			delay := rulesItem.Delay.ValueInt64()
+			typeVar10 := shared.DelayRuleType(rulesItem.Type.ValueString())
 			delayRule := shared.DelayRule{
 				Delay: delay,
-				Type:  type9,
+				Type:  typeVar10,
 			}
 			rules = append(rules, shared.Rule{
 				DelayRule: &delayRule,
@@ -2146,29 +2367,29 @@ func (r *ConnectionResource) Create(ctx context.Context, req resource.CreateRequ
 		} else {
 			isTeamDefault = nil
 		}
-		name2 := data.Name.ValueString()
-		rules1 := make([]shared.Rule, 0)
+		name3 := data.Name.ValueString()
+		var rules1 []shared.Rule = nil
 		for _, rulesItem1 := range data.Rules {
 			if rulesItem1.RetryRule != nil {
 				count1 := new(int64)
-				if !rulesItem1.Any.IsUnknown() && !rulesItem1.Any.IsNull() {
-					*count1 = rulesItem1.Any.ValueInt64()
+				if !rulesItem1.Count.IsUnknown() && !rulesItem1.Count.IsNull() {
+					*count1 = rulesItem1.Count.ValueInt64()
 				} else {
 					count1 = nil
 				}
 				interval1 := new(int64)
-				if !rulesItem1.Any.IsUnknown() && !rulesItem1.Any.IsNull() {
-					*interval1 = rulesItem1.Any.ValueInt64()
+				if !rulesItem1.Interval.IsUnknown() && !rulesItem1.Interval.IsNull() {
+					*interval1 = rulesItem1.Interval.ValueInt64()
 				} else {
 					interval1 = nil
 				}
-				strategy2 := shared.RetryStrategy(rulesItem1.Any.ValueString())
-				type10 := shared.RetryRuleType(rulesItem1.Any.ValueString())
+				strategy2 := shared.RetryStrategy(rulesItem1.Strategy.ValueString())
+				typeVar11 := shared.RetryRuleType(rulesItem1.Type.ValueString())
 				retryRule1 := shared.RetryRule{
 					Count:    count1,
 					Interval: interval1,
 					Strategy: strategy2,
-					Type:     type10,
+					Type:     typeVar11,
 				}
 				rules1 = append(rules1, shared.Rule{
 					RetryRule: &retryRule1,
@@ -2176,10 +2397,10 @@ func (r *ConnectionResource) Create(ctx context.Context, req resource.CreateRequ
 			}
 			if rulesItem1.AlertRule != nil {
 				strategy3 := shared.AlertStrategy(rulesItem1.Strategy.ValueString())
-				type11 := shared.AlertRuleType(rulesItem1.Type.ValueString())
+				typeVar12 := shared.AlertRuleType(rulesItem1.Type.ValueString())
 				alertRule1 := shared.AlertRule{
 					Strategy: strategy3,
-					Type:     type11,
+					Type:     typeVar12,
 				}
 				rules1 = append(rules1, shared.Rule{
 					AlertRule: &alertRule1,
@@ -2187,33 +2408,259 @@ func (r *ConnectionResource) Create(ctx context.Context, req resource.CreateRequ
 			}
 			if rulesItem1.FilterRule != nil {
 				var body1 *shared.ConnectionFilterProperty
+				if rulesItem1.Body != nil {
+					str4 := new(string)
+					if !rulesItem1.Body.Str.IsUnknown() && !rulesItem1.Body.Str.IsNull() {
+						*str4 = rulesItem1.Body.Str.ValueString()
+					} else {
+						str4 = nil
+					}
+					if str4 != nil {
+						body1 = &shared.ConnectionFilterProperty{
+							Str: str4,
+						}
+					}
+					float324 := new(float32)
+					if !rulesItem1.Body.Float32.IsUnknown() && !rulesItem1.Body.Float32.IsNull() {
+						float32Tmp4, _ := rulesItem1.Body.Float32.ValueBigFloat().Float64()
+						*float324 = float32(float32Tmp4)
+					} else {
+						float324 = nil
+					}
+					if float324 != nil {
+						body1 = &shared.ConnectionFilterProperty{
+							Float32: float324,
+						}
+					}
+					boolean4 := new(bool)
+					if !rulesItem1.Body.Boolean.IsUnknown() && !rulesItem1.Body.Boolean.IsNull() {
+						*boolean4 = rulesItem1.Body.Boolean.ValueBool()
+					} else {
+						boolean4 = nil
+					}
+					if boolean4 != nil {
+						body1 = &shared.ConnectionFilterProperty{
+							Boolean: boolean4,
+						}
+					}
+					var connectionFilterProperty44 *shared.ConnectionFilterProperty4
+					if rulesItem1.Body != nil {
+						connectionFilterProperty44 = &shared.ConnectionFilterProperty4{}
+					}
+					if connectionFilterProperty44 != nil {
+						body1 = &shared.ConnectionFilterProperty{
+							ConnectionFilterProperty4: connectionFilterProperty44,
+						}
+					}
+				}
 				var headers1 *shared.ConnectionFilterProperty
+				if rulesItem1.Headers != nil {
+					str5 := new(string)
+					if !rulesItem1.Headers.Str.IsUnknown() && !rulesItem1.Headers.Str.IsNull() {
+						*str5 = rulesItem1.Headers.Str.ValueString()
+					} else {
+						str5 = nil
+					}
+					if str5 != nil {
+						headers1 = &shared.ConnectionFilterProperty{
+							Str: str5,
+						}
+					}
+					float325 := new(float32)
+					if !rulesItem1.Headers.Float32.IsUnknown() && !rulesItem1.Headers.Float32.IsNull() {
+						float32Tmp5, _ := rulesItem1.Headers.Float32.ValueBigFloat().Float64()
+						*float325 = float32(float32Tmp5)
+					} else {
+						float325 = nil
+					}
+					if float325 != nil {
+						headers1 = &shared.ConnectionFilterProperty{
+							Float32: float325,
+						}
+					}
+					boolean5 := new(bool)
+					if !rulesItem1.Headers.Boolean.IsUnknown() && !rulesItem1.Headers.Boolean.IsNull() {
+						*boolean5 = rulesItem1.Headers.Boolean.ValueBool()
+					} else {
+						boolean5 = nil
+					}
+					if boolean5 != nil {
+						headers1 = &shared.ConnectionFilterProperty{
+							Boolean: boolean5,
+						}
+					}
+					var connectionFilterProperty45 *shared.ConnectionFilterProperty4
+					if rulesItem1.Headers != nil {
+						connectionFilterProperty45 = &shared.ConnectionFilterProperty4{}
+					}
+					if connectionFilterProperty45 != nil {
+						headers1 = &shared.ConnectionFilterProperty{
+							ConnectionFilterProperty4: connectionFilterProperty45,
+						}
+					}
+				}
 				var path1 *shared.ConnectionFilterProperty
+				if rulesItem1.Path != nil {
+					str6 := new(string)
+					if !rulesItem1.Path.Str.IsUnknown() && !rulesItem1.Path.Str.IsNull() {
+						*str6 = rulesItem1.Path.Str.ValueString()
+					} else {
+						str6 = nil
+					}
+					if str6 != nil {
+						path1 = &shared.ConnectionFilterProperty{
+							Str: str6,
+						}
+					}
+					float326 := new(float32)
+					if !rulesItem1.Path.Float32.IsUnknown() && !rulesItem1.Path.Float32.IsNull() {
+						float32Tmp6, _ := rulesItem1.Path.Float32.ValueBigFloat().Float64()
+						*float326 = float32(float32Tmp6)
+					} else {
+						float326 = nil
+					}
+					if float326 != nil {
+						path1 = &shared.ConnectionFilterProperty{
+							Float32: float326,
+						}
+					}
+					boolean6 := new(bool)
+					if !rulesItem1.Path.Boolean.IsUnknown() && !rulesItem1.Path.Boolean.IsNull() {
+						*boolean6 = rulesItem1.Path.Boolean.ValueBool()
+					} else {
+						boolean6 = nil
+					}
+					if boolean6 != nil {
+						path1 = &shared.ConnectionFilterProperty{
+							Boolean: boolean6,
+						}
+					}
+					var connectionFilterProperty46 *shared.ConnectionFilterProperty4
+					if rulesItem1.Path != nil {
+						connectionFilterProperty46 = &shared.ConnectionFilterProperty4{}
+					}
+					if connectionFilterProperty46 != nil {
+						path1 = &shared.ConnectionFilterProperty{
+							ConnectionFilterProperty4: connectionFilterProperty46,
+						}
+					}
+				}
 				var query1 *shared.ConnectionFilterProperty
-				type12 := shared.FilterRuleType(rulesItem1.Type.ValueString())
+				if rulesItem1.Query != nil {
+					str7 := new(string)
+					if !rulesItem1.Query.Str.IsUnknown() && !rulesItem1.Query.Str.IsNull() {
+						*str7 = rulesItem1.Query.Str.ValueString()
+					} else {
+						str7 = nil
+					}
+					if str7 != nil {
+						query1 = &shared.ConnectionFilterProperty{
+							Str: str7,
+						}
+					}
+					float327 := new(float32)
+					if !rulesItem1.Query.Float32.IsUnknown() && !rulesItem1.Query.Float32.IsNull() {
+						float32Tmp7, _ := rulesItem1.Query.Float32.ValueBigFloat().Float64()
+						*float327 = float32(float32Tmp7)
+					} else {
+						float327 = nil
+					}
+					if float327 != nil {
+						query1 = &shared.ConnectionFilterProperty{
+							Float32: float327,
+						}
+					}
+					boolean7 := new(bool)
+					if !rulesItem1.Query.Boolean.IsUnknown() && !rulesItem1.Query.Boolean.IsNull() {
+						*boolean7 = rulesItem1.Query.Boolean.ValueBool()
+					} else {
+						boolean7 = nil
+					}
+					if boolean7 != nil {
+						query1 = &shared.ConnectionFilterProperty{
+							Boolean: boolean7,
+						}
+					}
+					var connectionFilterProperty47 *shared.ConnectionFilterProperty4
+					if rulesItem1.Query != nil {
+						connectionFilterProperty47 = &shared.ConnectionFilterProperty4{}
+					}
+					if connectionFilterProperty47 != nil {
+						query1 = &shared.ConnectionFilterProperty{
+							ConnectionFilterProperty4: connectionFilterProperty47,
+						}
+					}
+				}
+				typeVar13 := shared.FilterRuleType(rulesItem1.Type.ValueString())
 				filterRule1 := shared.FilterRule{
 					Body:    body1,
 					Headers: headers1,
 					Path:    path1,
 					Query:   query1,
-					Type:    type12,
+					Type:    typeVar13,
 				}
 				rules1 = append(rules1, shared.Rule{
 					FilterRule: &filterRule1,
 				})
 			}
-			if rulesItem1.Any != nil {
-				var any1 interface{}
+			if rulesItem1.TransformRule != nil {
+				var transformRule1 shared.TransformRule
+				var transformReference1 *shared.TransformReference
+				if rulesItem1.TransformRule != nil {
+					transformationId2 := rulesItem1.TransformRule.TransformationID.ValueString()
+					typeVar14 := shared.TransformReferenceType(rulesItem1.TransformRule.Type.ValueString())
+					transformReference1 = &shared.TransformReference{
+						TransformationID: transformationId2,
+						Type:             typeVar14,
+					}
+				}
+				if transformReference1 != nil {
+					transformRule1 = shared.TransformRule{
+						TransformReference: transformReference1,
+					}
+				}
+				var transformFull1 *shared.TransformFull
+				if rulesItem1.TransformRule != nil {
+					var transformation1 *shared.TransformFullTransformation
+					if rulesItem1.TransformRule != nil {
+						code1 := rulesItem1.TransformRule.Code.ValueString()
+						env1 := make(map[string]string)
+						// Warning. This is a map, but the source tf var is not a map. This might indicate a bug.
+						name4 := rulesItem1.TransformRule.Name.ValueString()
+						transformation1 = &shared.TransformFullTransformation{
+							Code: code1,
+							Env:  env1,
+							Name: name4,
+						}
+					}
+					transformationId3 := new(string)
+					if !rulesItem1.TransformRule.TransformationID.IsUnknown() && !rulesItem1.TransformRule.TransformationID.IsNull() {
+						*transformationId3 = rulesItem1.TransformRule.TransformationID.ValueString()
+					} else {
+						transformationId3 = nil
+					}
+					typeVar15 := shared.TransformFullType(rulesItem1.TransformRule.Type.ValueString())
+					transformFull1 = &shared.TransformFull{
+						Transformation:   transformation1,
+						TransformationID: transformationId3,
+						Type:             typeVar15,
+					}
+				}
+				if transformFull1 != nil {
+					transformRule1 = shared.TransformRule{
+						TransformFull: transformFull1,
+					}
+				}
 				rules1 = append(rules1, shared.Rule{
-					Any: &any1,
+					TransformRule: &transformRule1,
 				})
 			}
 			if rulesItem1.DelayRule != nil {
-				delay1 := rulesItem1.RetryRule.ValueInt64()
-				type13 := shared.DelayRuleType(rulesItem1.Type.ValueString())
+				delay1 := rulesItem1.Delay.ValueInt64()
+				typeVar16 := shared.DelayRuleType(rulesItem1.Type.ValueString())
 				delayRule1 := shared.DelayRule{
 					Delay: delay1,
-					Type:  type13,
+					Type:  typeVar16,
 				}
 				rules1 = append(rules1, shared.Rule{
 					DelayRule: &delayRule1,
@@ -2222,7 +2669,7 @@ func (r *ConnectionResource) Create(ctx context.Context, req resource.CreateRequ
 		}
 		ruleset = &operations.CreateConnectionRequestBodyRuleset{
 			IsTeamDefault: isTeamDefault,
-			Name:          name2,
+			Name:          name3,
 			Rules:         rules1,
 		}
 	}
@@ -2233,26 +2680,24 @@ func (r *ConnectionResource) Create(ctx context.Context, req resource.CreateRequ
 		rulesetID = nil
 	}
 	var source *operations.CreateConnectionRequestBodySource
+	var allowedHTTPMethods []shared.SourceAllowedHTTPMethod = nil
+	for _, allowedHTTPMethodsItem := range data.AllowedHTTPMethods {
+		allowedHTTPMethods = append(allowedHTTPMethods, shared.SourceAllowedHTTPMethod(allowedHTTPMethodsItem.ValueString()))
+	}
+	var customResponse *shared.SourceCustomResponse
 	if data != nil {
-		allowedHTTPMethods := make([]shared.SourceAllowedHTTPMethod, 0)
-		for _, allowedHTTPMethodsItem := range data.AllowedHTTPMethods {
-			allowedHTTPMethods = append(allowedHTTPMethods, shared.SourceAllowedHTTPMethod(allowedHTTPMethodsItem.ValueString()))
+		body2 := data.Body.ValueString()
+		contentType := shared.SourceCustomResponseContentType(data.ContentType.ValueString())
+		customResponse = &shared.SourceCustomResponse{
+			Body:        body2,
+			ContentType: contentType,
 		}
-		var customResponse *shared.SourceCustomResponse
-		if data != nil {
-			body2 := data.Body.ValueString()
-			contentType := shared.SourceCustomResponseContentType(data.ContentType.ValueString())
-			customResponse = &shared.SourceCustomResponse{
-				Body:        body2,
-				ContentType: contentType,
-			}
-		}
-		name3 := data.Name.ValueString()
-		source = &operations.CreateConnectionRequestBodySource{
-			AllowedHTTPMethods: allowedHTTPMethods,
-			CustomResponse:     customResponse,
-			Name:               name3,
-		}
+	}
+	name5 := data.Name.ValueString()
+	source = &operations.CreateConnectionRequestBodySource{
+		AllowedHTTPMethods: allowedHTTPMethods,
+		CustomResponse:     customResponse,
+		Name:               name5,
 	}
 	sourceID := new(string)
 	if !data.SourceID.IsUnknown() && !data.SourceID.IsNull() {
@@ -2270,9 +2715,12 @@ func (r *ConnectionResource) Create(ctx context.Context, req resource.CreateRequ
 		Source:        source,
 		SourceID:      sourceID,
 	}
-	res, err := r.client.Connection.Create(ctx, request)
+	res, err := r.client.Connection.CreateConnection(ctx, request)
 	if err != nil {
 		resp.Diagnostics.AddError("failure to invoke API", err.Error())
+		if res != nil && res.RawResponse != nil {
+			resp.Diagnostics.AddError("unexpected http request/response", debugResponse(res.RawResponse))
+		}
 		return
 	}
 	if res == nil {
@@ -2311,41 +2759,16 @@ func (r *ConnectionResource) Read(ctx context.Context, req resource.ReadRequest,
 		return
 	}
 
-	archived := new(bool)
-	if !data.IsTeamDefault.IsUnknown() && !data.IsTeamDefault.IsNull() {
-		*archived = data.IsTeamDefault.ValueBool()
-	} else {
-		archived = nil
+	id := data.ID.ValueString()
+	request := operations.GetConnectionRequest{
+		ID: id,
 	}
-	var archivedAt *operations.GetConnectionsArchivedAt
-	var destinationID *operations.GetConnectionsDestinationID
-	var dir *operations.GetConnectionsDir
-	fullName := new(string)
-	if !data.Name.IsUnknown() && !data.Name.IsNull() {
-		*fullName = data.Name.ValueString()
-	} else {
-		fullName = nil
-	}
-	var id *operations.GetConnectionsID
-	var name *operations.GetConnectionsName
-	var orderBy *operations.GetConnectionsOrderBy
-	var pausedAt *operations.GetConnectionsPausedAt
-	var sourceID *operations.GetConnectionsSourceID
-	request := operations.GetConnectionsRequest{
-		Archived:      archived,
-		ArchivedAt:    archivedAt,
-		DestinationID: destinationID,
-		Dir:           dir,
-		FullName:      fullName,
-		ID:            id,
-		Name:          name,
-		OrderBy:       orderBy,
-		PausedAt:      pausedAt,
-		SourceID:      sourceID,
-	}
-	res, err := r.client.Connections.Get(ctx, request)
+	res, err := r.client.Connection.GetConnection(ctx, request)
 	if err != nil {
 		resp.Diagnostics.AddError("failure to invoke API", err.Error())
+		if res != nil && res.RawResponse != nil {
+			resp.Diagnostics.AddError("unexpected http request/response", debugResponse(res.RawResponse))
+		}
 		return
 	}
 	if res == nil {
@@ -2356,11 +2779,11 @@ func (r *ConnectionResource) Read(ctx context.Context, req resource.ReadRequest,
 		resp.Diagnostics.AddError(fmt.Sprintf("unexpected response from API. Got an unexpected response code %v", res.StatusCode), debugResponse(res.RawResponse))
 		return
 	}
-	if res.APIErrorResponse == nil {
+	if res.Connection == nil {
 		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res.RawResponse))
 		return
 	}
-	data.RefreshFromGetResponse(res.APIErrorResponse)
+	data.RefreshFromGetResponse(res.Connection)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -2401,9 +2824,12 @@ func (r *ConnectionResource) Delete(ctx context.Context, req resource.DeleteRequ
 	request := operations.DeleteConnectionRequest{
 		ID: id,
 	}
-	res, err := r.client.Connection.Delete(ctx, request)
+	res, err := r.client.Connection.DeleteConnection(ctx, request)
 	if err != nil {
 		resp.Diagnostics.AddError("failure to invoke API", err.Error())
+		if res != nil && res.RawResponse != nil {
+			resp.Diagnostics.AddError("unexpected http request/response", debugResponse(res.RawResponse))
+		}
 		return
 	}
 	if res == nil {
@@ -2418,5 +2844,5 @@ func (r *ConnectionResource) Delete(ctx context.Context, req resource.DeleteRequ
 }
 
 func (r *ConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.AddError("Not Implemented", "No available import state operation is available for resource connection.")
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
