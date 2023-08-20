@@ -58,7 +58,7 @@ type UpdateIssueResponse struct {
 	APIErrorResponse *shared.APIErrorResponse
 	ContentType      string
 	// Updated issue
-	Issue       interface{}
+	Issue       *shared.Issue
 	StatusCode  int
 	RawResponse *http.Response
 }

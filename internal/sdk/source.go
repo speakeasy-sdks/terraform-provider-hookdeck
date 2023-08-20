@@ -24,8 +24,8 @@ func newSource(sdkConfig sdkConfiguration) *source {
 	}
 }
 
-// Archive - Archive a source
-func (s *source) Archive(ctx context.Context, request operations.ArchiveSourceRequest) (*operations.ArchiveSourceResponse, error) {
+// ArchiveSource - Archive a source
+func (s *source) ArchiveSource(ctx context.Context, request operations.ArchiveSourceRequest) (*operations.ArchiveSourceResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/sources/{id}/archive", request, nil)
 	if err != nil {
@@ -36,7 +36,7 @@ func (s *source) Archive(ctx context.Context, request operations.ArchiveSourceRe
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	client := s.sdkConfiguration.SecurityClient
@@ -69,7 +69,7 @@ func (s *source) Archive(ctx context.Context, request operations.ArchiveSourceRe
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.Source
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.Source = out
@@ -79,7 +79,7 @@ func (s *source) Archive(ctx context.Context, request operations.ArchiveSourceRe
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.APIErrorResponse
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.APIErrorResponse = out
@@ -89,8 +89,8 @@ func (s *source) Archive(ctx context.Context, request operations.ArchiveSourceRe
 	return res, nil
 }
 
-// Create - Create a source
-func (s *source) Create(ctx context.Context, request operations.CreateSourceRequestBody) (*operations.CreateSourceResponse, error) {
+// CreateSource - Create a source
+func (s *source) CreateSource(ctx context.Context, request operations.CreateSourceRequestBody) (*operations.CreateSourceResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url := strings.TrimSuffix(baseURL, "/") + "/sources"
 
@@ -102,11 +102,14 @@ func (s *source) Create(ctx context.Context, request operations.CreateSourceRequ
 		return nil, fmt.Errorf("request body is required")
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "POST", url, bodyReader)
+	debugBody := bytes.NewBuffer([]byte{})
+	debugReader := io.TeeReader(bodyReader, debugBody)
+
+	req, err := http.NewRequestWithContext(ctx, "POST", url, debugReader)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	req.Header.Set("Content-Type", reqContentType)
@@ -125,6 +128,7 @@ func (s *source) Create(ctx context.Context, request operations.CreateSourceRequ
 	if err != nil {
 		return nil, fmt.Errorf("error reading response body: %w", err)
 	}
+	httpRes.Request.Body = io.NopCloser(debugBody)
 	httpRes.Body.Close()
 	httpRes.Body = io.NopCloser(bytes.NewBuffer(rawBody))
 
@@ -141,7 +145,7 @@ func (s *source) Create(ctx context.Context, request operations.CreateSourceRequ
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.Source
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.Source = out
@@ -153,7 +157,7 @@ func (s *source) Create(ctx context.Context, request operations.CreateSourceRequ
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.APIErrorResponse
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.APIErrorResponse = out
@@ -163,8 +167,8 @@ func (s *source) Create(ctx context.Context, request operations.CreateSourceRequ
 	return res, nil
 }
 
-// Delete - Delete a source
-func (s *source) Delete(ctx context.Context, request operations.DeleteSourceRequest) (*operations.DeleteSourceResponse, error) {
+// DeleteSource - Delete a source
+func (s *source) DeleteSource(ctx context.Context, request operations.DeleteSourceRequest) (*operations.DeleteSourceResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/sources/{id}", request, nil)
 	if err != nil {
@@ -175,7 +179,7 @@ func (s *source) Delete(ctx context.Context, request operations.DeleteSourceRequ
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	client := s.sdkConfiguration.SecurityClient
@@ -208,7 +212,7 @@ func (s *source) Delete(ctx context.Context, request operations.DeleteSourceRequ
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *operations.DeleteSource200ApplicationJSON
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.DeleteSource200ApplicationJSONObject = out
@@ -218,7 +222,7 @@ func (s *source) Delete(ctx context.Context, request operations.DeleteSourceRequ
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.APIErrorResponse
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.APIErrorResponse = out
@@ -228,8 +232,8 @@ func (s *source) Delete(ctx context.Context, request operations.DeleteSourceRequ
 	return res, nil
 }
 
-// Get - Get a source
-func (s *source) Get(ctx context.Context, request operations.GetSourceRequest) (*operations.GetSourceResponse, error) {
+// GetSource - Get a source
+func (s *source) GetSource(ctx context.Context, request operations.GetSourceRequest) (*operations.GetSourceResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/sources/{id}", request, nil)
 	if err != nil {
@@ -240,7 +244,7 @@ func (s *source) Get(ctx context.Context, request operations.GetSourceRequest) (
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	client := s.sdkConfiguration.SecurityClient
@@ -273,7 +277,7 @@ func (s *source) Get(ctx context.Context, request operations.GetSourceRequest) (
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.Source
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.Source = out
@@ -283,7 +287,7 @@ func (s *source) Get(ctx context.Context, request operations.GetSourceRequest) (
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.APIErrorResponse
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.APIErrorResponse = out
@@ -293,8 +297,8 @@ func (s *source) Get(ctx context.Context, request operations.GetSourceRequest) (
 	return res, nil
 }
 
-// Unarchive - Unarchive a source
-func (s *source) Unarchive(ctx context.Context, request operations.UnarchiveSourceRequest) (*operations.UnarchiveSourceResponse, error) {
+// UnarchiveSource - Unarchive a source
+func (s *source) UnarchiveSource(ctx context.Context, request operations.UnarchiveSourceRequest) (*operations.UnarchiveSourceResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/sources/{id}/unarchive", request, nil)
 	if err != nil {
@@ -305,7 +309,7 @@ func (s *source) Unarchive(ctx context.Context, request operations.UnarchiveSour
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	client := s.sdkConfiguration.SecurityClient
@@ -338,7 +342,7 @@ func (s *source) Unarchive(ctx context.Context, request operations.UnarchiveSour
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.Source
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.Source = out
@@ -348,7 +352,7 @@ func (s *source) Unarchive(ctx context.Context, request operations.UnarchiveSour
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.APIErrorResponse
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.APIErrorResponse = out
@@ -358,8 +362,8 @@ func (s *source) Unarchive(ctx context.Context, request operations.UnarchiveSour
 	return res, nil
 }
 
-// Update - Update a source
-func (s *source) Update(ctx context.Context, request operations.UpdateSourceRequest) (*operations.UpdateSourceResponse, error) {
+// UpdateSource - Update a source
+func (s *source) UpdateSource(ctx context.Context, request operations.UpdateSourceRequest) (*operations.UpdateSourceResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/sources/{id}", request, nil)
 	if err != nil {
@@ -374,11 +378,14 @@ func (s *source) Update(ctx context.Context, request operations.UpdateSourceRequ
 		return nil, fmt.Errorf("request body is required")
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "PUT", url, bodyReader)
+	debugBody := bytes.NewBuffer([]byte{})
+	debugReader := io.TeeReader(bodyReader, debugBody)
+
+	req, err := http.NewRequestWithContext(ctx, "PUT", url, debugReader)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	req.Header.Set("Content-Type", reqContentType)
@@ -397,6 +404,7 @@ func (s *source) Update(ctx context.Context, request operations.UpdateSourceRequ
 	if err != nil {
 		return nil, fmt.Errorf("error reading response body: %w", err)
 	}
+	httpRes.Request.Body = io.NopCloser(debugBody)
 	httpRes.Body.Close()
 	httpRes.Body = io.NopCloser(bytes.NewBuffer(rawBody))
 
@@ -413,7 +421,7 @@ func (s *source) Update(ctx context.Context, request operations.UpdateSourceRequ
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.Source
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.Source = out
@@ -427,7 +435,7 @@ func (s *source) Update(ctx context.Context, request operations.UpdateSourceRequ
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.APIErrorResponse
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.APIErrorResponse = out
@@ -437,8 +445,8 @@ func (s *source) Update(ctx context.Context, request operations.UpdateSourceRequ
 	return res, nil
 }
 
-// Upsert - Update or create a source
-func (s *source) Upsert(ctx context.Context, request operations.UpsertSourceRequestBody) (*operations.UpsertSourceResponse, error) {
+// UpsertSource - Update or create a source
+func (s *source) UpsertSource(ctx context.Context, request operations.UpsertSourceRequestBody) (*operations.UpsertSourceResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url := strings.TrimSuffix(baseURL, "/") + "/sources"
 
@@ -450,11 +458,14 @@ func (s *source) Upsert(ctx context.Context, request operations.UpsertSourceRequ
 		return nil, fmt.Errorf("request body is required")
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "PUT", url, bodyReader)
+	debugBody := bytes.NewBuffer([]byte{})
+	debugReader := io.TeeReader(bodyReader, debugBody)
+
+	req, err := http.NewRequestWithContext(ctx, "PUT", url, debugReader)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	req.Header.Set("Content-Type", reqContentType)
@@ -473,6 +484,7 @@ func (s *source) Upsert(ctx context.Context, request operations.UpsertSourceRequ
 	if err != nil {
 		return nil, fmt.Errorf("error reading response body: %w", err)
 	}
+	httpRes.Request.Body = io.NopCloser(debugBody)
 	httpRes.Body.Close()
 	httpRes.Body = io.NopCloser(bytes.NewBuffer(rawBody))
 
@@ -489,7 +501,7 @@ func (s *source) Upsert(ctx context.Context, request operations.UpsertSourceRequ
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.Source
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.Source = out
@@ -501,7 +513,7 @@ func (s *source) Upsert(ctx context.Context, request operations.UpsertSourceRequ
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.APIErrorResponse
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.APIErrorResponse = out
