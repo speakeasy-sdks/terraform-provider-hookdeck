@@ -23,9 +23,9 @@ func newAttempt(sdkConfig sdkConfiguration) *attempt {
 	}
 }
 
-// Get - Get a Single Attempt
+// GetAttempt - Get a Single Attempt
 // Retrive a single attempt details.
-func (s *attempt) Get(ctx context.Context, request operations.GetAttemptRequest) (*operations.GetAttemptResponse, error) {
+func (s *attempt) GetAttempt(ctx context.Context, request operations.GetAttemptRequest) (*operations.GetAttemptResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/attempts/{id}", request, nil)
 	if err != nil {
@@ -36,7 +36,7 @@ func (s *attempt) Get(ctx context.Context, request operations.GetAttemptRequest)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	client := s.sdkConfiguration.SecurityClient
@@ -69,7 +69,7 @@ func (s *attempt) Get(ctx context.Context, request operations.GetAttemptRequest)
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.EventAttempt
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.EventAttempt = out
@@ -79,7 +79,7 @@ func (s *attempt) Get(ctx context.Context, request operations.GetAttemptRequest)
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.APIErrorResponse
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.APIErrorResponse = out
