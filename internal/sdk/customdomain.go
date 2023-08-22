@@ -23,8 +23,8 @@ func newCustomDomain(sdkConfig sdkConfiguration) *customDomain {
 	}
 }
 
-// Add - Add a custom domain to the workspace
-func (s *customDomain) Add(ctx context.Context, request operations.AddCustomDomainRequest) (*operations.AddCustomDomainResponse, error) {
+// AddCustomDomain - Add a custom domain to the workspace
+func (s *customDomain) AddCustomDomain(ctx context.Context, request operations.AddCustomDomainRequest) (*operations.AddCustomDomainResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/teams/{team_id}/custom_domains", request, nil)
 	if err != nil {
@@ -39,7 +39,10 @@ func (s *customDomain) Add(ctx context.Context, request operations.AddCustomDoma
 		return nil, fmt.Errorf("request body is required")
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "POST", url, bodyReader)
+	debugBody := bytes.NewBuffer([]byte{})
+	debugReader := io.TeeReader(bodyReader, debugBody)
+
+	req, err := http.NewRequestWithContext(ctx, "POST", url, debugReader)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
@@ -62,6 +65,7 @@ func (s *customDomain) Add(ctx context.Context, request operations.AddCustomDoma
 	if err != nil {
 		return nil, fmt.Errorf("error reading response body: %w", err)
 	}
+	httpRes.Request.Body = io.NopCloser(debugBody)
 	httpRes.Body.Close()
 	httpRes.Body = io.NopCloser(bytes.NewBuffer(rawBody))
 
@@ -78,7 +82,7 @@ func (s *customDomain) Add(ctx context.Context, request operations.AddCustomDoma
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.AddCustomHostname
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.AddCustomHostname = out
@@ -88,8 +92,8 @@ func (s *customDomain) Add(ctx context.Context, request operations.AddCustomDoma
 	return res, nil
 }
 
-// Delete - Removes a custom domain from the workspace
-func (s *customDomain) Delete(ctx context.Context, request operations.DeleteCustomDomainRequest) (*operations.DeleteCustomDomainResponse, error) {
+// DeleteCustomDomain - Removes a custom domain from the workspace
+func (s *customDomain) DeleteCustomDomain(ctx context.Context, request operations.DeleteCustomDomainRequest) (*operations.DeleteCustomDomainResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/teams/{team_id}/custom_domains/{domain_id}", request, nil)
 	if err != nil {
@@ -133,7 +137,7 @@ func (s *customDomain) Delete(ctx context.Context, request operations.DeleteCust
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.DeleteCustomDomainSchema
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.DeleteCustomDomainSchema = out

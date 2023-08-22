@@ -5,9 +5,9 @@ package provider
 import "github.com/hashicorp/terraform-plugin-framework/types"
 
 type FilterRule struct {
-	Body    *ConnectionFilterProperty  `tfsdk:"body"`
-	Headers *ConnectionFilterProperty1 `tfsdk:"headers"`
-	Path    *ConnectionFilterProperty2 `tfsdk:"path"`
-	Query   *ConnectionFilterProperty3 `tfsdk:"query"`
-	Type    types.String               `tfsdk:"type"`
+	Body    *ConnectionFilterProperty `tfsdk:"body"`
+	Headers *ConnectionFilterProperty `tfsdk:"headers"`
+	Path    *ConnectionFilterProperty `tfsdk:"path"`
+	Query   *ConnectionFilterProperty `tfsdk:"query"`
+	Type    types.String              `tfsdk:"type"`
 }
