@@ -94,11 +94,11 @@ type GetIssuesAggregationKeysResponseStatus struct {
 	Type GetIssuesAggregationKeysResponseStatusType
 }
 
-func CreateGetIssuesAggregationKeysResponseStatusFloat32(float32 float32) GetIssuesAggregationKeysResponseStatus {
+func CreateGetIssuesAggregationKeysResponseStatusFloat32(float32T float32) GetIssuesAggregationKeysResponseStatus {
 	typ := GetIssuesAggregationKeysResponseStatusTypeFloat32
 
 	return GetIssuesAggregationKeysResponseStatus{
-		Float32: &float32,
+		Float32: &float32T,
 		Type:    typ,
 	}
 }
@@ -115,11 +115,11 @@ func CreateGetIssuesAggregationKeysResponseStatusArrayOffloat32(arrayOffloat32 [
 func (u *GetIssuesAggregationKeysResponseStatus) UnmarshalJSON(data []byte) error {
 	var d *json.Decoder
 
-	float32 := new(float32)
+	float32Var := new(float32)
 	d = json.NewDecoder(bytes.NewReader(data))
 	d.DisallowUnknownFields()
-	if err := d.Decode(&float32); err == nil {
-		u.Float32 = float32
+	if err := d.Decode(&float32Var); err == nil {
+		u.Float32 = float32Var
 		u.Type = GetIssuesAggregationKeysResponseStatusTypeFloat32
 		return nil
 	}

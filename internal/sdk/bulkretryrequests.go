@@ -24,8 +24,8 @@ func newBulkRetryRequests(sdkConfig sdkConfiguration) *bulkRetryRequests {
 	}
 }
 
-// Create - Create a requests bulk retry
-func (s *bulkRetryRequests) Create(ctx context.Context, request operations.CreateRequestBulkRetryRequestBody) (*operations.CreateRequestBulkRetryResponse, error) {
+// CreateRequestBulkRetry - Create a requests bulk retry
+func (s *bulkRetryRequests) CreateRequestBulkRetry(ctx context.Context, request operations.CreateRequestBulkRetryRequestBody) (*operations.CreateRequestBulkRetryResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url := strings.TrimSuffix(baseURL, "/") + "/bulk/requests/retry"
 
@@ -37,11 +37,14 @@ func (s *bulkRetryRequests) Create(ctx context.Context, request operations.Creat
 		return nil, fmt.Errorf("request body is required")
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "POST", url, bodyReader)
+	debugBody := bytes.NewBuffer([]byte{})
+	debugReader := io.TeeReader(bodyReader, debugBody)
+
+	req, err := http.NewRequestWithContext(ctx, "POST", url, debugReader)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	req.Header.Set("Content-Type", reqContentType)
@@ -60,6 +63,7 @@ func (s *bulkRetryRequests) Create(ctx context.Context, request operations.Creat
 	if err != nil {
 		return nil, fmt.Errorf("error reading response body: %w", err)
 	}
+	httpRes.Request.Body = io.NopCloser(debugBody)
 	httpRes.Body.Close()
 	httpRes.Body = io.NopCloser(bytes.NewBuffer(rawBody))
 
@@ -76,7 +80,7 @@ func (s *bulkRetryRequests) Create(ctx context.Context, request operations.Creat
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.BatchOperation
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.BatchOperation = out
@@ -88,7 +92,7 @@ func (s *bulkRetryRequests) Create(ctx context.Context, request operations.Creat
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.APIErrorResponse
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.APIErrorResponse = out

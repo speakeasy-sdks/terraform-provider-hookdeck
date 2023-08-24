@@ -39,11 +39,11 @@ func CreateConnectionFilterPropertyStr(str string) ConnectionFilterProperty {
 	}
 }
 
-func CreateConnectionFilterPropertyFloat32(float32 float32) ConnectionFilterProperty {
+func CreateConnectionFilterPropertyFloat32(float32T float32) ConnectionFilterProperty {
 	typ := ConnectionFilterPropertyTypeFloat32
 
 	return ConnectionFilterProperty{
-		Float32: &float32,
+		Float32: &float32T,
 		Type:    typ,
 	}
 }
@@ -78,11 +78,11 @@ func (u *ConnectionFilterProperty) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 
-	float32 := new(float32)
+	float32Var := new(float32)
 	d = json.NewDecoder(bytes.NewReader(data))
 	d.DisallowUnknownFields()
-	if err := d.Decode(&float32); err == nil {
-		u.Float32 = float32
+	if err := d.Decode(&float32Var); err == nil {
+		u.Float32 = float32Var
 		u.Type = ConnectionFilterPropertyTypeFloat32
 		return nil
 	}
