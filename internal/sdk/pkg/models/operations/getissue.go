@@ -16,7 +16,7 @@ type GetIssueResponse struct {
 	APIErrorResponse *shared.APIErrorResponse
 	ContentType      string
 	// A single issue
-	IssueWithData interface{}
+	IssueWithData *shared.IssueWithData
 	StatusCode    int
 	RawResponse   *http.Response
 }

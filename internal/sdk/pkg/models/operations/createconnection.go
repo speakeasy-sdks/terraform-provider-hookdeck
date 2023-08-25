@@ -43,7 +43,7 @@ func (e *CreateConnectionRequestBodyDestinationRateLimitPeriod) UnmarshalJSON(da
 // CreateConnectionRequestBodyDestination - Destination input object
 type CreateConnectionRequestBodyDestination struct {
 	// Config for the destination's auth method
-	AuthMethod interface{} `json:"auth_method,omitempty"`
+	AuthMethod *shared.DestinationAuthMethodConfig `json:"auth_method,omitempty"`
 	// Path for the CLI destination
 	CliPath *string `json:"cli_path,omitempty"`
 	// HTTP method used on requests sent to the destination, overrides the method used on requests sent to the source.
