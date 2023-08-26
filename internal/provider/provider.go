@@ -106,11 +106,19 @@ func (p *HashicupsProvider) Configure(ctx context.Context, req provider.Configur
 func (p *HashicupsProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewConnectionResource,
+		NewDestinationResource,
+		NewIssueTriggerResource,
+		NewSourceResource,
 	}
 }
 
 func (p *HashicupsProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{}
+	return []func() datasource.DataSource{
+		NewConnectionDataSource,
+		NewDestinationDataSource,
+		NewIssueTriggerDataSource,
+		NewSourceDataSource,
+	}
 }
 
 func New(version string) func() provider.Provider {
