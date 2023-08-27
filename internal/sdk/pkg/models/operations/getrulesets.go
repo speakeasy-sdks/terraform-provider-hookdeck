@@ -630,6 +630,142 @@ type GetRulesetsName2 struct {
 	Lte      *GetRulesetsName2Lte      `queryParam:"name=lte"`
 }
 
+type GetRulesetsName1Type string
+
+const (
+	GetRulesetsName1TypeStr        GetRulesetsName1Type = "str"
+	GetRulesetsName1TypeArrayOfstr GetRulesetsName1Type = "arrayOfstr"
+)
+
+type GetRulesetsName1 struct {
+	Str        *string
+	ArrayOfstr []string
+
+	Type GetRulesetsName1Type
+}
+
+func CreateGetRulesetsName1Str(str string) GetRulesetsName1 {
+	typ := GetRulesetsName1TypeStr
+
+	return GetRulesetsName1{
+		Str:  &str,
+		Type: typ,
+	}
+}
+
+func CreateGetRulesetsName1ArrayOfstr(arrayOfstr []string) GetRulesetsName1 {
+	typ := GetRulesetsName1TypeArrayOfstr
+
+	return GetRulesetsName1{
+		ArrayOfstr: arrayOfstr,
+		Type:       typ,
+	}
+}
+
+func (u *GetRulesetsName1) UnmarshalJSON(data []byte) error {
+	var d *json.Decoder
+
+	str := new(string)
+	d = json.NewDecoder(bytes.NewReader(data))
+	d.DisallowUnknownFields()
+	if err := d.Decode(&str); err == nil {
+		u.Str = str
+		u.Type = GetRulesetsName1TypeStr
+		return nil
+	}
+
+	arrayOfstr := []string{}
+	d = json.NewDecoder(bytes.NewReader(data))
+	d.DisallowUnknownFields()
+	if err := d.Decode(&arrayOfstr); err == nil {
+		u.ArrayOfstr = arrayOfstr
+		u.Type = GetRulesetsName1TypeArrayOfstr
+		return nil
+	}
+
+	return errors.New("could not unmarshal into supported union types")
+}
+
+func (u GetRulesetsName1) MarshalJSON() ([]byte, error) {
+	if u.Str != nil {
+		return json.Marshal(u.Str)
+	}
+
+	if u.ArrayOfstr != nil {
+		return json.Marshal(u.ArrayOfstr)
+	}
+
+	return nil, nil
+}
+
+type GetRulesetsNameType string
+
+const (
+	GetRulesetsNameTypeGetRulesetsName1 GetRulesetsNameType = "getRulesetsName_1"
+	GetRulesetsNameTypeGetRulesetsName2 GetRulesetsNameType = "getRulesetsName_2"
+)
+
+type GetRulesetsName struct {
+	GetRulesetsName1 *GetRulesetsName1
+	GetRulesetsName2 *GetRulesetsName2
+
+	Type GetRulesetsNameType
+}
+
+func CreateGetRulesetsNameGetRulesetsName1(getRulesetsName1 GetRulesetsName1) GetRulesetsName {
+	typ := GetRulesetsNameTypeGetRulesetsName1
+
+	return GetRulesetsName{
+		GetRulesetsName1: &getRulesetsName1,
+		Type:             typ,
+	}
+}
+
+func CreateGetRulesetsNameGetRulesetsName2(getRulesetsName2 GetRulesetsName2) GetRulesetsName {
+	typ := GetRulesetsNameTypeGetRulesetsName2
+
+	return GetRulesetsName{
+		GetRulesetsName2: &getRulesetsName2,
+		Type:             typ,
+	}
+}
+
+func (u *GetRulesetsName) UnmarshalJSON(data []byte) error {
+	var d *json.Decoder
+
+	getRulesetsName1 := new(GetRulesetsName1)
+	d = json.NewDecoder(bytes.NewReader(data))
+	d.DisallowUnknownFields()
+	if err := d.Decode(&getRulesetsName1); err == nil {
+		u.GetRulesetsName1 = getRulesetsName1
+		u.Type = GetRulesetsNameTypeGetRulesetsName1
+		return nil
+	}
+
+	getRulesetsName2 := new(GetRulesetsName2)
+	d = json.NewDecoder(bytes.NewReader(data))
+	d.DisallowUnknownFields()
+	if err := d.Decode(&getRulesetsName2); err == nil {
+		u.GetRulesetsName2 = getRulesetsName2
+		u.Type = GetRulesetsNameTypeGetRulesetsName2
+		return nil
+	}
+
+	return errors.New("could not unmarshal into supported union types")
+}
+
+func (u GetRulesetsName) MarshalJSON() ([]byte, error) {
+	if u.GetRulesetsName1 != nil {
+		return json.Marshal(u.GetRulesetsName1)
+	}
+
+	if u.GetRulesetsName2 != nil {
+		return json.Marshal(u.GetRulesetsName2)
+	}
+
+	return nil, nil
+}
+
 type GetRulesetsOrderBy2 string
 
 const (
@@ -753,7 +889,7 @@ type GetRulesetsRequest struct {
 	Dir        *GetRulesetsDir        `queryParam:"style=form,explode=true,name=dir"`
 	ID         *GetRulesetsID         `queryParam:"style=form,explode=true,name=id"`
 	Limit      *int64                 `queryParam:"style=form,explode=true,name=limit"`
-	Name       interface{}            `queryParam:"style=form,explode=true,name=name"`
+	Name       *GetRulesetsName       `queryParam:"style=form,explode=true,name=name"`
 	Next       *string                `queryParam:"style=form,explode=true,name=next"`
 	OrderBy    *GetRulesetsOrderBy    `queryParam:"style=form,explode=true,name=order_by"`
 	Prev       *string                `queryParam:"style=form,explode=true,name=prev"`
