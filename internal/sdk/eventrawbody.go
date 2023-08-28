@@ -23,9 +23,9 @@ func newEventRawBody(sdkConfig sdkConfiguration) *eventRawBody {
 	}
 }
 
-// Get - Get an Event Raw Body Data
+// GetEventRawBody - Get an Event Raw Body Data
 // Retrieve a raw body data of a request that Hookdeck receives from a source.
-func (s *eventRawBody) Get(ctx context.Context, request operations.GetEventRawBodyRequest) (*operations.GetEventRawBodyResponse, error) {
+func (s *eventRawBody) GetEventRawBody(ctx context.Context, request operations.GetEventRawBodyRequest) (*operations.GetEventRawBodyResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/events/{id}/raw_body", request, nil)
 	if err != nil {
@@ -36,7 +36,7 @@ func (s *eventRawBody) Get(ctx context.Context, request operations.GetEventRawBo
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	client := s.sdkConfiguration.SecurityClient
@@ -69,7 +69,7 @@ func (s *eventRawBody) Get(ctx context.Context, request operations.GetEventRawBo
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.RawBody
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.RawBody = out
@@ -79,7 +79,7 @@ func (s *eventRawBody) Get(ctx context.Context, request operations.GetEventRawBo
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.APIErrorResponse
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.APIErrorResponse = out
