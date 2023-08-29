@@ -16,7 +16,7 @@ type DismissIssueResponse struct {
 	APIErrorResponse *shared.APIErrorResponse
 	ContentType      string
 	// Dismissed issue
-	Issue       interface{}
+	Issue       *shared.Issue
 	StatusCode  int
 	RawResponse *http.Response
 }

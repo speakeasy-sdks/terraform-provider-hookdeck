@@ -24,8 +24,8 @@ func newConnectionNumberUpdate(sdkConfig sdkConfiguration) *connectionNumberUpda
 	}
 }
 
-// Upsert - Update or create a connection
-func (s *connectionNumberUpdate) Upsert(ctx context.Context, request operations.UpsertConnectionRequestBody) (*operations.UpsertConnectionResponse, error) {
+// UpsertConnection - Update or create a connection
+func (s *connectionNumberUpdate) UpsertConnection(ctx context.Context, request operations.UpsertConnectionRequestBody) (*operations.UpsertConnectionResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url := strings.TrimSuffix(baseURL, "/") + "/webhooks"
 
@@ -37,11 +37,14 @@ func (s *connectionNumberUpdate) Upsert(ctx context.Context, request operations.
 		return nil, fmt.Errorf("request body is required")
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "PUT", url, bodyReader)
+	debugBody := bytes.NewBuffer([]byte{})
+	debugReader := io.TeeReader(bodyReader, debugBody)
+
+	req, err := http.NewRequestWithContext(ctx, "PUT", url, debugReader)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	req.Header.Set("Content-Type", reqContentType)
@@ -60,6 +63,7 @@ func (s *connectionNumberUpdate) Upsert(ctx context.Context, request operations.
 	if err != nil {
 		return nil, fmt.Errorf("error reading response body: %w", err)
 	}
+	httpRes.Request.Body = io.NopCloser(debugBody)
 	httpRes.Body.Close()
 	httpRes.Body = io.NopCloser(bytes.NewBuffer(rawBody))
 
@@ -76,7 +80,7 @@ func (s *connectionNumberUpdate) Upsert(ctx context.Context, request operations.
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.Connection
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.Connection = out
@@ -88,7 +92,7 @@ func (s *connectionNumberUpdate) Upsert(ctx context.Context, request operations.
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.APIErrorResponse
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.APIErrorResponse = out

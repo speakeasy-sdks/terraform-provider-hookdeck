@@ -1,10 +1,24 @@
 configVersion: 1.0.0
+management:
+  docChecksum: d830a406b2443ec8c3f767c5da86b8c3
+  docVersion: 1.0.0
+  speakeasyVersion: 1.74.17
+  generationVersion: 2.88.5
 generation:
   sdkClassName: SDK
   sdkFlattening: true
   singleTagPerOp: false
   telemetryEnabled: false
+features:
+  terraform:
+    core: 2.84.1
+    globalSecurity: 2.81.1
+    globalServerURLs: 2.82.0
+    groups: 2.81.1
+    ignores: 2.81.1
+    includes: 2.81.1
+    nameOverrides: 2.81.1
 terraform:
-  version: 0.0.1
+  version: 0.1.0
   author: speakeasy
   packageName: hashicups
