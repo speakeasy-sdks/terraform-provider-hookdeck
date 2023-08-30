@@ -25,9 +25,9 @@ func newDestinations(sdkConfig sdkConfiguration) *destinations {
 	}
 }
 
-// Get - Get Destinations
+// GetDestinations - Get Destinations
 // Retrieve a list of endpoints to which your webhooks can be routed.
-func (s *destinations) Get(ctx context.Context, request operations.GetDestinationsRequest) (*operations.GetDestinationsResponse, error) {
+func (s *destinations) GetDestinations(ctx context.Context, request operations.GetDestinationsRequest) (*operations.GetDestinationsResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url := strings.TrimSuffix(baseURL, "/") + "/destinations"
 
@@ -35,7 +35,7 @@ func (s *destinations) Get(ctx context.Context, request operations.GetDestinatio
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	if err := utils.PopulateQueryParams(ctx, req, request, nil); err != nil {
@@ -72,7 +72,7 @@ func (s *destinations) Get(ctx context.Context, request operations.GetDestinatio
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.DestinationPaginatedResult
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.DestinationPaginatedResult = out
@@ -84,7 +84,7 @@ func (s *destinations) Get(ctx context.Context, request operations.GetDestinatio
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.APIErrorResponse
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.APIErrorResponse = out

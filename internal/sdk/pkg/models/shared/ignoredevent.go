@@ -3,14 +3,85 @@
 package shared
 
 import (
+	"bytes"
+	"encoding/json"
+	"errors"
 	"time"
 )
+
+type IgnoredEventMetaType string
+
+const (
+	IgnoredEventMetaTypeFilteredMeta             IgnoredEventMetaType = "FilteredMeta"
+	IgnoredEventMetaTypeTransformationFailedMeta IgnoredEventMetaType = "TransformationFailedMeta"
+)
+
+type IgnoredEventMeta struct {
+	FilteredMeta             *FilteredMeta
+	TransformationFailedMeta *TransformationFailedMeta
+
+	Type IgnoredEventMetaType
+}
+
+func CreateIgnoredEventMetaFilteredMeta(filteredMeta FilteredMeta) IgnoredEventMeta {
+	typ := IgnoredEventMetaTypeFilteredMeta
+
+	return IgnoredEventMeta{
+		FilteredMeta: &filteredMeta,
+		Type:         typ,
+	}
+}
+
+func CreateIgnoredEventMetaTransformationFailedMeta(transformationFailedMeta TransformationFailedMeta) IgnoredEventMeta {
+	typ := IgnoredEventMetaTypeTransformationFailedMeta
+
+	return IgnoredEventMeta{
+		TransformationFailedMeta: &transformationFailedMeta,
+		Type:                     typ,
+	}
+}
+
+func (u *IgnoredEventMeta) UnmarshalJSON(data []byte) error {
+	var d *json.Decoder
+
+	filteredMeta := new(FilteredMeta)
+	d = json.NewDecoder(bytes.NewReader(data))
+	d.DisallowUnknownFields()
+	if err := d.Decode(&filteredMeta); err == nil {
+		u.FilteredMeta = filteredMeta
+		u.Type = IgnoredEventMetaTypeFilteredMeta
+		return nil
+	}
+
+	transformationFailedMeta := new(TransformationFailedMeta)
+	d = json.NewDecoder(bytes.NewReader(data))
+	d.DisallowUnknownFields()
+	if err := d.Decode(&transformationFailedMeta); err == nil {
+		u.TransformationFailedMeta = transformationFailedMeta
+		u.Type = IgnoredEventMetaTypeTransformationFailedMeta
+		return nil
+	}
+
+	return errors.New("could not unmarshal into supported union types")
+}
+
+func (u IgnoredEventMeta) MarshalJSON() ([]byte, error) {
+	if u.FilteredMeta != nil {
+		return json.Marshal(u.FilteredMeta)
+	}
+
+	if u.TransformationFailedMeta != nil {
+		return json.Marshal(u.TransformationFailedMeta)
+	}
+
+	return nil, nil
+}
 
 type IgnoredEvent struct {
 	Cause     IgnoredEventCause `json:"cause"`
 	CreatedAt time.Time         `json:"created_at"`
 	ID        string            `json:"id"`
-	Meta      interface{}       `json:"meta,omitempty"`
+	Meta      *IgnoredEventMeta `json:"meta,omitempty"`
 	RequestID string            `json:"request_id"`
 	TeamID    string            `json:"team_id"`
 	UpdatedAt time.Time         `json:"updated_at"`
