@@ -24,8 +24,8 @@ func newTransformation(sdkConfig sdkConfiguration) *transformation {
 	}
 }
 
-// Create - Create a transformation
-func (s *transformation) Create(ctx context.Context, request operations.CreateTransformationRequestBody) (*operations.CreateTransformationResponse, error) {
+// CreateTransformation - Create a transformation
+func (s *transformation) CreateTransformation(ctx context.Context, request operations.CreateTransformationRequestBody) (*operations.CreateTransformationResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url := strings.TrimSuffix(baseURL, "/") + "/transformations"
 
@@ -37,11 +37,14 @@ func (s *transformation) Create(ctx context.Context, request operations.CreateTr
 		return nil, fmt.Errorf("request body is required")
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "POST", url, bodyReader)
+	debugBody := bytes.NewBuffer([]byte{})
+	debugReader := io.TeeReader(bodyReader, debugBody)
+
+	req, err := http.NewRequestWithContext(ctx, "POST", url, debugReader)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	req.Header.Set("Content-Type", reqContentType)
@@ -60,6 +63,7 @@ func (s *transformation) Create(ctx context.Context, request operations.CreateTr
 	if err != nil {
 		return nil, fmt.Errorf("error reading response body: %w", err)
 	}
+	httpRes.Request.Body = io.NopCloser(debugBody)
 	httpRes.Body.Close()
 	httpRes.Body = io.NopCloser(bytes.NewBuffer(rawBody))
 
@@ -76,7 +80,7 @@ func (s *transformation) Create(ctx context.Context, request operations.CreateTr
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.Transformation
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.Transformation = out
@@ -88,7 +92,7 @@ func (s *transformation) Create(ctx context.Context, request operations.CreateTr
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.APIErrorResponse
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.APIErrorResponse = out
@@ -98,8 +102,8 @@ func (s *transformation) Create(ctx context.Context, request operations.CreateTr
 	return res, nil
 }
 
-// Get - Get a transformation
-func (s *transformation) Get(ctx context.Context, request operations.GetTransformationRequest) (*operations.GetTransformationResponse, error) {
+// GetTransformation - Get a transformation
+func (s *transformation) GetTransformation(ctx context.Context, request operations.GetTransformationRequest) (*operations.GetTransformationResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/transformations/{id}", request, nil)
 	if err != nil {
@@ -110,7 +114,7 @@ func (s *transformation) Get(ctx context.Context, request operations.GetTransfor
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	client := s.sdkConfiguration.SecurityClient
@@ -143,7 +147,7 @@ func (s *transformation) Get(ctx context.Context, request operations.GetTransfor
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.Transformation
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.Transformation = out
@@ -153,7 +157,7 @@ func (s *transformation) Get(ctx context.Context, request operations.GetTransfor
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.APIErrorResponse
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.APIErrorResponse = out
@@ -163,8 +167,8 @@ func (s *transformation) Get(ctx context.Context, request operations.GetTransfor
 	return res, nil
 }
 
-// Test - Test a transformation code
-func (s *transformation) Test(ctx context.Context, request operations.TestTransformationRequestBody) (*operations.TestTransformationResponse, error) {
+// TestTransformation - Test a transformation code
+func (s *transformation) TestTransformation(ctx context.Context, request operations.TestTransformationRequestBody) (*operations.TestTransformationResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url := strings.TrimSuffix(baseURL, "/") + "/transformations/run"
 
@@ -176,11 +180,14 @@ func (s *transformation) Test(ctx context.Context, request operations.TestTransf
 		return nil, fmt.Errorf("request body is required")
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "PUT", url, bodyReader)
+	debugBody := bytes.NewBuffer([]byte{})
+	debugReader := io.TeeReader(bodyReader, debugBody)
+
+	req, err := http.NewRequestWithContext(ctx, "PUT", url, debugReader)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	req.Header.Set("Content-Type", reqContentType)
@@ -199,6 +206,7 @@ func (s *transformation) Test(ctx context.Context, request operations.TestTransf
 	if err != nil {
 		return nil, fmt.Errorf("error reading response body: %w", err)
 	}
+	httpRes.Request.Body = io.NopCloser(debugBody)
 	httpRes.Body.Close()
 	httpRes.Body = io.NopCloser(bytes.NewBuffer(rawBody))
 
@@ -215,7 +223,7 @@ func (s *transformation) Test(ctx context.Context, request operations.TestTransf
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.TransformationExecutorOutput
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.TransformationExecutorOutput = out
@@ -227,7 +235,7 @@ func (s *transformation) Test(ctx context.Context, request operations.TestTransf
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.APIErrorResponse
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.APIErrorResponse = out
@@ -237,8 +245,8 @@ func (s *transformation) Test(ctx context.Context, request operations.TestTransf
 	return res, nil
 }
 
-// Update - Update a transformation
-func (s *transformation) Update(ctx context.Context, request operations.UpdateTransformationRequest) (*operations.UpdateTransformationResponse, error) {
+// UpdateTransformation - Update a transformation
+func (s *transformation) UpdateTransformation(ctx context.Context, request operations.UpdateTransformationRequest) (*operations.UpdateTransformationResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/transformations/{id}", request, nil)
 	if err != nil {
@@ -253,11 +261,14 @@ func (s *transformation) Update(ctx context.Context, request operations.UpdateTr
 		return nil, fmt.Errorf("request body is required")
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "PUT", url, bodyReader)
+	debugBody := bytes.NewBuffer([]byte{})
+	debugReader := io.TeeReader(bodyReader, debugBody)
+
+	req, err := http.NewRequestWithContext(ctx, "PUT", url, debugReader)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	req.Header.Set("Content-Type", reqContentType)
@@ -276,6 +287,7 @@ func (s *transformation) Update(ctx context.Context, request operations.UpdateTr
 	if err != nil {
 		return nil, fmt.Errorf("error reading response body: %w", err)
 	}
+	httpRes.Request.Body = io.NopCloser(debugBody)
 	httpRes.Body.Close()
 	httpRes.Body = io.NopCloser(bytes.NewBuffer(rawBody))
 
@@ -292,7 +304,7 @@ func (s *transformation) Update(ctx context.Context, request operations.UpdateTr
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.Transformation
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.Transformation = out
@@ -306,7 +318,7 @@ func (s *transformation) Update(ctx context.Context, request operations.UpdateTr
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.APIErrorResponse
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.APIErrorResponse = out
@@ -316,8 +328,8 @@ func (s *transformation) Update(ctx context.Context, request operations.UpdateTr
 	return res, nil
 }
 
-// Upsert - Update or create a transformation
-func (s *transformation) Upsert(ctx context.Context, request operations.UpsertTransformationRequestBody) (*operations.UpsertTransformationResponse, error) {
+// UpsertTransformation - Update or create a transformation
+func (s *transformation) UpsertTransformation(ctx context.Context, request operations.UpsertTransformationRequestBody) (*operations.UpsertTransformationResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url := strings.TrimSuffix(baseURL, "/") + "/transformations"
 
@@ -329,11 +341,14 @@ func (s *transformation) Upsert(ctx context.Context, request operations.UpsertTr
 		return nil, fmt.Errorf("request body is required")
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "PUT", url, bodyReader)
+	debugBody := bytes.NewBuffer([]byte{})
+	debugReader := io.TeeReader(bodyReader, debugBody)
+
+	req, err := http.NewRequestWithContext(ctx, "PUT", url, debugReader)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	req.Header.Set("Content-Type", reqContentType)
@@ -352,6 +367,7 @@ func (s *transformation) Upsert(ctx context.Context, request operations.UpsertTr
 	if err != nil {
 		return nil, fmt.Errorf("error reading response body: %w", err)
 	}
+	httpRes.Request.Body = io.NopCloser(debugBody)
 	httpRes.Body.Close()
 	httpRes.Body = io.NopCloser(bytes.NewBuffer(rawBody))
 
@@ -368,7 +384,7 @@ func (s *transformation) Upsert(ctx context.Context, request operations.UpsertTr
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.Transformation
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.Transformation = out
@@ -380,7 +396,7 @@ func (s *transformation) Upsert(ctx context.Context, request operations.UpsertTr
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.APIErrorResponse
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.APIErrorResponse = out
