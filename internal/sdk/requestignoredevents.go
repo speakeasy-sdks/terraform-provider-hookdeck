@@ -23,8 +23,8 @@ func newRequestIgnoredEvents(sdkConfig sdkConfiguration) *requestIgnoredEvents {
 	}
 }
 
-// Get - Get request ignored events
-func (s *requestIgnoredEvents) Get(ctx context.Context, request operations.GetRequestIgnoredEventsRequest) (*operations.GetRequestIgnoredEventsResponse, error) {
+// GetRequestIgnoredEvents - Get request ignored events
+func (s *requestIgnoredEvents) GetRequestIgnoredEvents(ctx context.Context, request operations.GetRequestIgnoredEventsRequest) (*operations.GetRequestIgnoredEventsResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/requests/{id}/ignored_events", request, nil)
 	if err != nil {
@@ -35,7 +35,7 @@ func (s *requestIgnoredEvents) Get(ctx context.Context, request operations.GetRe
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	if err := utils.PopulateQueryParams(ctx, req, request, nil); err != nil {
@@ -72,7 +72,7 @@ func (s *requestIgnoredEvents) Get(ctx context.Context, request operations.GetRe
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.IgnoredEventPaginatedResult
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.IgnoredEventPaginatedResult = out
@@ -86,7 +86,7 @@ func (s *requestIgnoredEvents) Get(ctx context.Context, request operations.GetRe
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.APIErrorResponse
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.APIErrorResponse = out
