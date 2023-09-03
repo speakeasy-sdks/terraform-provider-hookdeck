@@ -24,8 +24,8 @@ func newRuleset(sdkConfig sdkConfiguration) *ruleset {
 	}
 }
 
-// Archive - Archive a ruleset
-func (s *ruleset) Archive(ctx context.Context, request operations.ArchiveRulesetRequest) (*operations.ArchiveRulesetResponse, error) {
+// ArchiveRuleset - Archive a ruleset
+func (s *ruleset) ArchiveRuleset(ctx context.Context, request operations.ArchiveRulesetRequest) (*operations.ArchiveRulesetResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/rulesets/{id}/archive", request, nil)
 	if err != nil {
@@ -36,7 +36,7 @@ func (s *ruleset) Archive(ctx context.Context, request operations.ArchiveRuleset
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	client := s.sdkConfiguration.SecurityClient
@@ -69,7 +69,7 @@ func (s *ruleset) Archive(ctx context.Context, request operations.ArchiveRuleset
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.Ruleset
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.Ruleset = out
@@ -79,7 +79,7 @@ func (s *ruleset) Archive(ctx context.Context, request operations.ArchiveRuleset
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.APIErrorResponse
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.APIErrorResponse = out
@@ -89,8 +89,8 @@ func (s *ruleset) Archive(ctx context.Context, request operations.ArchiveRuleset
 	return res, nil
 }
 
-// Create - Create a ruleset
-func (s *ruleset) Create(ctx context.Context, request operations.CreateRulesetRequestBody) (*operations.CreateRulesetResponse, error) {
+// CreateRuleset - Create a ruleset
+func (s *ruleset) CreateRuleset(ctx context.Context, request operations.CreateRulesetRequestBody) (*operations.CreateRulesetResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url := strings.TrimSuffix(baseURL, "/") + "/rulesets"
 
@@ -102,11 +102,14 @@ func (s *ruleset) Create(ctx context.Context, request operations.CreateRulesetRe
 		return nil, fmt.Errorf("request body is required")
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "POST", url, bodyReader)
+	debugBody := bytes.NewBuffer([]byte{})
+	debugReader := io.TeeReader(bodyReader, debugBody)
+
+	req, err := http.NewRequestWithContext(ctx, "POST", url, debugReader)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	req.Header.Set("Content-Type", reqContentType)
@@ -125,6 +128,7 @@ func (s *ruleset) Create(ctx context.Context, request operations.CreateRulesetRe
 	if err != nil {
 		return nil, fmt.Errorf("error reading response body: %w", err)
 	}
+	httpRes.Request.Body = io.NopCloser(debugBody)
 	httpRes.Body.Close()
 	httpRes.Body = io.NopCloser(bytes.NewBuffer(rawBody))
 
@@ -141,7 +145,7 @@ func (s *ruleset) Create(ctx context.Context, request operations.CreateRulesetRe
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.Ruleset
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.Ruleset = out
@@ -153,7 +157,7 @@ func (s *ruleset) Create(ctx context.Context, request operations.CreateRulesetRe
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.APIErrorResponse
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.APIErrorResponse = out
@@ -163,8 +167,8 @@ func (s *ruleset) Create(ctx context.Context, request operations.CreateRulesetRe
 	return res, nil
 }
 
-// Get - Get a ruleset
-func (s *ruleset) Get(ctx context.Context, request operations.GetRulesetRequest) (*operations.GetRulesetResponse, error) {
+// GetRuleset - Get a ruleset
+func (s *ruleset) GetRuleset(ctx context.Context, request operations.GetRulesetRequest) (*operations.GetRulesetResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/rulesets/{id}", request, nil)
 	if err != nil {
@@ -175,7 +179,7 @@ func (s *ruleset) Get(ctx context.Context, request operations.GetRulesetRequest)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	client := s.sdkConfiguration.SecurityClient
@@ -208,7 +212,7 @@ func (s *ruleset) Get(ctx context.Context, request operations.GetRulesetRequest)
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.Ruleset
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.Ruleset = out
@@ -218,7 +222,7 @@ func (s *ruleset) Get(ctx context.Context, request operations.GetRulesetRequest)
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.APIErrorResponse
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.APIErrorResponse = out
@@ -228,8 +232,8 @@ func (s *ruleset) Get(ctx context.Context, request operations.GetRulesetRequest)
 	return res, nil
 }
 
-// Unarchive - Unarchive a ruleset
-func (s *ruleset) Unarchive(ctx context.Context, request operations.UnarchiveRulesetRequest) (*operations.UnarchiveRulesetResponse, error) {
+// UnarchiveRuleset - Unarchive a ruleset
+func (s *ruleset) UnarchiveRuleset(ctx context.Context, request operations.UnarchiveRulesetRequest) (*operations.UnarchiveRulesetResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/rulesets/{id}/unarchive", request, nil)
 	if err != nil {
@@ -240,7 +244,7 @@ func (s *ruleset) Unarchive(ctx context.Context, request operations.UnarchiveRul
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	client := s.sdkConfiguration.SecurityClient
@@ -273,7 +277,7 @@ func (s *ruleset) Unarchive(ctx context.Context, request operations.UnarchiveRul
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.Ruleset
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.Ruleset = out
@@ -283,7 +287,7 @@ func (s *ruleset) Unarchive(ctx context.Context, request operations.UnarchiveRul
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.APIErrorResponse
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.APIErrorResponse = out
@@ -293,8 +297,8 @@ func (s *ruleset) Unarchive(ctx context.Context, request operations.UnarchiveRul
 	return res, nil
 }
 
-// Update - Update a ruleset
-func (s *ruleset) Update(ctx context.Context, request operations.UpdateRulesetRequest) (*operations.UpdateRulesetResponse, error) {
+// UpdateRuleset - Update a ruleset
+func (s *ruleset) UpdateRuleset(ctx context.Context, request operations.UpdateRulesetRequest) (*operations.UpdateRulesetResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/rulesets/{id}", request, nil)
 	if err != nil {
@@ -309,11 +313,14 @@ func (s *ruleset) Update(ctx context.Context, request operations.UpdateRulesetRe
 		return nil, fmt.Errorf("request body is required")
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "PUT", url, bodyReader)
+	debugBody := bytes.NewBuffer([]byte{})
+	debugReader := io.TeeReader(bodyReader, debugBody)
+
+	req, err := http.NewRequestWithContext(ctx, "PUT", url, debugReader)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	req.Header.Set("Content-Type", reqContentType)
@@ -332,6 +339,7 @@ func (s *ruleset) Update(ctx context.Context, request operations.UpdateRulesetRe
 	if err != nil {
 		return nil, fmt.Errorf("error reading response body: %w", err)
 	}
+	httpRes.Request.Body = io.NopCloser(debugBody)
 	httpRes.Body.Close()
 	httpRes.Body = io.NopCloser(bytes.NewBuffer(rawBody))
 
@@ -348,7 +356,7 @@ func (s *ruleset) Update(ctx context.Context, request operations.UpdateRulesetRe
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.Ruleset
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.Ruleset = out
@@ -362,7 +370,7 @@ func (s *ruleset) Update(ctx context.Context, request operations.UpdateRulesetRe
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.APIErrorResponse
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.APIErrorResponse = out
@@ -372,8 +380,8 @@ func (s *ruleset) Update(ctx context.Context, request operations.UpdateRulesetRe
 	return res, nil
 }
 
-// Upsert - Update or create a ruleset
-func (s *ruleset) Upsert(ctx context.Context, request operations.UpsertRulesetRequestBody) (*operations.UpsertRulesetResponse, error) {
+// UpsertRuleset - Update or create a ruleset
+func (s *ruleset) UpsertRuleset(ctx context.Context, request operations.UpsertRulesetRequestBody) (*operations.UpsertRulesetResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url := strings.TrimSuffix(baseURL, "/") + "/rulesets"
 
@@ -385,11 +393,14 @@ func (s *ruleset) Upsert(ctx context.Context, request operations.UpsertRulesetRe
 		return nil, fmt.Errorf("request body is required")
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "PUT", url, bodyReader)
+	debugBody := bytes.NewBuffer([]byte{})
+	debugReader := io.TeeReader(bodyReader, debugBody)
+
+	req, err := http.NewRequestWithContext(ctx, "PUT", url, debugReader)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
 
 	req.Header.Set("Content-Type", reqContentType)
@@ -408,6 +419,7 @@ func (s *ruleset) Upsert(ctx context.Context, request operations.UpsertRulesetRe
 	if err != nil {
 		return nil, fmt.Errorf("error reading response body: %w", err)
 	}
+	httpRes.Request.Body = io.NopCloser(debugBody)
 	httpRes.Body.Close()
 	httpRes.Body = io.NopCloser(bytes.NewBuffer(rawBody))
 
@@ -424,7 +436,7 @@ func (s *ruleset) Upsert(ctx context.Context, request operations.UpsertRulesetRe
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.Ruleset
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.Ruleset = out
@@ -436,7 +448,7 @@ func (s *ruleset) Upsert(ctx context.Context, request operations.UpsertRulesetRe
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.APIErrorResponse
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.APIErrorResponse = out
