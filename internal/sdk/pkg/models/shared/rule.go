@@ -11,19 +11,19 @@ import (
 type RuleType string
 
 const (
-	RuleTypeRetryRule  RuleType = "RetryRule"
-	RuleTypeAlertRule  RuleType = "AlertRule"
-	RuleTypeFilterRule RuleType = "FilterRule"
-	RuleTypeAny        RuleType = "any"
-	RuleTypeDelayRule  RuleType = "DelayRule"
+	RuleTypeRetryRule     RuleType = "RetryRule"
+	RuleTypeAlertRule     RuleType = "AlertRule"
+	RuleTypeFilterRule    RuleType = "FilterRule"
+	RuleTypeTransformRule RuleType = "TransformRule"
+	RuleTypeDelayRule     RuleType = "DelayRule"
 )
 
 type Rule struct {
-	RetryRule  *RetryRule
-	AlertRule  *AlertRule
-	FilterRule *FilterRule
-	Any        interface{}
-	DelayRule  *DelayRule
+	RetryRule     *RetryRule
+	AlertRule     *AlertRule
+	FilterRule    *FilterRule
+	TransformRule *TransformRule
+	DelayRule     *DelayRule
 
 	Type RuleType
 }
@@ -55,12 +55,12 @@ func CreateRuleFilterRule(filterRule FilterRule) Rule {
 	}
 }
 
-func CreateRuleAny(any interface{}) Rule {
-	typ := RuleTypeAny
+func CreateRuleTransformRule(transformRule TransformRule) Rule {
+	typ := RuleTypeTransformRule
 
 	return Rule{
-		Any:  &any,
-		Type: typ,
+		TransformRule: &transformRule,
+		Type:          typ,
 	}
 }
 
@@ -103,12 +103,12 @@ func (u *Rule) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 
-	any := new(interface{})
+	transformRule := new(TransformRule)
 	d = json.NewDecoder(bytes.NewReader(data))
 	d.DisallowUnknownFields()
-	if err := d.Decode(&any); err == nil {
-		u.Any = any
-		u.Type = RuleTypeAny
+	if err := d.Decode(&transformRule); err == nil {
+		u.TransformRule = transformRule
+		u.Type = RuleTypeTransformRule
 		return nil
 	}
 
@@ -137,8 +137,8 @@ func (u Rule) MarshalJSON() ([]byte, error) {
 		return json.Marshal(u.FilterRule)
 	}
 
-	if u.Any != nil {
-		return json.Marshal(u.Any)
+	if u.TransformRule != nil {
+		return json.Marshal(u.TransformRule)
 	}
 
 	if u.DelayRule != nil {
