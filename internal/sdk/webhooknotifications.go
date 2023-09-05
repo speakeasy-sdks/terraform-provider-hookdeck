@@ -24,8 +24,8 @@ func newWebhookNotifications(sdkConfig sdkConfiguration) *webhookNotifications {
 	}
 }
 
-// Toggle - Toggle webhook notifications for the workspace
-func (s *webhookNotifications) Toggle(ctx context.Context, request operations.ToggleWebhookNotificationsRequestBody) (*operations.ToggleWebhookNotificationsResponse, error) {
+// ToggleWebhookNotifications - Toggle webhook notifications for the workspace
+func (s *webhookNotifications) ToggleWebhookNotifications(ctx context.Context, request operations.ToggleWebhookNotificationsRequestBody) (*operations.ToggleWebhookNotificationsResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url := strings.TrimSuffix(baseURL, "/") + "/notifications/webhooks"
 
@@ -37,7 +37,10 @@ func (s *webhookNotifications) Toggle(ctx context.Context, request operations.To
 		return nil, fmt.Errorf("request body is required")
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "PUT", url, bodyReader)
+	debugBody := bytes.NewBuffer([]byte{})
+	debugReader := io.TeeReader(bodyReader, debugBody)
+
+	req, err := http.NewRequestWithContext(ctx, "PUT", url, debugReader)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
@@ -60,6 +63,7 @@ func (s *webhookNotifications) Toggle(ctx context.Context, request operations.To
 	if err != nil {
 		return nil, fmt.Errorf("error reading response body: %w", err)
 	}
+	httpRes.Request.Body = io.NopCloser(debugBody)
 	httpRes.Body.Close()
 	httpRes.Body = io.NopCloser(bytes.NewBuffer(rawBody))
 
@@ -76,7 +80,7 @@ func (s *webhookNotifications) Toggle(ctx context.Context, request operations.To
 		case utils.MatchContentType(contentType, `application/json`):
 			var out *shared.ToggleWebhookNotifications
 			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
-				return nil, err
+				return res, err
 			}
 
 			res.ToggleWebhookNotifications = out
