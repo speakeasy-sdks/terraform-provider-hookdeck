@@ -11,7 +11,7 @@ type IssueTrigger struct {
 	// Notification channels object for the specific channel type
 	Channels *IssueTriggerChannels `json:"channels,omitempty"`
 	// Configuration object for the specific issue type selected
-	Configs interface{} `json:"configs"`
+	Configs IssueTriggerReference `json:"configs"`
 	// ISO timestamp for when the issue trigger was created
 	CreatedAt time.Time `json:"created_at"`
 	// ISO timestamp for when the issue trigger was deleted
