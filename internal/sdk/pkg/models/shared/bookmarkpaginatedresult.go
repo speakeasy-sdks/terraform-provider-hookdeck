@@ -2,9 +2,29 @@
 
 package shared
 
-// BookmarkPaginatedResult - List of bookmarks
 type BookmarkPaginatedResult struct {
 	Count      *int64          `json:"count,omitempty"`
 	Models     []Bookmark      `json:"models,omitempty"`
 	Pagination *SeekPagination `json:"pagination,omitempty"`
+}
+
+func (o *BookmarkPaginatedResult) GetCount() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.Count
+}
+
+func (o *BookmarkPaginatedResult) GetModels() []Bookmark {
+	if o == nil {
+		return nil
+	}
+	return o.Models
+}
+
+func (o *BookmarkPaginatedResult) GetPagination() *SeekPagination {
+	if o == nil {
+		return nil
+	}
+	return o.Pagination
 }

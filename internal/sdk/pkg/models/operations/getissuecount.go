@@ -3,11 +3,11 @@
 package operations
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"hashicups/internal/sdk/pkg/models/shared"
+	"hashicups/internal/sdk/pkg/utils"
 	"net/http"
 	"time"
 )
@@ -45,21 +45,16 @@ func CreateGetIssueCountAggregationKeysErrorCodeArrayOfAttemptErrorCode(arrayOfA
 }
 
 func (u *GetIssueCountAggregationKeysErrorCode) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
 	attemptErrorCode := new(shared.AttemptErrorCode)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&attemptErrorCode); err == nil {
+	if err := utils.UnmarshalJSON(data, &attemptErrorCode, "", true, true); err == nil {
 		u.AttemptErrorCode = attemptErrorCode
 		u.Type = GetIssueCountAggregationKeysErrorCodeTypeAttemptErrorCode
 		return nil
 	}
 
 	arrayOfAttemptErrorCode := []shared.AttemptErrorCode{}
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&arrayOfAttemptErrorCode); err == nil {
+	if err := utils.UnmarshalJSON(data, &arrayOfAttemptErrorCode, "", true, true); err == nil {
 		u.ArrayOfAttemptErrorCode = arrayOfAttemptErrorCode
 		u.Type = GetIssueCountAggregationKeysErrorCodeTypeArrayOfAttemptErrorCode
 		return nil
@@ -70,14 +65,14 @@ func (u *GetIssueCountAggregationKeysErrorCode) UnmarshalJSON(data []byte) error
 
 func (u GetIssueCountAggregationKeysErrorCode) MarshalJSON() ([]byte, error) {
 	if u.AttemptErrorCode != nil {
-		return json.Marshal(u.AttemptErrorCode)
+		return utils.MarshalJSON(u.AttemptErrorCode, "", true)
 	}
 
 	if u.ArrayOfAttemptErrorCode != nil {
-		return json.Marshal(u.ArrayOfAttemptErrorCode)
+		return utils.MarshalJSON(u.ArrayOfAttemptErrorCode, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 type GetIssueCountAggregationKeysResponseStatusType string
@@ -94,11 +89,11 @@ type GetIssueCountAggregationKeysResponseStatus struct {
 	Type GetIssueCountAggregationKeysResponseStatusType
 }
 
-func CreateGetIssueCountAggregationKeysResponseStatusFloat32(float32 float32) GetIssueCountAggregationKeysResponseStatus {
+func CreateGetIssueCountAggregationKeysResponseStatusFloat32(float32T float32) GetIssueCountAggregationKeysResponseStatus {
 	typ := GetIssueCountAggregationKeysResponseStatusTypeFloat32
 
 	return GetIssueCountAggregationKeysResponseStatus{
-		Float32: &float32,
+		Float32: &float32T,
 		Type:    typ,
 	}
 }
@@ -113,21 +108,16 @@ func CreateGetIssueCountAggregationKeysResponseStatusArrayOffloat32(arrayOffloat
 }
 
 func (u *GetIssueCountAggregationKeysResponseStatus) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
-	float32 := new(float32)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&float32); err == nil {
-		u.Float32 = float32
+	float32Var := new(float32)
+	if err := utils.UnmarshalJSON(data, &float32Var, "", true, true); err == nil {
+		u.Float32 = float32Var
 		u.Type = GetIssueCountAggregationKeysResponseStatusTypeFloat32
 		return nil
 	}
 
 	arrayOffloat32 := []float32{}
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&arrayOffloat32); err == nil {
+	if err := utils.UnmarshalJSON(data, &arrayOffloat32, "", true, true); err == nil {
 		u.ArrayOffloat32 = arrayOffloat32
 		u.Type = GetIssueCountAggregationKeysResponseStatusTypeArrayOffloat32
 		return nil
@@ -138,14 +128,14 @@ func (u *GetIssueCountAggregationKeysResponseStatus) UnmarshalJSON(data []byte) 
 
 func (u GetIssueCountAggregationKeysResponseStatus) MarshalJSON() ([]byte, error) {
 	if u.Float32 != nil {
-		return json.Marshal(u.Float32)
+		return utils.MarshalJSON(u.Float32, "", true)
 	}
 
 	if u.ArrayOffloat32 != nil {
-		return json.Marshal(u.ArrayOffloat32)
+		return utils.MarshalJSON(u.ArrayOffloat32, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 type GetIssueCountAggregationKeysWebhookIDType string
@@ -181,21 +171,16 @@ func CreateGetIssueCountAggregationKeysWebhookIDArrayOfstr(arrayOfstr []string) 
 }
 
 func (u *GetIssueCountAggregationKeysWebhookID) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
 	str := new(string)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&str); err == nil {
+	if err := utils.UnmarshalJSON(data, &str, "", true, true); err == nil {
 		u.Str = str
 		u.Type = GetIssueCountAggregationKeysWebhookIDTypeStr
 		return nil
 	}
 
 	arrayOfstr := []string{}
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&arrayOfstr); err == nil {
+	if err := utils.UnmarshalJSON(data, &arrayOfstr, "", true, true); err == nil {
 		u.ArrayOfstr = arrayOfstr
 		u.Type = GetIssueCountAggregationKeysWebhookIDTypeArrayOfstr
 		return nil
@@ -206,14 +191,14 @@ func (u *GetIssueCountAggregationKeysWebhookID) UnmarshalJSON(data []byte) error
 
 func (u GetIssueCountAggregationKeysWebhookID) MarshalJSON() ([]byte, error) {
 	if u.Str != nil {
-		return json.Marshal(u.Str)
+		return utils.MarshalJSON(u.Str, "", true)
 	}
 
 	if u.ArrayOfstr != nil {
-		return json.Marshal(u.ArrayOfstr)
+		return utils.MarshalJSON(u.ArrayOfstr, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 // GetIssueCountAggregationKeys - Filter by aggregation keys
@@ -223,6 +208,27 @@ type GetIssueCountAggregationKeys struct {
 	WebhookID      *GetIssueCountAggregationKeysWebhookID      `queryParam:"name=webhook_id"`
 }
 
+func (o *GetIssueCountAggregationKeys) GetErrorCode() *GetIssueCountAggregationKeysErrorCode {
+	if o == nil {
+		return nil
+	}
+	return o.ErrorCode
+}
+
+func (o *GetIssueCountAggregationKeys) GetResponseStatus() *GetIssueCountAggregationKeysResponseStatus {
+	if o == nil {
+		return nil
+	}
+	return o.ResponseStatus
+}
+
+func (o *GetIssueCountAggregationKeys) GetWebhookID() *GetIssueCountAggregationKeysWebhookID {
+	if o == nil {
+		return nil
+	}
+	return o.WebhookID
+}
+
 // GetIssueCountCreatedAt2 - Filter by created dates
 type GetIssueCountCreatedAt2 struct {
 	Any *bool      `queryParam:"name=any"`
@@ -230,6 +236,52 @@ type GetIssueCountCreatedAt2 struct {
 	Gte *time.Time `queryParam:"name=gte"`
 	Le  *time.Time `queryParam:"name=le"`
 	Lte *time.Time `queryParam:"name=lte"`
+}
+
+func (g GetIssueCountCreatedAt2) MarshalJSON() ([]byte, error) {
+	return utils.MarshalJSON(g, "", false)
+}
+
+func (g *GetIssueCountCreatedAt2) UnmarshalJSON(data []byte) error {
+	if err := utils.UnmarshalJSON(data, &g, "", false, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *GetIssueCountCreatedAt2) GetAny() *bool {
+	if o == nil {
+		return nil
+	}
+	return o.Any
+}
+
+func (o *GetIssueCountCreatedAt2) GetGt() *time.Time {
+	if o == nil {
+		return nil
+	}
+	return o.Gt
+}
+
+func (o *GetIssueCountCreatedAt2) GetGte() *time.Time {
+	if o == nil {
+		return nil
+	}
+	return o.Gte
+}
+
+func (o *GetIssueCountCreatedAt2) GetLe() *time.Time {
+	if o == nil {
+		return nil
+	}
+	return o.Le
+}
+
+func (o *GetIssueCountCreatedAt2) GetLte() *time.Time {
+	if o == nil {
+		return nil
+	}
+	return o.Lte
 }
 
 type GetIssueCountCreatedAtType string
@@ -265,23 +317,18 @@ func CreateGetIssueCountCreatedAtGetIssueCountCreatedAt2(getIssueCountCreatedAt2
 }
 
 func (u *GetIssueCountCreatedAt) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
-	dateTime := new(time.Time)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&dateTime); err == nil {
-		u.DateTime = dateTime
-		u.Type = GetIssueCountCreatedAtTypeDateTime
+	getIssueCountCreatedAt2 := new(GetIssueCountCreatedAt2)
+	if err := utils.UnmarshalJSON(data, &getIssueCountCreatedAt2, "", true, true); err == nil {
+		u.GetIssueCountCreatedAt2 = getIssueCountCreatedAt2
+		u.Type = GetIssueCountCreatedAtTypeGetIssueCountCreatedAt2
 		return nil
 	}
 
-	getIssueCountCreatedAt2 := new(GetIssueCountCreatedAt2)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&getIssueCountCreatedAt2); err == nil {
-		u.GetIssueCountCreatedAt2 = getIssueCountCreatedAt2
-		u.Type = GetIssueCountCreatedAtTypeGetIssueCountCreatedAt2
+	dateTime := new(time.Time)
+	if err := utils.UnmarshalJSON(data, &dateTime, "", true, true); err == nil {
+		u.DateTime = dateTime
+		u.Type = GetIssueCountCreatedAtTypeDateTime
 		return nil
 	}
 
@@ -290,14 +337,14 @@ func (u *GetIssueCountCreatedAt) UnmarshalJSON(data []byte) error {
 
 func (u GetIssueCountCreatedAt) MarshalJSON() ([]byte, error) {
 	if u.DateTime != nil {
-		return json.Marshal(u.DateTime)
+		return utils.MarshalJSON(u.DateTime, "", true)
 	}
 
 	if u.GetIssueCountCreatedAt2 != nil {
-		return json.Marshal(u.GetIssueCountCreatedAt2)
+		return utils.MarshalJSON(u.GetIssueCountCreatedAt2, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 type GetIssueCountDir2 string
@@ -388,21 +435,16 @@ func CreateGetIssueCountDirArrayOfgetIssueCountDir2(arrayOfgetIssueCountDir2 []G
 }
 
 func (u *GetIssueCountDir) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
 	getIssueCountDir1 := new(GetIssueCountDir1)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&getIssueCountDir1); err == nil {
+	if err := utils.UnmarshalJSON(data, &getIssueCountDir1, "", true, true); err == nil {
 		u.GetIssueCountDir1 = getIssueCountDir1
 		u.Type = GetIssueCountDirTypeGetIssueCountDir1
 		return nil
 	}
 
 	arrayOfgetIssueCountDir2 := []GetIssueCountDir2{}
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&arrayOfgetIssueCountDir2); err == nil {
+	if err := utils.UnmarshalJSON(data, &arrayOfgetIssueCountDir2, "", true, true); err == nil {
 		u.ArrayOfgetIssueCountDir2 = arrayOfgetIssueCountDir2
 		u.Type = GetIssueCountDirTypeArrayOfgetIssueCountDir2
 		return nil
@@ -413,14 +455,14 @@ func (u *GetIssueCountDir) UnmarshalJSON(data []byte) error {
 
 func (u GetIssueCountDir) MarshalJSON() ([]byte, error) {
 	if u.GetIssueCountDir1 != nil {
-		return json.Marshal(u.GetIssueCountDir1)
+		return utils.MarshalJSON(u.GetIssueCountDir1, "", true)
 	}
 
 	if u.ArrayOfgetIssueCountDir2 != nil {
-		return json.Marshal(u.ArrayOfgetIssueCountDir2)
+		return utils.MarshalJSON(u.ArrayOfgetIssueCountDir2, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 // GetIssueCountDismissedAt2 - Filter by dismissed dates
@@ -430,6 +472,52 @@ type GetIssueCountDismissedAt2 struct {
 	Gte *time.Time `queryParam:"name=gte"`
 	Le  *time.Time `queryParam:"name=le"`
 	Lte *time.Time `queryParam:"name=lte"`
+}
+
+func (g GetIssueCountDismissedAt2) MarshalJSON() ([]byte, error) {
+	return utils.MarshalJSON(g, "", false)
+}
+
+func (g *GetIssueCountDismissedAt2) UnmarshalJSON(data []byte) error {
+	if err := utils.UnmarshalJSON(data, &g, "", false, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *GetIssueCountDismissedAt2) GetAny() *bool {
+	if o == nil {
+		return nil
+	}
+	return o.Any
+}
+
+func (o *GetIssueCountDismissedAt2) GetGt() *time.Time {
+	if o == nil {
+		return nil
+	}
+	return o.Gt
+}
+
+func (o *GetIssueCountDismissedAt2) GetGte() *time.Time {
+	if o == nil {
+		return nil
+	}
+	return o.Gte
+}
+
+func (o *GetIssueCountDismissedAt2) GetLe() *time.Time {
+	if o == nil {
+		return nil
+	}
+	return o.Le
+}
+
+func (o *GetIssueCountDismissedAt2) GetLte() *time.Time {
+	if o == nil {
+		return nil
+	}
+	return o.Lte
 }
 
 type GetIssueCountDismissedAtType string
@@ -465,23 +553,18 @@ func CreateGetIssueCountDismissedAtGetIssueCountDismissedAt2(getIssueCountDismis
 }
 
 func (u *GetIssueCountDismissedAt) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
-	dateTime := new(time.Time)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&dateTime); err == nil {
-		u.DateTime = dateTime
-		u.Type = GetIssueCountDismissedAtTypeDateTime
+	getIssueCountDismissedAt2 := new(GetIssueCountDismissedAt2)
+	if err := utils.UnmarshalJSON(data, &getIssueCountDismissedAt2, "", true, true); err == nil {
+		u.GetIssueCountDismissedAt2 = getIssueCountDismissedAt2
+		u.Type = GetIssueCountDismissedAtTypeGetIssueCountDismissedAt2
 		return nil
 	}
 
-	getIssueCountDismissedAt2 := new(GetIssueCountDismissedAt2)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&getIssueCountDismissedAt2); err == nil {
-		u.GetIssueCountDismissedAt2 = getIssueCountDismissedAt2
-		u.Type = GetIssueCountDismissedAtTypeGetIssueCountDismissedAt2
+	dateTime := new(time.Time)
+	if err := utils.UnmarshalJSON(data, &dateTime, "", true, true); err == nil {
+		u.DateTime = dateTime
+		u.Type = GetIssueCountDismissedAtTypeDateTime
 		return nil
 	}
 
@@ -490,14 +573,14 @@ func (u *GetIssueCountDismissedAt) UnmarshalJSON(data []byte) error {
 
 func (u GetIssueCountDismissedAt) MarshalJSON() ([]byte, error) {
 	if u.DateTime != nil {
-		return json.Marshal(u.DateTime)
+		return utils.MarshalJSON(u.DateTime, "", true)
 	}
 
 	if u.GetIssueCountDismissedAt2 != nil {
-		return json.Marshal(u.GetIssueCountDismissedAt2)
+		return utils.MarshalJSON(u.GetIssueCountDismissedAt2, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 // GetIssueCountFirstSeenAt2 - Filter by first seen dates
@@ -507,6 +590,52 @@ type GetIssueCountFirstSeenAt2 struct {
 	Gte *time.Time `queryParam:"name=gte"`
 	Le  *time.Time `queryParam:"name=le"`
 	Lte *time.Time `queryParam:"name=lte"`
+}
+
+func (g GetIssueCountFirstSeenAt2) MarshalJSON() ([]byte, error) {
+	return utils.MarshalJSON(g, "", false)
+}
+
+func (g *GetIssueCountFirstSeenAt2) UnmarshalJSON(data []byte) error {
+	if err := utils.UnmarshalJSON(data, &g, "", false, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *GetIssueCountFirstSeenAt2) GetAny() *bool {
+	if o == nil {
+		return nil
+	}
+	return o.Any
+}
+
+func (o *GetIssueCountFirstSeenAt2) GetGt() *time.Time {
+	if o == nil {
+		return nil
+	}
+	return o.Gt
+}
+
+func (o *GetIssueCountFirstSeenAt2) GetGte() *time.Time {
+	if o == nil {
+		return nil
+	}
+	return o.Gte
+}
+
+func (o *GetIssueCountFirstSeenAt2) GetLe() *time.Time {
+	if o == nil {
+		return nil
+	}
+	return o.Le
+}
+
+func (o *GetIssueCountFirstSeenAt2) GetLte() *time.Time {
+	if o == nil {
+		return nil
+	}
+	return o.Lte
 }
 
 type GetIssueCountFirstSeenAtType string
@@ -542,23 +671,18 @@ func CreateGetIssueCountFirstSeenAtGetIssueCountFirstSeenAt2(getIssueCountFirstS
 }
 
 func (u *GetIssueCountFirstSeenAt) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
-	dateTime := new(time.Time)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&dateTime); err == nil {
-		u.DateTime = dateTime
-		u.Type = GetIssueCountFirstSeenAtTypeDateTime
+	getIssueCountFirstSeenAt2 := new(GetIssueCountFirstSeenAt2)
+	if err := utils.UnmarshalJSON(data, &getIssueCountFirstSeenAt2, "", true, true); err == nil {
+		u.GetIssueCountFirstSeenAt2 = getIssueCountFirstSeenAt2
+		u.Type = GetIssueCountFirstSeenAtTypeGetIssueCountFirstSeenAt2
 		return nil
 	}
 
-	getIssueCountFirstSeenAt2 := new(GetIssueCountFirstSeenAt2)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&getIssueCountFirstSeenAt2); err == nil {
-		u.GetIssueCountFirstSeenAt2 = getIssueCountFirstSeenAt2
-		u.Type = GetIssueCountFirstSeenAtTypeGetIssueCountFirstSeenAt2
+	dateTime := new(time.Time)
+	if err := utils.UnmarshalJSON(data, &dateTime, "", true, true); err == nil {
+		u.DateTime = dateTime
+		u.Type = GetIssueCountFirstSeenAtTypeDateTime
 		return nil
 	}
 
@@ -567,14 +691,14 @@ func (u *GetIssueCountFirstSeenAt) UnmarshalJSON(data []byte) error {
 
 func (u GetIssueCountFirstSeenAt) MarshalJSON() ([]byte, error) {
 	if u.DateTime != nil {
-		return json.Marshal(u.DateTime)
+		return utils.MarshalJSON(u.DateTime, "", true)
 	}
 
 	if u.GetIssueCountFirstSeenAt2 != nil {
-		return json.Marshal(u.GetIssueCountFirstSeenAt2)
+		return utils.MarshalJSON(u.GetIssueCountFirstSeenAt2, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 type GetIssueCountIDType string
@@ -610,21 +734,16 @@ func CreateGetIssueCountIDArrayOfstr(arrayOfstr []string) GetIssueCountID {
 }
 
 func (u *GetIssueCountID) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
 	str := new(string)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&str); err == nil {
+	if err := utils.UnmarshalJSON(data, &str, "", true, true); err == nil {
 		u.Str = str
 		u.Type = GetIssueCountIDTypeStr
 		return nil
 	}
 
 	arrayOfstr := []string{}
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&arrayOfstr); err == nil {
+	if err := utils.UnmarshalJSON(data, &arrayOfstr, "", true, true); err == nil {
 		u.ArrayOfstr = arrayOfstr
 		u.Type = GetIssueCountIDTypeArrayOfstr
 		return nil
@@ -635,14 +754,14 @@ func (u *GetIssueCountID) UnmarshalJSON(data []byte) error {
 
 func (u GetIssueCountID) MarshalJSON() ([]byte, error) {
 	if u.Str != nil {
-		return json.Marshal(u.Str)
+		return utils.MarshalJSON(u.Str, "", true)
 	}
 
 	if u.ArrayOfstr != nil {
-		return json.Marshal(u.ArrayOfstr)
+		return utils.MarshalJSON(u.ArrayOfstr, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 type GetIssueCountIssueTriggerIDType string
@@ -678,21 +797,16 @@ func CreateGetIssueCountIssueTriggerIDArrayOfstr(arrayOfstr []string) GetIssueCo
 }
 
 func (u *GetIssueCountIssueTriggerID) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
 	str := new(string)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&str); err == nil {
+	if err := utils.UnmarshalJSON(data, &str, "", true, true); err == nil {
 		u.Str = str
 		u.Type = GetIssueCountIssueTriggerIDTypeStr
 		return nil
 	}
 
 	arrayOfstr := []string{}
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&arrayOfstr); err == nil {
+	if err := utils.UnmarshalJSON(data, &arrayOfstr, "", true, true); err == nil {
 		u.ArrayOfstr = arrayOfstr
 		u.Type = GetIssueCountIssueTriggerIDTypeArrayOfstr
 		return nil
@@ -703,14 +817,14 @@ func (u *GetIssueCountIssueTriggerID) UnmarshalJSON(data []byte) error {
 
 func (u GetIssueCountIssueTriggerID) MarshalJSON() ([]byte, error) {
 	if u.Str != nil {
-		return json.Marshal(u.Str)
+		return utils.MarshalJSON(u.Str, "", true)
 	}
 
 	if u.ArrayOfstr != nil {
-		return json.Marshal(u.ArrayOfstr)
+		return utils.MarshalJSON(u.ArrayOfstr, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 // GetIssueCountLastSeenAt2 - Filter by last seen dates
@@ -720,6 +834,52 @@ type GetIssueCountLastSeenAt2 struct {
 	Gte *time.Time `queryParam:"name=gte"`
 	Le  *time.Time `queryParam:"name=le"`
 	Lte *time.Time `queryParam:"name=lte"`
+}
+
+func (g GetIssueCountLastSeenAt2) MarshalJSON() ([]byte, error) {
+	return utils.MarshalJSON(g, "", false)
+}
+
+func (g *GetIssueCountLastSeenAt2) UnmarshalJSON(data []byte) error {
+	if err := utils.UnmarshalJSON(data, &g, "", false, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *GetIssueCountLastSeenAt2) GetAny() *bool {
+	if o == nil {
+		return nil
+	}
+	return o.Any
+}
+
+func (o *GetIssueCountLastSeenAt2) GetGt() *time.Time {
+	if o == nil {
+		return nil
+	}
+	return o.Gt
+}
+
+func (o *GetIssueCountLastSeenAt2) GetGte() *time.Time {
+	if o == nil {
+		return nil
+	}
+	return o.Gte
+}
+
+func (o *GetIssueCountLastSeenAt2) GetLe() *time.Time {
+	if o == nil {
+		return nil
+	}
+	return o.Le
+}
+
+func (o *GetIssueCountLastSeenAt2) GetLte() *time.Time {
+	if o == nil {
+		return nil
+	}
+	return o.Lte
 }
 
 type GetIssueCountLastSeenAtType string
@@ -755,23 +915,18 @@ func CreateGetIssueCountLastSeenAtGetIssueCountLastSeenAt2(getIssueCountLastSeen
 }
 
 func (u *GetIssueCountLastSeenAt) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
-	dateTime := new(time.Time)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&dateTime); err == nil {
-		u.DateTime = dateTime
-		u.Type = GetIssueCountLastSeenAtTypeDateTime
+	getIssueCountLastSeenAt2 := new(GetIssueCountLastSeenAt2)
+	if err := utils.UnmarshalJSON(data, &getIssueCountLastSeenAt2, "", true, true); err == nil {
+		u.GetIssueCountLastSeenAt2 = getIssueCountLastSeenAt2
+		u.Type = GetIssueCountLastSeenAtTypeGetIssueCountLastSeenAt2
 		return nil
 	}
 
-	getIssueCountLastSeenAt2 := new(GetIssueCountLastSeenAt2)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&getIssueCountLastSeenAt2); err == nil {
-		u.GetIssueCountLastSeenAt2 = getIssueCountLastSeenAt2
-		u.Type = GetIssueCountLastSeenAtTypeGetIssueCountLastSeenAt2
+	dateTime := new(time.Time)
+	if err := utils.UnmarshalJSON(data, &dateTime, "", true, true); err == nil {
+		u.DateTime = dateTime
+		u.Type = GetIssueCountLastSeenAtTypeDateTime
 		return nil
 	}
 
@@ -780,14 +935,14 @@ func (u *GetIssueCountLastSeenAt) UnmarshalJSON(data []byte) error {
 
 func (u GetIssueCountLastSeenAt) MarshalJSON() ([]byte, error) {
 	if u.DateTime != nil {
-		return json.Marshal(u.DateTime)
+		return utils.MarshalJSON(u.DateTime, "", true)
 	}
 
 	if u.GetIssueCountLastSeenAt2 != nil {
-		return json.Marshal(u.GetIssueCountLastSeenAt2)
+		return utils.MarshalJSON(u.GetIssueCountLastSeenAt2, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 type GetIssueCountMergedWithType string
@@ -823,21 +978,16 @@ func CreateGetIssueCountMergedWithArrayOfstr(arrayOfstr []string) GetIssueCountM
 }
 
 func (u *GetIssueCountMergedWith) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
 	str := new(string)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&str); err == nil {
+	if err := utils.UnmarshalJSON(data, &str, "", true, true); err == nil {
 		u.Str = str
 		u.Type = GetIssueCountMergedWithTypeStr
 		return nil
 	}
 
 	arrayOfstr := []string{}
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&arrayOfstr); err == nil {
+	if err := utils.UnmarshalJSON(data, &arrayOfstr, "", true, true); err == nil {
 		u.ArrayOfstr = arrayOfstr
 		u.Type = GetIssueCountMergedWithTypeArrayOfstr
 		return nil
@@ -848,14 +998,14 @@ func (u *GetIssueCountMergedWith) UnmarshalJSON(data []byte) error {
 
 func (u GetIssueCountMergedWith) MarshalJSON() ([]byte, error) {
 	if u.Str != nil {
-		return json.Marshal(u.Str)
+		return utils.MarshalJSON(u.Str, "", true)
 	}
 
 	if u.ArrayOfstr != nil {
-		return json.Marshal(u.ArrayOfstr)
+		return utils.MarshalJSON(u.ArrayOfstr, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 type GetIssueCountOrderBy2 string
@@ -964,21 +1114,16 @@ func CreateGetIssueCountOrderByArrayOfgetIssueCountOrderBy2(arrayOfgetIssueCount
 }
 
 func (u *GetIssueCountOrderBy) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
 	getIssueCountOrderBy1 := new(GetIssueCountOrderBy1)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&getIssueCountOrderBy1); err == nil {
+	if err := utils.UnmarshalJSON(data, &getIssueCountOrderBy1, "", true, true); err == nil {
 		u.GetIssueCountOrderBy1 = getIssueCountOrderBy1
 		u.Type = GetIssueCountOrderByTypeGetIssueCountOrderBy1
 		return nil
 	}
 
 	arrayOfgetIssueCountOrderBy2 := []GetIssueCountOrderBy2{}
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&arrayOfgetIssueCountOrderBy2); err == nil {
+	if err := utils.UnmarshalJSON(data, &arrayOfgetIssueCountOrderBy2, "", true, true); err == nil {
 		u.ArrayOfgetIssueCountOrderBy2 = arrayOfgetIssueCountOrderBy2
 		u.Type = GetIssueCountOrderByTypeArrayOfgetIssueCountOrderBy2
 		return nil
@@ -989,14 +1134,14 @@ func (u *GetIssueCountOrderBy) UnmarshalJSON(data []byte) error {
 
 func (u GetIssueCountOrderBy) MarshalJSON() ([]byte, error) {
 	if u.GetIssueCountOrderBy1 != nil {
-		return json.Marshal(u.GetIssueCountOrderBy1)
+		return utils.MarshalJSON(u.GetIssueCountOrderBy1, "", true)
 	}
 
 	if u.ArrayOfgetIssueCountOrderBy2 != nil {
-		return json.Marshal(u.ArrayOfgetIssueCountOrderBy2)
+		return utils.MarshalJSON(u.ArrayOfgetIssueCountOrderBy2, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 // GetIssueCountStatus2 - Issue status
@@ -1100,21 +1245,16 @@ func CreateGetIssueCountStatusArrayOfgetIssueCountStatus2(arrayOfgetIssueCountSt
 }
 
 func (u *GetIssueCountStatus) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
 	getIssueCountStatus1 := new(GetIssueCountStatus1)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&getIssueCountStatus1); err == nil {
+	if err := utils.UnmarshalJSON(data, &getIssueCountStatus1, "", true, true); err == nil {
 		u.GetIssueCountStatus1 = getIssueCountStatus1
 		u.Type = GetIssueCountStatusTypeGetIssueCountStatus1
 		return nil
 	}
 
 	arrayOfgetIssueCountStatus2 := []GetIssueCountStatus2{}
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&arrayOfgetIssueCountStatus2); err == nil {
+	if err := utils.UnmarshalJSON(data, &arrayOfgetIssueCountStatus2, "", true, true); err == nil {
 		u.ArrayOfgetIssueCountStatus2 = arrayOfgetIssueCountStatus2
 		u.Type = GetIssueCountStatusTypeArrayOfgetIssueCountStatus2
 		return nil
@@ -1125,14 +1265,14 @@ func (u *GetIssueCountStatus) UnmarshalJSON(data []byte) error {
 
 func (u GetIssueCountStatus) MarshalJSON() ([]byte, error) {
 	if u.GetIssueCountStatus1 != nil {
-		return json.Marshal(u.GetIssueCountStatus1)
+		return utils.MarshalJSON(u.GetIssueCountStatus1, "", true)
 	}
 
 	if u.ArrayOfgetIssueCountStatus2 != nil {
-		return json.Marshal(u.ArrayOfgetIssueCountStatus2)
+		return utils.MarshalJSON(u.ArrayOfgetIssueCountStatus2, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 // GetIssueCountType2 - Issue type
@@ -1230,21 +1370,16 @@ func CreateGetIssueCountTypeArrayOfgetIssueCountType2(arrayOfgetIssueCountType2 
 }
 
 func (u *GetIssueCountType) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
 	getIssueCountType1 := new(GetIssueCountType1)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&getIssueCountType1); err == nil {
+	if err := utils.UnmarshalJSON(data, &getIssueCountType1, "", true, true); err == nil {
 		u.GetIssueCountType1 = getIssueCountType1
 		u.Type = GetIssueCountTypeTypeGetIssueCountType1
 		return nil
 	}
 
 	arrayOfgetIssueCountType2 := []GetIssueCountType2{}
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&arrayOfgetIssueCountType2); err == nil {
+	if err := utils.UnmarshalJSON(data, &arrayOfgetIssueCountType2, "", true, true); err == nil {
 		u.ArrayOfgetIssueCountType2 = arrayOfgetIssueCountType2
 		u.Type = GetIssueCountTypeTypeArrayOfgetIssueCountType2
 		return nil
@@ -1255,14 +1390,14 @@ func (u *GetIssueCountType) UnmarshalJSON(data []byte) error {
 
 func (u GetIssueCountType) MarshalJSON() ([]byte, error) {
 	if u.GetIssueCountType1 != nil {
-		return json.Marshal(u.GetIssueCountType1)
+		return utils.MarshalJSON(u.GetIssueCountType1, "", true)
 	}
 
 	if u.ArrayOfgetIssueCountType2 != nil {
-		return json.Marshal(u.ArrayOfgetIssueCountType2)
+		return utils.MarshalJSON(u.ArrayOfgetIssueCountType2, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 type GetIssueCountRequest struct {
@@ -1284,12 +1419,155 @@ type GetIssueCountRequest struct {
 	Type            *GetIssueCountType            `queryParam:"style=form,explode=true,name=type"`
 }
 
+func (o *GetIssueCountRequest) GetAggregationKeys() *GetIssueCountAggregationKeys {
+	if o == nil {
+		return nil
+	}
+	return o.AggregationKeys
+}
+
+func (o *GetIssueCountRequest) GetCreatedAt() *GetIssueCountCreatedAt {
+	if o == nil {
+		return nil
+	}
+	return o.CreatedAt
+}
+
+func (o *GetIssueCountRequest) GetDir() *GetIssueCountDir {
+	if o == nil {
+		return nil
+	}
+	return o.Dir
+}
+
+func (o *GetIssueCountRequest) GetDismissedAt() *GetIssueCountDismissedAt {
+	if o == nil {
+		return nil
+	}
+	return o.DismissedAt
+}
+
+func (o *GetIssueCountRequest) GetFirstSeenAt() *GetIssueCountFirstSeenAt {
+	if o == nil {
+		return nil
+	}
+	return o.FirstSeenAt
+}
+
+func (o *GetIssueCountRequest) GetID() *GetIssueCountID {
+	if o == nil {
+		return nil
+	}
+	return o.ID
+}
+
+func (o *GetIssueCountRequest) GetIssueTriggerID() *GetIssueCountIssueTriggerID {
+	if o == nil {
+		return nil
+	}
+	return o.IssueTriggerID
+}
+
+func (o *GetIssueCountRequest) GetLastSeenAt() *GetIssueCountLastSeenAt {
+	if o == nil {
+		return nil
+	}
+	return o.LastSeenAt
+}
+
+func (o *GetIssueCountRequest) GetLimit() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.Limit
+}
+
+func (o *GetIssueCountRequest) GetMergedWith() *GetIssueCountMergedWith {
+	if o == nil {
+		return nil
+	}
+	return o.MergedWith
+}
+
+func (o *GetIssueCountRequest) GetNext() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Next
+}
+
+func (o *GetIssueCountRequest) GetOrderBy() *GetIssueCountOrderBy {
+	if o == nil {
+		return nil
+	}
+	return o.OrderBy
+}
+
+func (o *GetIssueCountRequest) GetPrev() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Prev
+}
+
+func (o *GetIssueCountRequest) GetStatus() *GetIssueCountStatus {
+	if o == nil {
+		return nil
+	}
+	return o.Status
+}
+
+func (o *GetIssueCountRequest) GetType() *GetIssueCountType {
+	if o == nil {
+		return nil
+	}
+	return o.Type
+}
+
 type GetIssueCountResponse struct {
 	// Unprocessable Entity
 	APIErrorResponse *shared.APIErrorResponse
-	ContentType      string
+	// HTTP response content type for this operation
+	ContentType string
 	// Issue count
-	IssueCount  *shared.IssueCount
-	StatusCode  int
+	IssueCount *shared.IssueCount
+	// HTTP response status code for this operation
+	StatusCode int
+	// Raw HTTP response; suitable for custom response parsing
 	RawResponse *http.Response
+}
+
+func (o *GetIssueCountResponse) GetAPIErrorResponse() *shared.APIErrorResponse {
+	if o == nil {
+		return nil
+	}
+	return o.APIErrorResponse
+}
+
+func (o *GetIssueCountResponse) GetContentType() string {
+	if o == nil {
+		return ""
+	}
+	return o.ContentType
+}
+
+func (o *GetIssueCountResponse) GetIssueCount() *shared.IssueCount {
+	if o == nil {
+		return nil
+	}
+	return o.IssueCount
+}
+
+func (o *GetIssueCountResponse) GetStatusCode() int {
+	if o == nil {
+		return 0
+	}
+	return o.StatusCode
+}
+
+func (o *GetIssueCountResponse) GetRawResponse() *http.Response {
+	if o == nil {
+		return nil
+	}
+	return o.RawResponse
 }

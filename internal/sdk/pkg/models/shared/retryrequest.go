@@ -2,8 +2,21 @@
 
 package shared
 
-// RetryRequest - Retry request operation result
 type RetryRequest struct {
 	Events  []Event `json:"events,omitempty"`
 	Request Request `json:"request"`
+}
+
+func (o *RetryRequest) GetEvents() []Event {
+	if o == nil {
+		return nil
+	}
+	return o.Events
+}
+
+func (o *RetryRequest) GetRequest() Request {
+	if o == nil {
+		return Request{}
+	}
+	return o.Request
 }

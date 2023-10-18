@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"hashicups/internal/sdk/pkg/models/operations"
+	"hashicups/internal/sdk/pkg/models/sdkerrors"
 	"hashicups/internal/sdk/pkg/models/shared"
 	"hashicups/internal/sdk/pkg/utils"
 	"io"
@@ -23,7 +24,7 @@ func newCustomDomains(sdkConfig sdkConfiguration) *customDomains {
 	}
 }
 
-// List - List all custom domains and their verification statuses for the workspace
+// List all custom domains and their verification statuses for the workspace
 func (s *customDomains) List(ctx context.Context, request operations.ListCustomDomainsRequest) (*operations.ListCustomDomainsResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/teams/{team_id}/custom_domains", request, nil)
@@ -36,7 +37,7 @@ func (s *customDomains) List(ctx context.Context, request operations.ListCustomD
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 	req.Header.Set("Accept", "application/json")
-	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
+	req.Header.Set("user-agent", s.sdkConfiguration.UserAgent)
 
 	client := s.sdkConfiguration.SecurityClient
 
@@ -67,11 +68,13 @@ func (s *customDomains) List(ctx context.Context, request operations.ListCustomD
 		switch {
 		case utils.MatchContentType(contentType, `application/json`):
 			var out []shared.ListCustomDomainSchema
-			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
 				return nil, err
 			}
 
 			res.ListCustomDomainSchema = out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
 		}
 	}
 

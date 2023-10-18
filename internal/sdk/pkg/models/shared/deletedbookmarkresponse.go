@@ -2,8 +2,14 @@
 
 package shared
 
-// DeletedBookmarkResponse - An object with deleted bookmark's id
 type DeletedBookmarkResponse struct {
 	// Bookmark ID
 	ID string `json:"id"`
+}
+
+func (o *DeletedBookmarkResponse) GetID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ID
 }

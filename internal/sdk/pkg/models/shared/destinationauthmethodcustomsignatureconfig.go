@@ -9,3 +9,17 @@ type DestinationAuthMethodCustomSignatureConfig struct {
 	// Signing secret for the custom signature auth. If left empty a secret will be generated for you.
 	SigningSecret *string `json:"signing_secret,omitempty"`
 }
+
+func (o *DestinationAuthMethodCustomSignatureConfig) GetKey() string {
+	if o == nil {
+		return ""
+	}
+	return o.Key
+}
+
+func (o *DestinationAuthMethodCustomSignatureConfig) GetSigningSecret() *string {
+	if o == nil {
+		return nil
+	}
+	return o.SigningSecret
+}

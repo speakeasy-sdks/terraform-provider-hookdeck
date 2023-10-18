@@ -9,3 +9,17 @@ type DestinationAuthMethodBasicAuthConfig struct {
 	// Username for basic auth
 	Username string `json:"username"`
 }
+
+func (o *DestinationAuthMethodBasicAuthConfig) GetPassword() string {
+	if o == nil {
+		return ""
+	}
+	return o.Password
+}
+
+func (o *DestinationAuthMethodBasicAuthConfig) GetUsername() string {
+	if o == nil {
+		return ""
+	}
+	return o.Username
+}

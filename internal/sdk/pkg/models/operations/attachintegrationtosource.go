@@ -12,12 +12,64 @@ type AttachIntegrationToSourceRequest struct {
 	SourceID string `pathParam:"style=simple,explode=false,name=source_id"`
 }
 
+func (o *AttachIntegrationToSourceRequest) GetID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ID
+}
+
+func (o *AttachIntegrationToSourceRequest) GetSourceID() string {
+	if o == nil {
+		return ""
+	}
+	return o.SourceID
+}
+
 type AttachIntegrationToSourceResponse struct {
 	// Bad Request
 	APIErrorResponse *shared.APIErrorResponse
 	// Attach operation success status
 	AttachedIntegrationToSource *shared.AttachedIntegrationToSource
-	ContentType                 string
-	StatusCode                  int
-	RawResponse                 *http.Response
+	// HTTP response content type for this operation
+	ContentType string
+	// HTTP response status code for this operation
+	StatusCode int
+	// Raw HTTP response; suitable for custom response parsing
+	RawResponse *http.Response
+}
+
+func (o *AttachIntegrationToSourceResponse) GetAPIErrorResponse() *shared.APIErrorResponse {
+	if o == nil {
+		return nil
+	}
+	return o.APIErrorResponse
+}
+
+func (o *AttachIntegrationToSourceResponse) GetAttachedIntegrationToSource() *shared.AttachedIntegrationToSource {
+	if o == nil {
+		return nil
+	}
+	return o.AttachedIntegrationToSource
+}
+
+func (o *AttachIntegrationToSourceResponse) GetContentType() string {
+	if o == nil {
+		return ""
+	}
+	return o.ContentType
+}
+
+func (o *AttachIntegrationToSourceResponse) GetStatusCode() int {
+	if o == nil {
+		return 0
+	}
+	return o.StatusCode
+}
+
+func (o *AttachIntegrationToSourceResponse) GetRawResponse() *http.Response {
+	if o == nil {
+		return nil
+	}
+	return o.RawResponse
 }

@@ -16,17 +16,90 @@ type UpdateSourceRequestBody struct {
 	Name *string `json:"name,omitempty"`
 }
 
+func (o *UpdateSourceRequestBody) GetAllowedHTTPMethods() []shared.SourceAllowedHTTPMethod {
+	if o == nil {
+		return nil
+	}
+	return o.AllowedHTTPMethods
+}
+
+func (o *UpdateSourceRequestBody) GetCustomResponse() *shared.SourceCustomResponse {
+	if o == nil {
+		return nil
+	}
+	return o.CustomResponse
+}
+
+func (o *UpdateSourceRequestBody) GetName() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Name
+}
+
 type UpdateSourceRequest struct {
 	RequestBody UpdateSourceRequestBody `request:"mediaType=application/json"`
 	ID          string                  `pathParam:"style=simple,explode=false,name=id"`
 }
 
+func (o *UpdateSourceRequest) GetRequestBody() UpdateSourceRequestBody {
+	if o == nil {
+		return UpdateSourceRequestBody{}
+	}
+	return o.RequestBody
+}
+
+func (o *UpdateSourceRequest) GetID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ID
+}
+
 type UpdateSourceResponse struct {
 	// Bad Request
 	APIErrorResponse *shared.APIErrorResponse
-	ContentType      string
+	// HTTP response content type for this operation
+	ContentType string
 	// A single source
-	Source      *shared.Source
-	StatusCode  int
+	Source *shared.Source
+	// HTTP response status code for this operation
+	StatusCode int
+	// Raw HTTP response; suitable for custom response parsing
 	RawResponse *http.Response
+}
+
+func (o *UpdateSourceResponse) GetAPIErrorResponse() *shared.APIErrorResponse {
+	if o == nil {
+		return nil
+	}
+	return o.APIErrorResponse
+}
+
+func (o *UpdateSourceResponse) GetContentType() string {
+	if o == nil {
+		return ""
+	}
+	return o.ContentType
+}
+
+func (o *UpdateSourceResponse) GetSource() *shared.Source {
+	if o == nil {
+		return nil
+	}
+	return o.Source
+}
+
+func (o *UpdateSourceResponse) GetStatusCode() int {
+	if o == nil {
+		return 0
+	}
+	return o.StatusCode
+}
+
+func (o *UpdateSourceResponse) GetRawResponse() *http.Response {
+	if o == nil {
+		return nil
+	}
+	return o.RawResponse
 }
