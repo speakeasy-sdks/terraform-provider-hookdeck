@@ -3,9 +3,8 @@
 package shared
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
+	"hashicups/internal/sdk/pkg/utils"
 )
 
 type IssueTriggerTransformationConfigsTransformationsType string
@@ -41,21 +40,16 @@ func CreateIssueTriggerTransformationConfigsTransformationsArrayOfstr(arrayOfstr
 }
 
 func (u *IssueTriggerTransformationConfigsTransformations) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
 	str := new(string)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&str); err == nil {
+	if err := utils.UnmarshalJSON(data, &str, "", true, true); err == nil {
 		u.Str = str
 		u.Type = IssueTriggerTransformationConfigsTransformationsTypeStr
 		return nil
 	}
 
 	arrayOfstr := []string{}
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&arrayOfstr); err == nil {
+	if err := utils.UnmarshalJSON(data, &arrayOfstr, "", true, true); err == nil {
 		u.ArrayOfstr = arrayOfstr
 		u.Type = IssueTriggerTransformationConfigsTransformationsTypeArrayOfstr
 		return nil
@@ -66,14 +60,14 @@ func (u *IssueTriggerTransformationConfigsTransformations) UnmarshalJSON(data []
 
 func (u IssueTriggerTransformationConfigsTransformations) MarshalJSON() ([]byte, error) {
 	if u.Str != nil {
-		return json.Marshal(u.Str)
+		return utils.MarshalJSON(u.Str, "", true)
 	}
 
 	if u.ArrayOfstr != nil {
-		return json.Marshal(u.ArrayOfstr)
+		return utils.MarshalJSON(u.ArrayOfstr, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 // IssueTriggerTransformationConfigs - Configurations for a 'Transformation' issue trigger
@@ -82,4 +76,18 @@ type IssueTriggerTransformationConfigs struct {
 	LogLevel TransformationExecutionLogLevel `json:"log_level"`
 	// A pattern to match on the transformation name or array of transformation IDs. Use `*` as wildcard.
 	Transformations IssueTriggerTransformationConfigsTransformations `json:"transformations"`
+}
+
+func (o *IssueTriggerTransformationConfigs) GetLogLevel() TransformationExecutionLogLevel {
+	if o == nil {
+		return TransformationExecutionLogLevel("")
+	}
+	return o.LogLevel
+}
+
+func (o *IssueTriggerTransformationConfigs) GetTransformations() IssueTriggerTransformationConfigsTransformations {
+	if o == nil {
+		return IssueTriggerTransformationConfigsTransformations{}
+	}
+	return o.Transformations
 }

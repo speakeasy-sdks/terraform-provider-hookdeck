@@ -2,7 +2,13 @@
 
 package shared
 
-// DeletedIntegration - An object with deleted integration id
 type DeletedIntegration struct {
 	ID string `json:"id"`
+}
+
+func (o *DeletedIntegration) GetID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ID
 }

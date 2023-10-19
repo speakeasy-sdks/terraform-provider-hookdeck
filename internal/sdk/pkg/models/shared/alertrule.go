@@ -38,3 +38,17 @@ type AlertRule struct {
 	// An alert rule must be of type `alert`
 	Type AlertRuleType `json:"type"`
 }
+
+func (o *AlertRule) GetStrategy() AlertStrategy {
+	if o == nil {
+		return AlertStrategy("")
+	}
+	return o.Strategy
+}
+
+func (o *AlertRule) GetType() AlertRuleType {
+	if o == nil {
+		return AlertRuleType("")
+	}
+	return o.Type
+}

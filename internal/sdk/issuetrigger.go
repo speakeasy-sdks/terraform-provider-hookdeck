@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"hashicups/internal/sdk/pkg/models/operations"
+	"hashicups/internal/sdk/pkg/models/sdkerrors"
 	"hashicups/internal/sdk/pkg/models/shared"
 	"hashicups/internal/sdk/pkg/utils"
 	"io"
@@ -24,13 +25,13 @@ func newIssueTrigger(sdkConfig sdkConfiguration) *issueTrigger {
 	}
 }
 
-// Create - Create an Issue Trigger
+// Create an Issue Trigger
 // Create a new issue trigger.
 func (s *issueTrigger) Create(ctx context.Context, request operations.CreateIssueTriggerRequestBody) (*operations.CreateIssueTriggerResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url := strings.TrimSuffix(baseURL, "/") + "/issue-triggers"
 
-	bodyReader, reqContentType, err := utils.SerializeRequestBody(ctx, request, "Request", "json")
+	bodyReader, reqContentType, err := utils.SerializeRequestBody(ctx, request, false, false, "Request", "json", `request:"mediaType=application/json"`)
 	if err != nil {
 		return nil, fmt.Errorf("error serializing request body: %w", err)
 	}
@@ -38,12 +39,15 @@ func (s *issueTrigger) Create(ctx context.Context, request operations.CreateIssu
 		return nil, fmt.Errorf("request body is required")
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "POST", url, bodyReader)
+	debugBody := bytes.NewBuffer([]byte{})
+	debugReader := io.TeeReader(bodyReader, debugBody)
+
+	req, err := http.NewRequestWithContext(ctx, "POST", url, debugReader)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
-	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("user-agent", s.sdkConfiguration.UserAgent)
 
 	req.Header.Set("Content-Type", reqContentType)
 
@@ -61,6 +65,7 @@ func (s *issueTrigger) Create(ctx context.Context, request operations.CreateIssu
 	if err != nil {
 		return nil, fmt.Errorf("error reading response body: %w", err)
 	}
+	httpRes.Request.Body = io.NopCloser(debugBody)
 	httpRes.Body.Close()
 	httpRes.Body = io.NopCloser(bytes.NewBuffer(rawBody))
 
@@ -75,31 +80,35 @@ func (s *issueTrigger) Create(ctx context.Context, request operations.CreateIssu
 	case httpRes.StatusCode == 200:
 		switch {
 		case utils.MatchContentType(contentType, `application/json`):
-			var out *shared.IssueTrigger
-			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
+			var out shared.IssueTrigger
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
 				return nil, err
 			}
 
-			res.IssueTrigger = out
+			res.IssueTrigger = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
 		}
 	case httpRes.StatusCode == 400:
 		fallthrough
 	case httpRes.StatusCode == 422:
 		switch {
 		case utils.MatchContentType(contentType, `application/json`):
-			var out *shared.APIErrorResponse
-			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
+			var out shared.APIErrorResponse
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
 				return nil, err
 			}
 
-			res.APIErrorResponse = out
+			res.APIErrorResponse = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
 		}
 	}
 
 	return res, nil
 }
 
-// Delete - Delete an Issue Trigger
+// Delete an Issue Trigger
 // Delete an existing issue trigger.
 func (s *issueTrigger) Delete(ctx context.Context, request operations.DeleteIssueTriggerRequest) (*operations.DeleteIssueTriggerResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
@@ -112,8 +121,8 @@ func (s *issueTrigger) Delete(ctx context.Context, request operations.DeleteIssu
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
-	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("user-agent", s.sdkConfiguration.UserAgent)
 
 	client := s.sdkConfiguration.SecurityClient
 
@@ -143,29 +152,33 @@ func (s *issueTrigger) Delete(ctx context.Context, request operations.DeleteIssu
 	case httpRes.StatusCode == 200:
 		switch {
 		case utils.MatchContentType(contentType, `application/json`):
-			var out *shared.DeletedIssueTriggerResponse
-			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
+			var out shared.DeletedIssueTriggerResponse
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
 				return nil, err
 			}
 
-			res.DeletedIssueTriggerResponse = out
+			res.DeletedIssueTriggerResponse = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
 		}
 	case httpRes.StatusCode == 404:
 		switch {
 		case utils.MatchContentType(contentType, `application/json`):
-			var out *shared.APIErrorResponse
-			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
+			var out shared.APIErrorResponse
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
 				return nil, err
 			}
 
-			res.APIErrorResponse = out
+			res.APIErrorResponse = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
 		}
 	}
 
 	return res, nil
 }
 
-// Disable - Disable an Issue Trigger
+// Disable an Issue Trigger
 // Disable an existing issue trigger.
 func (s *issueTrigger) Disable(ctx context.Context, request operations.DisableIssueTriggerRequest) (*operations.DisableIssueTriggerResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
@@ -178,8 +191,8 @@ func (s *issueTrigger) Disable(ctx context.Context, request operations.DisableIs
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
-	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("user-agent", s.sdkConfiguration.UserAgent)
 
 	client := s.sdkConfiguration.SecurityClient
 
@@ -209,29 +222,33 @@ func (s *issueTrigger) Disable(ctx context.Context, request operations.DisableIs
 	case httpRes.StatusCode == 200:
 		switch {
 		case utils.MatchContentType(contentType, `application/json`):
-			var out *shared.IssueTrigger
-			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
+			var out shared.IssueTrigger
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
 				return nil, err
 			}
 
-			res.IssueTrigger = out
+			res.IssueTrigger = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
 		}
 	case httpRes.StatusCode == 404:
 		switch {
 		case utils.MatchContentType(contentType, `application/json`):
-			var out *shared.APIErrorResponse
-			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
+			var out shared.APIErrorResponse
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
 				return nil, err
 			}
 
-			res.APIErrorResponse = out
+			res.APIErrorResponse = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
 		}
 	}
 
 	return res, nil
 }
 
-// Enable - Enable an Issue Trigger
+// Enable an Issue Trigger
 // Enable an existing issue trigger.
 func (s *issueTrigger) Enable(ctx context.Context, request operations.EnableIssueTriggerRequest) (*operations.EnableIssueTriggerResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
@@ -244,8 +261,8 @@ func (s *issueTrigger) Enable(ctx context.Context, request operations.EnableIssu
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
-	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("user-agent", s.sdkConfiguration.UserAgent)
 
 	client := s.sdkConfiguration.SecurityClient
 
@@ -275,29 +292,33 @@ func (s *issueTrigger) Enable(ctx context.Context, request operations.EnableIssu
 	case httpRes.StatusCode == 200:
 		switch {
 		case utils.MatchContentType(contentType, `application/json`):
-			var out *shared.IssueTrigger
-			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
+			var out shared.IssueTrigger
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
 				return nil, err
 			}
 
-			res.IssueTrigger = out
+			res.IssueTrigger = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
 		}
 	case httpRes.StatusCode == 404:
 		switch {
 		case utils.MatchContentType(contentType, `application/json`):
-			var out *shared.APIErrorResponse
-			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
+			var out shared.APIErrorResponse
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
 				return nil, err
 			}
 
-			res.APIErrorResponse = out
+			res.APIErrorResponse = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
 		}
 	}
 
 	return res, nil
 }
 
-// Get - Get an Issue Trigger
+// Get an Issue Trigger
 // Get a single issue trigger details.
 func (s *issueTrigger) Get(ctx context.Context, request operations.GetIssueTriggerRequest) (*operations.GetIssueTriggerResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
@@ -310,8 +331,8 @@ func (s *issueTrigger) Get(ctx context.Context, request operations.GetIssueTrigg
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
-	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("user-agent", s.sdkConfiguration.UserAgent)
 
 	client := s.sdkConfiguration.SecurityClient
 
@@ -341,29 +362,33 @@ func (s *issueTrigger) Get(ctx context.Context, request operations.GetIssueTrigg
 	case httpRes.StatusCode == 200:
 		switch {
 		case utils.MatchContentType(contentType, `application/json`):
-			var out *shared.IssueTrigger
-			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
+			var out shared.IssueTrigger
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
 				return nil, err
 			}
 
-			res.IssueTrigger = out
+			res.IssueTrigger = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
 		}
 	case httpRes.StatusCode == 404:
 		switch {
 		case utils.MatchContentType(contentType, `application/json`):
-			var out *shared.APIErrorResponse
-			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
+			var out shared.APIErrorResponse
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
 				return nil, err
 			}
 
-			res.APIErrorResponse = out
+			res.APIErrorResponse = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
 		}
 	}
 
 	return res, nil
 }
 
-// Update - Update an Issue Trigger
+// Update an Issue Trigger
 // Update the details of an issue trigger.
 func (s *issueTrigger) Update(ctx context.Context, request operations.UpdateIssueTriggerRequest) (*operations.UpdateIssueTriggerResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
@@ -372,7 +397,7 @@ func (s *issueTrigger) Update(ctx context.Context, request operations.UpdateIssu
 		return nil, fmt.Errorf("error generating URL: %w", err)
 	}
 
-	bodyReader, reqContentType, err := utils.SerializeRequestBody(ctx, request, "RequestBody", "json")
+	bodyReader, reqContentType, err := utils.SerializeRequestBody(ctx, request, false, false, "RequestBody", "json", `request:"mediaType=application/json"`)
 	if err != nil {
 		return nil, fmt.Errorf("error serializing request body: %w", err)
 	}
@@ -380,12 +405,15 @@ func (s *issueTrigger) Update(ctx context.Context, request operations.UpdateIssu
 		return nil, fmt.Errorf("request body is required")
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "PUT", url, bodyReader)
+	debugBody := bytes.NewBuffer([]byte{})
+	debugReader := io.TeeReader(bodyReader, debugBody)
+
+	req, err := http.NewRequestWithContext(ctx, "PUT", url, debugReader)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
-	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("user-agent", s.sdkConfiguration.UserAgent)
 
 	req.Header.Set("Content-Type", reqContentType)
 
@@ -403,6 +431,7 @@ func (s *issueTrigger) Update(ctx context.Context, request operations.UpdateIssu
 	if err != nil {
 		return nil, fmt.Errorf("error reading response body: %w", err)
 	}
+	httpRes.Request.Body = io.NopCloser(debugBody)
 	httpRes.Body.Close()
 	httpRes.Body = io.NopCloser(bytes.NewBuffer(rawBody))
 
@@ -417,24 +446,28 @@ func (s *issueTrigger) Update(ctx context.Context, request operations.UpdateIssu
 	case httpRes.StatusCode == 200:
 		switch {
 		case utils.MatchContentType(contentType, `application/json`):
-			var out *shared.IssueTrigger
-			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
+			var out shared.IssueTrigger
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
 				return nil, err
 			}
 
-			res.IssueTrigger = out
+			res.IssueTrigger = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
 		}
 	case httpRes.StatusCode == 400:
 		fallthrough
 	case httpRes.StatusCode == 422:
 		switch {
 		case utils.MatchContentType(contentType, `application/json`):
-			var out *shared.APIErrorResponse
-			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
+			var out shared.APIErrorResponse
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
 				return nil, err
 			}
 
-			res.APIErrorResponse = out
+			res.APIErrorResponse = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
 		}
 	}
 
@@ -447,7 +480,7 @@ func (s *issueTrigger) Upsert(ctx context.Context, request operations.UpsertIssu
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url := strings.TrimSuffix(baseURL, "/") + "/issue-triggers"
 
-	bodyReader, reqContentType, err := utils.SerializeRequestBody(ctx, request, "Request", "json")
+	bodyReader, reqContentType, err := utils.SerializeRequestBody(ctx, request, false, false, "Request", "json", `request:"mediaType=application/json"`)
 	if err != nil {
 		return nil, fmt.Errorf("error serializing request body: %w", err)
 	}
@@ -455,12 +488,15 @@ func (s *issueTrigger) Upsert(ctx context.Context, request operations.UpsertIssu
 		return nil, fmt.Errorf("request body is required")
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "PUT", url, bodyReader)
+	debugBody := bytes.NewBuffer([]byte{})
+	debugReader := io.TeeReader(bodyReader, debugBody)
+
+	req, err := http.NewRequestWithContext(ctx, "PUT", url, debugReader)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
-	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("user-agent", s.sdkConfiguration.UserAgent)
 
 	req.Header.Set("Content-Type", reqContentType)
 
@@ -478,6 +514,7 @@ func (s *issueTrigger) Upsert(ctx context.Context, request operations.UpsertIssu
 	if err != nil {
 		return nil, fmt.Errorf("error reading response body: %w", err)
 	}
+	httpRes.Request.Body = io.NopCloser(debugBody)
 	httpRes.Body.Close()
 	httpRes.Body = io.NopCloser(bytes.NewBuffer(rawBody))
 
@@ -492,24 +529,28 @@ func (s *issueTrigger) Upsert(ctx context.Context, request operations.UpsertIssu
 	case httpRes.StatusCode == 200:
 		switch {
 		case utils.MatchContentType(contentType, `application/json`):
-			var out *shared.IssueTrigger
-			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
+			var out shared.IssueTrigger
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
 				return nil, err
 			}
 
-			res.IssueTrigger = out
+			res.IssueTrigger = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
 		}
 	case httpRes.StatusCode == 400:
 		fallthrough
 	case httpRes.StatusCode == 422:
 		switch {
 		case utils.MatchContentType(contentType, `application/json`):
-			var out *shared.APIErrorResponse
-			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
+			var out shared.APIErrorResponse
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
 				return nil, err
 			}
 
-			res.APIErrorResponse = out
+			res.APIErrorResponse = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
 		}
 	}
 

@@ -39,3 +39,17 @@ type CustomSignature struct {
 	// Type of auth method
 	Type CustomSignatureType `json:"type"`
 }
+
+func (o *CustomSignature) GetConfig() DestinationAuthMethodCustomSignatureConfig {
+	if o == nil {
+		return DestinationAuthMethodCustomSignatureConfig{}
+	}
+	return o.Config
+}
+
+func (o *CustomSignature) GetType() CustomSignatureType {
+	if o == nil {
+		return CustomSignatureType("")
+	}
+	return o.Type
+}

@@ -16,12 +16,71 @@ type CreateSourceRequestBody struct {
 	Name string `json:"name"`
 }
 
+func (o *CreateSourceRequestBody) GetAllowedHTTPMethods() []shared.SourceAllowedHTTPMethod {
+	if o == nil {
+		return nil
+	}
+	return o.AllowedHTTPMethods
+}
+
+func (o *CreateSourceRequestBody) GetCustomResponse() *shared.SourceCustomResponse {
+	if o == nil {
+		return nil
+	}
+	return o.CustomResponse
+}
+
+func (o *CreateSourceRequestBody) GetName() string {
+	if o == nil {
+		return ""
+	}
+	return o.Name
+}
+
 type CreateSourceResponse struct {
 	// Bad Request
 	APIErrorResponse *shared.APIErrorResponse
-	ContentType      string
+	// HTTP response content type for this operation
+	ContentType string
 	// A single source
-	Source      *shared.Source
-	StatusCode  int
+	Source *shared.Source
+	// HTTP response status code for this operation
+	StatusCode int
+	// Raw HTTP response; suitable for custom response parsing
 	RawResponse *http.Response
+}
+
+func (o *CreateSourceResponse) GetAPIErrorResponse() *shared.APIErrorResponse {
+	if o == nil {
+		return nil
+	}
+	return o.APIErrorResponse
+}
+
+func (o *CreateSourceResponse) GetContentType() string {
+	if o == nil {
+		return ""
+	}
+	return o.ContentType
+}
+
+func (o *CreateSourceResponse) GetSource() *shared.Source {
+	if o == nil {
+		return nil
+	}
+	return o.Source
+}
+
+func (o *CreateSourceResponse) GetStatusCode() int {
+	if o == nil {
+		return 0
+	}
+	return o.StatusCode
+}
+
+func (o *CreateSourceResponse) GetRawResponse() *http.Response {
+	if o == nil {
+		return nil
+	}
+	return o.RawResponse
 }

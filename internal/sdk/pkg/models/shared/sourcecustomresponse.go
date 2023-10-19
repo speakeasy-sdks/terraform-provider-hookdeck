@@ -9,3 +9,17 @@ type SourceCustomResponse struct {
 	// Content type of the custom response
 	ContentType SourceCustomResponseContentType `json:"content_type"`
 }
+
+func (o *SourceCustomResponse) GetBody() string {
+	if o == nil {
+		return ""
+	}
+	return o.Body
+}
+
+func (o *SourceCustomResponse) GetContentType() SourceCustomResponseContentType {
+	if o == nil {
+		return SourceCustomResponseContentType("")
+	}
+	return o.ContentType
+}

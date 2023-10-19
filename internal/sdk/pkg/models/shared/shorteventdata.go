@@ -3,9 +3,8 @@
 package shared
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
+	"hashicups/internal/sdk/pkg/utils"
 )
 
 type ShortEventDataBody2 struct {
@@ -55,30 +54,23 @@ func CreateShortEventDataBodyArrayOfany(arrayOfany []interface{}) ShortEventData
 }
 
 func (u *ShortEventDataBody) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
-
-	str := new(string)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&str); err == nil {
-		u.Str = str
-		u.Type = ShortEventDataBodyTypeStr
-		return nil
-	}
 
 	shortEventDataBody2 := new(ShortEventDataBody2)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&shortEventDataBody2); err == nil {
+	if err := utils.UnmarshalJSON(data, &shortEventDataBody2, "", true, true); err == nil {
 		u.ShortEventDataBody2 = shortEventDataBody2
 		u.Type = ShortEventDataBodyTypeShortEventDataBody2
 		return nil
 	}
 
+	str := new(string)
+	if err := utils.UnmarshalJSON(data, &str, "", true, true); err == nil {
+		u.Str = str
+		u.Type = ShortEventDataBodyTypeStr
+		return nil
+	}
+
 	arrayOfany := []interface{}{}
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&arrayOfany); err == nil {
+	if err := utils.UnmarshalJSON(data, &arrayOfany, "", true, true); err == nil {
 		u.ArrayOfany = arrayOfany
 		u.Type = ShortEventDataBodyTypeArrayOfany
 		return nil
@@ -89,18 +81,18 @@ func (u *ShortEventDataBody) UnmarshalJSON(data []byte) error {
 
 func (u ShortEventDataBody) MarshalJSON() ([]byte, error) {
 	if u.Str != nil {
-		return json.Marshal(u.Str)
+		return utils.MarshalJSON(u.Str, "", true)
 	}
 
 	if u.ShortEventDataBody2 != nil {
-		return json.Marshal(u.ShortEventDataBody2)
+		return utils.MarshalJSON(u.ShortEventDataBody2, "", true)
 	}
 
 	if u.ArrayOfany != nil {
-		return json.Marshal(u.ArrayOfany)
+		return utils.MarshalJSON(u.ArrayOfany, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 type ShortEventDataHeadersType string
@@ -136,21 +128,16 @@ func CreateShortEventDataHeadersMapOfstr(mapOfstr map[string]string) ShortEventD
 }
 
 func (u *ShortEventDataHeaders) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
 	str := new(string)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&str); err == nil {
+	if err := utils.UnmarshalJSON(data, &str, "", true, true); err == nil {
 		u.Str = str
 		u.Type = ShortEventDataHeadersTypeStr
 		return nil
 	}
 
 	mapOfstr := map[string]string{}
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&mapOfstr); err == nil {
+	if err := utils.UnmarshalJSON(data, &mapOfstr, "", true, true); err == nil {
 		u.MapOfstr = mapOfstr
 		u.Type = ShortEventDataHeadersTypeMapOfstr
 		return nil
@@ -161,14 +148,14 @@ func (u *ShortEventDataHeaders) UnmarshalJSON(data []byte) error {
 
 func (u ShortEventDataHeaders) MarshalJSON() ([]byte, error) {
 	if u.Str != nil {
-		return json.Marshal(u.Str)
+		return utils.MarshalJSON(u.Str, "", true)
 	}
 
 	if u.MapOfstr != nil {
-		return json.Marshal(u.MapOfstr)
+		return utils.MarshalJSON(u.MapOfstr, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 type ShortEventDataParsedQuery2 struct {
@@ -207,23 +194,18 @@ func CreateShortEventDataParsedQueryShortEventDataParsedQuery2(shortEventDataPar
 }
 
 func (u *ShortEventDataParsedQuery) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
-	str := new(string)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&str); err == nil {
-		u.Str = str
-		u.Type = ShortEventDataParsedQueryTypeStr
+	shortEventDataParsedQuery2 := new(ShortEventDataParsedQuery2)
+	if err := utils.UnmarshalJSON(data, &shortEventDataParsedQuery2, "", true, true); err == nil {
+		u.ShortEventDataParsedQuery2 = shortEventDataParsedQuery2
+		u.Type = ShortEventDataParsedQueryTypeShortEventDataParsedQuery2
 		return nil
 	}
 
-	shortEventDataParsedQuery2 := new(ShortEventDataParsedQuery2)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&shortEventDataParsedQuery2); err == nil {
-		u.ShortEventDataParsedQuery2 = shortEventDataParsedQuery2
-		u.Type = ShortEventDataParsedQueryTypeShortEventDataParsedQuery2
+	str := new(string)
+	if err := utils.UnmarshalJSON(data, &str, "", true, true); err == nil {
+		u.Str = str
+		u.Type = ShortEventDataParsedQueryTypeStr
 		return nil
 	}
 
@@ -232,14 +214,14 @@ func (u *ShortEventDataParsedQuery) UnmarshalJSON(data []byte) error {
 
 func (u ShortEventDataParsedQuery) MarshalJSON() ([]byte, error) {
 	if u.Str != nil {
-		return json.Marshal(u.Str)
+		return utils.MarshalJSON(u.Str, "", true)
 	}
 
 	if u.ShortEventDataParsedQuery2 != nil {
-		return json.Marshal(u.ShortEventDataParsedQuery2)
+		return utils.MarshalJSON(u.ShortEventDataParsedQuery2, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 type ShortEventData struct {
@@ -249,4 +231,46 @@ type ShortEventData struct {
 	ParsedQuery    *ShortEventDataParsedQuery `json:"parsed_query,omitempty"`
 	Path           string                     `json:"path"`
 	Query          *string                    `json:"query,omitempty"`
+}
+
+func (o *ShortEventData) GetBody() *ShortEventDataBody {
+	if o == nil {
+		return nil
+	}
+	return o.Body
+}
+
+func (o *ShortEventData) GetHeaders() *ShortEventDataHeaders {
+	if o == nil {
+		return nil
+	}
+	return o.Headers
+}
+
+func (o *ShortEventData) GetIsLargePayload() *bool {
+	if o == nil {
+		return nil
+	}
+	return o.IsLargePayload
+}
+
+func (o *ShortEventData) GetParsedQuery() *ShortEventDataParsedQuery {
+	if o == nil {
+		return nil
+	}
+	return o.ParsedQuery
+}
+
+func (o *ShortEventData) GetPath() string {
+	if o == nil {
+		return ""
+	}
+	return o.Path
+}
+
+func (o *ShortEventData) GetQuery() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Query
 }

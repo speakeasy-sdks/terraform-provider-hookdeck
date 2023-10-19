@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"hashicups/internal/sdk/pkg/models/operations"
+	"hashicups/internal/sdk/pkg/models/sdkerrors"
 	"hashicups/internal/sdk/pkg/models/shared"
 	"hashicups/internal/sdk/pkg/utils"
 	"io"
@@ -25,7 +26,7 @@ func newBookmarks(sdkConfig sdkConfiguration) *bookmarks {
 	}
 }
 
-// Get - Get Bookmarks
+// Get Bookmarks
 // Retrieve a list of bookmarks.
 func (s *bookmarks) Get(ctx context.Context, request operations.GetBookmarksRequest) (*operations.GetBookmarksResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
@@ -35,8 +36,8 @@ func (s *bookmarks) Get(ctx context.Context, request operations.GetBookmarksRequ
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
-	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("user-agent", s.sdkConfiguration.UserAgent)
 
 	if err := utils.PopulateQueryParams(ctx, req, request, nil); err != nil {
 		return nil, fmt.Errorf("error populating query params: %w", err)
@@ -70,24 +71,28 @@ func (s *bookmarks) Get(ctx context.Context, request operations.GetBookmarksRequ
 	case httpRes.StatusCode == 200:
 		switch {
 		case utils.MatchContentType(contentType, `application/json`):
-			var out *shared.BookmarkPaginatedResult
-			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
+			var out shared.BookmarkPaginatedResult
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
 				return nil, err
 			}
 
-			res.BookmarkPaginatedResult = out
+			res.BookmarkPaginatedResult = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
 		}
 	case httpRes.StatusCode == 400:
 		fallthrough
 	case httpRes.StatusCode == 422:
 		switch {
 		case utils.MatchContentType(contentType, `application/json`):
-			var out *shared.APIErrorResponse
-			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
+			var out shared.APIErrorResponse
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
 				return nil, err
 			}
 
-			res.APIErrorResponse = out
+			res.APIErrorResponse = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
 		}
 	}
 

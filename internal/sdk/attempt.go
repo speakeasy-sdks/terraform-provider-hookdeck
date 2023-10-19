@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"hashicups/internal/sdk/pkg/models/operations"
+	"hashicups/internal/sdk/pkg/models/sdkerrors"
 	"hashicups/internal/sdk/pkg/models/shared"
 	"hashicups/internal/sdk/pkg/utils"
 	"io"
@@ -23,7 +24,7 @@ func newAttempt(sdkConfig sdkConfiguration) *attempt {
 	}
 }
 
-// Get - Get a Single Attempt
+// Get a Single Attempt
 // Retrive a single attempt details.
 func (s *attempt) Get(ctx context.Context, request operations.GetAttemptRequest) (*operations.GetAttemptResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
@@ -36,8 +37,8 @@ func (s *attempt) Get(ctx context.Context, request operations.GetAttemptRequest)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
-	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("user-agent", s.sdkConfiguration.UserAgent)
 
 	client := s.sdkConfiguration.SecurityClient
 
@@ -67,22 +68,26 @@ func (s *attempt) Get(ctx context.Context, request operations.GetAttemptRequest)
 	case httpRes.StatusCode == 200:
 		switch {
 		case utils.MatchContentType(contentType, `application/json`):
-			var out *shared.EventAttempt
-			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
+			var out shared.EventAttempt
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
 				return nil, err
 			}
 
-			res.EventAttempt = out
+			res.EventAttempt = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
 		}
 	case httpRes.StatusCode == 404:
 		switch {
 		case utils.MatchContentType(contentType, `application/json`):
-			var out *shared.APIErrorResponse
-			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
+			var out shared.APIErrorResponse
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
 				return nil, err
 			}
 
-			res.APIErrorResponse = out
+			res.APIErrorResponse = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
 		}
 	}
 

@@ -8,3 +8,24 @@ type DeliveryIssueAggregationKeys struct {
 	ResponseStatus []float32          `json:"response_status"`
 	WebhookID      []string           `json:"webhook_id"`
 }
+
+func (o *DeliveryIssueAggregationKeys) GetErrorCode() []AttemptErrorCode {
+	if o == nil {
+		return []AttemptErrorCode{}
+	}
+	return o.ErrorCode
+}
+
+func (o *DeliveryIssueAggregationKeys) GetResponseStatus() []float32 {
+	if o == nil {
+		return []float32{}
+	}
+	return o.ResponseStatus
+}
+
+func (o *DeliveryIssueAggregationKeys) GetWebhookID() []string {
+	if o == nil {
+		return []string{}
+	}
+	return o.WebhookID
+}

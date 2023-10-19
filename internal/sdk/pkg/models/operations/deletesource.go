@@ -11,18 +11,70 @@ type DeleteSourceRequest struct {
 	ID string `pathParam:"style=simple,explode=false,name=id"`
 }
 
+func (o *DeleteSourceRequest) GetID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ID
+}
+
 // DeleteSource200ApplicationJSON - A single source
 type DeleteSource200ApplicationJSON struct {
 	// ID of the source
 	ID string `json:"id"`
 }
 
+func (o *DeleteSource200ApplicationJSON) GetID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ID
+}
+
 type DeleteSourceResponse struct {
 	// Not Found
 	APIErrorResponse *shared.APIErrorResponse
-	ContentType      string
-	StatusCode       int
-	RawResponse      *http.Response
+	// HTTP response content type for this operation
+	ContentType string
+	// HTTP response status code for this operation
+	StatusCode int
+	// Raw HTTP response; suitable for custom response parsing
+	RawResponse *http.Response
 	// A single source
 	DeleteSource200ApplicationJSONObject *DeleteSource200ApplicationJSON
+}
+
+func (o *DeleteSourceResponse) GetAPIErrorResponse() *shared.APIErrorResponse {
+	if o == nil {
+		return nil
+	}
+	return o.APIErrorResponse
+}
+
+func (o *DeleteSourceResponse) GetContentType() string {
+	if o == nil {
+		return ""
+	}
+	return o.ContentType
+}
+
+func (o *DeleteSourceResponse) GetStatusCode() int {
+	if o == nil {
+		return 0
+	}
+	return o.StatusCode
+}
+
+func (o *DeleteSourceResponse) GetRawResponse() *http.Response {
+	if o == nil {
+		return nil
+	}
+	return o.RawResponse
+}
+
+func (o *DeleteSourceResponse) GetDeleteSource200ApplicationJSONObject() *DeleteSource200ApplicationJSON {
+	if o == nil {
+		return nil
+	}
+	return o.DeleteSource200ApplicationJSONObject
 }

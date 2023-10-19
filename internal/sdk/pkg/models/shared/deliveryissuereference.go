@@ -7,3 +7,17 @@ type DeliveryIssueReference struct {
 	AttemptID string `json:"attempt_id"`
 	EventID   string `json:"event_id"`
 }
+
+func (o *DeliveryIssueReference) GetAttemptID() string {
+	if o == nil {
+		return ""
+	}
+	return o.AttemptID
+}
+
+func (o *DeliveryIssueReference) GetEventID() string {
+	if o == nil {
+		return ""
+	}
+	return o.EventID
+}
