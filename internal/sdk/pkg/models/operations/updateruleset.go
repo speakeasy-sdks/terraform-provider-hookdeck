@@ -15,17 +15,90 @@ type UpdateRulesetRequestBody struct {
 	Rules []shared.Rule `json:"rules,omitempty"`
 }
 
+func (o *UpdateRulesetRequestBody) GetIsTeamDefault() *bool {
+	if o == nil {
+		return nil
+	}
+	return o.IsTeamDefault
+}
+
+func (o *UpdateRulesetRequestBody) GetName() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Name
+}
+
+func (o *UpdateRulesetRequestBody) GetRules() []shared.Rule {
+	if o == nil {
+		return nil
+	}
+	return o.Rules
+}
+
 type UpdateRulesetRequest struct {
 	RequestBody UpdateRulesetRequestBody `request:"mediaType=application/json"`
 	ID          string                   `pathParam:"style=simple,explode=false,name=id"`
 }
 
+func (o *UpdateRulesetRequest) GetRequestBody() UpdateRulesetRequestBody {
+	if o == nil {
+		return UpdateRulesetRequestBody{}
+	}
+	return o.RequestBody
+}
+
+func (o *UpdateRulesetRequest) GetID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ID
+}
+
 type UpdateRulesetResponse struct {
 	// Bad Request
 	APIErrorResponse *shared.APIErrorResponse
-	ContentType      string
+	// HTTP response content type for this operation
+	ContentType string
 	// A single ruleset
-	Ruleset     *shared.Ruleset
-	StatusCode  int
+	Ruleset *shared.Ruleset
+	// HTTP response status code for this operation
+	StatusCode int
+	// Raw HTTP response; suitable for custom response parsing
 	RawResponse *http.Response
+}
+
+func (o *UpdateRulesetResponse) GetAPIErrorResponse() *shared.APIErrorResponse {
+	if o == nil {
+		return nil
+	}
+	return o.APIErrorResponse
+}
+
+func (o *UpdateRulesetResponse) GetContentType() string {
+	if o == nil {
+		return ""
+	}
+	return o.ContentType
+}
+
+func (o *UpdateRulesetResponse) GetRuleset() *shared.Ruleset {
+	if o == nil {
+		return nil
+	}
+	return o.Ruleset
+}
+
+func (o *UpdateRulesetResponse) GetStatusCode() int {
+	if o == nil {
+		return 0
+	}
+	return o.StatusCode
+}
+
+func (o *UpdateRulesetResponse) GetRawResponse() *http.Response {
+	if o == nil {
+		return nil
+	}
+	return o.RawResponse
 }

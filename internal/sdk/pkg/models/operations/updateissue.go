@@ -48,17 +48,76 @@ type UpdateIssueRequestBody struct {
 	Status UpdateIssueRequestBodyStatus `json:"status"`
 }
 
+func (o *UpdateIssueRequestBody) GetStatus() UpdateIssueRequestBodyStatus {
+	if o == nil {
+		return UpdateIssueRequestBodyStatus("")
+	}
+	return o.Status
+}
+
 type UpdateIssueRequest struct {
 	RequestBody UpdateIssueRequestBody `request:"mediaType=application/json"`
 	ID          string                 `pathParam:"style=simple,explode=false,name=id"`
 }
 
+func (o *UpdateIssueRequest) GetRequestBody() UpdateIssueRequestBody {
+	if o == nil {
+		return UpdateIssueRequestBody{}
+	}
+	return o.RequestBody
+}
+
+func (o *UpdateIssueRequest) GetID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ID
+}
+
 type UpdateIssueResponse struct {
 	// Bad Request
 	APIErrorResponse *shared.APIErrorResponse
-	ContentType      string
+	// HTTP response content type for this operation
+	ContentType string
 	// Updated issue
-	Issue       interface{}
-	StatusCode  int
+	Issue *shared.Issue
+	// HTTP response status code for this operation
+	StatusCode int
+	// Raw HTTP response; suitable for custom response parsing
 	RawResponse *http.Response
+}
+
+func (o *UpdateIssueResponse) GetAPIErrorResponse() *shared.APIErrorResponse {
+	if o == nil {
+		return nil
+	}
+	return o.APIErrorResponse
+}
+
+func (o *UpdateIssueResponse) GetContentType() string {
+	if o == nil {
+		return ""
+	}
+	return o.ContentType
+}
+
+func (o *UpdateIssueResponse) GetIssue() *shared.Issue {
+	if o == nil {
+		return nil
+	}
+	return o.Issue
+}
+
+func (o *UpdateIssueResponse) GetStatusCode() int {
+	if o == nil {
+		return 0
+	}
+	return o.StatusCode
+}
+
+func (o *UpdateIssueResponse) GetRawResponse() *http.Response {
+	if o == nil {
+		return nil
+	}
+	return o.RawResponse
 }

@@ -38,3 +38,17 @@ type TransformReference struct {
 	// A transformation rule must be of type `transformation`
 	Type TransformReferenceType `json:"type"`
 }
+
+func (o *TransformReference) GetTransformationID() string {
+	if o == nil {
+		return ""
+	}
+	return o.TransformationID
+}
+
+func (o *TransformReference) GetType() TransformReferenceType {
+	if o == nil {
+		return TransformReferenceType("")
+	}
+	return o.Type
+}

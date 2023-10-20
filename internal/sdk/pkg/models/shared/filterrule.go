@@ -44,3 +44,38 @@ type FilterRule struct {
 	// A filter rule must be of type `filter`
 	Type FilterRuleType `json:"type"`
 }
+
+func (o *FilterRule) GetBody() *ConnectionFilterProperty {
+	if o == nil {
+		return nil
+	}
+	return o.Body
+}
+
+func (o *FilterRule) GetHeaders() *ConnectionFilterProperty {
+	if o == nil {
+		return nil
+	}
+	return o.Headers
+}
+
+func (o *FilterRule) GetPath() *ConnectionFilterProperty {
+	if o == nil {
+		return nil
+	}
+	return o.Path
+}
+
+func (o *FilterRule) GetQuery() *ConnectionFilterProperty {
+	if o == nil {
+		return nil
+	}
+	return o.Query
+}
+
+func (o *FilterRule) GetType() FilterRuleType {
+	if o == nil {
+		return FilterRuleType("")
+	}
+	return o.Type
+}

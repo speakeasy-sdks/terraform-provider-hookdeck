@@ -3,11 +3,11 @@
 package operations
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"hashicups/internal/sdk/pkg/models/shared"
+	"hashicups/internal/sdk/pkg/utils"
 	"net/http"
 )
 
@@ -99,21 +99,16 @@ func CreateGetAttemptsDirArrayOfgetAttemptsDir2(arrayOfgetAttemptsDir2 []GetAtte
 }
 
 func (u *GetAttemptsDir) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
 	getAttemptsDir1 := new(GetAttemptsDir1)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&getAttemptsDir1); err == nil {
+	if err := utils.UnmarshalJSON(data, &getAttemptsDir1, "", true, true); err == nil {
 		u.GetAttemptsDir1 = getAttemptsDir1
 		u.Type = GetAttemptsDirTypeGetAttemptsDir1
 		return nil
 	}
 
 	arrayOfgetAttemptsDir2 := []GetAttemptsDir2{}
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&arrayOfgetAttemptsDir2); err == nil {
+	if err := utils.UnmarshalJSON(data, &arrayOfgetAttemptsDir2, "", true, true); err == nil {
 		u.ArrayOfgetAttemptsDir2 = arrayOfgetAttemptsDir2
 		u.Type = GetAttemptsDirTypeArrayOfgetAttemptsDir2
 		return nil
@@ -124,14 +119,14 @@ func (u *GetAttemptsDir) UnmarshalJSON(data []byte) error {
 
 func (u GetAttemptsDir) MarshalJSON() ([]byte, error) {
 	if u.GetAttemptsDir1 != nil {
-		return json.Marshal(u.GetAttemptsDir1)
+		return utils.MarshalJSON(u.GetAttemptsDir1, "", true)
 	}
 
 	if u.ArrayOfgetAttemptsDir2 != nil {
-		return json.Marshal(u.ArrayOfgetAttemptsDir2)
+		return utils.MarshalJSON(u.ArrayOfgetAttemptsDir2, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 type GetAttemptsEventIDType string
@@ -167,21 +162,16 @@ func CreateGetAttemptsEventIDArrayOfstr(arrayOfstr []string) GetAttemptsEventID 
 }
 
 func (u *GetAttemptsEventID) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
 	str := new(string)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&str); err == nil {
+	if err := utils.UnmarshalJSON(data, &str, "", true, true); err == nil {
 		u.Str = str
 		u.Type = GetAttemptsEventIDTypeStr
 		return nil
 	}
 
 	arrayOfstr := []string{}
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&arrayOfstr); err == nil {
+	if err := utils.UnmarshalJSON(data, &arrayOfstr, "", true, true); err == nil {
 		u.ArrayOfstr = arrayOfstr
 		u.Type = GetAttemptsEventIDTypeArrayOfstr
 		return nil
@@ -192,14 +182,14 @@ func (u *GetAttemptsEventID) UnmarshalJSON(data []byte) error {
 
 func (u GetAttemptsEventID) MarshalJSON() ([]byte, error) {
 	if u.Str != nil {
-		return json.Marshal(u.Str)
+		return utils.MarshalJSON(u.Str, "", true)
 	}
 
 	if u.ArrayOfstr != nil {
-		return json.Marshal(u.ArrayOfstr)
+		return utils.MarshalJSON(u.ArrayOfstr, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 type GetAttemptsOrderBy2 string
@@ -284,21 +274,16 @@ func CreateGetAttemptsOrderByArrayOfgetAttemptsOrderBy2(arrayOfgetAttemptsOrderB
 }
 
 func (u *GetAttemptsOrderBy) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
 	getAttemptsOrderBy1 := new(GetAttemptsOrderBy1)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&getAttemptsOrderBy1); err == nil {
+	if err := utils.UnmarshalJSON(data, &getAttemptsOrderBy1, "", true, true); err == nil {
 		u.GetAttemptsOrderBy1 = getAttemptsOrderBy1
 		u.Type = GetAttemptsOrderByTypeGetAttemptsOrderBy1
 		return nil
 	}
 
 	arrayOfgetAttemptsOrderBy2 := []GetAttemptsOrderBy2{}
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&arrayOfgetAttemptsOrderBy2); err == nil {
+	if err := utils.UnmarshalJSON(data, &arrayOfgetAttemptsOrderBy2, "", true, true); err == nil {
 		u.ArrayOfgetAttemptsOrderBy2 = arrayOfgetAttemptsOrderBy2
 		u.Type = GetAttemptsOrderByTypeArrayOfgetAttemptsOrderBy2
 		return nil
@@ -309,14 +294,14 @@ func (u *GetAttemptsOrderBy) UnmarshalJSON(data []byte) error {
 
 func (u GetAttemptsOrderBy) MarshalJSON() ([]byte, error) {
 	if u.GetAttemptsOrderBy1 != nil {
-		return json.Marshal(u.GetAttemptsOrderBy1)
+		return utils.MarshalJSON(u.GetAttemptsOrderBy1, "", true)
 	}
 
 	if u.ArrayOfgetAttemptsOrderBy2 != nil {
-		return json.Marshal(u.ArrayOfgetAttemptsOrderBy2)
+		return utils.MarshalJSON(u.ArrayOfgetAttemptsOrderBy2, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 type GetAttemptsRequest struct {
@@ -328,12 +313,92 @@ type GetAttemptsRequest struct {
 	Prev    *string             `queryParam:"style=form,explode=true,name=prev"`
 }
 
+func (o *GetAttemptsRequest) GetDir() *GetAttemptsDir {
+	if o == nil {
+		return nil
+	}
+	return o.Dir
+}
+
+func (o *GetAttemptsRequest) GetEventID() *GetAttemptsEventID {
+	if o == nil {
+		return nil
+	}
+	return o.EventID
+}
+
+func (o *GetAttemptsRequest) GetLimit() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.Limit
+}
+
+func (o *GetAttemptsRequest) GetNext() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Next
+}
+
+func (o *GetAttemptsRequest) GetOrderBy() *GetAttemptsOrderBy {
+	if o == nil {
+		return nil
+	}
+	return o.OrderBy
+}
+
+func (o *GetAttemptsRequest) GetPrev() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Prev
+}
+
 type GetAttemptsResponse struct {
 	// Bad Request
 	APIErrorResponse *shared.APIErrorResponse
-	ContentType      string
+	// HTTP response content type for this operation
+	ContentType string
 	// List of attempts
 	EventAttemptPaginatedResult *shared.EventAttemptPaginatedResult
-	StatusCode                  int
-	RawResponse                 *http.Response
+	// HTTP response status code for this operation
+	StatusCode int
+	// Raw HTTP response; suitable for custom response parsing
+	RawResponse *http.Response
+}
+
+func (o *GetAttemptsResponse) GetAPIErrorResponse() *shared.APIErrorResponse {
+	if o == nil {
+		return nil
+	}
+	return o.APIErrorResponse
+}
+
+func (o *GetAttemptsResponse) GetContentType() string {
+	if o == nil {
+		return ""
+	}
+	return o.ContentType
+}
+
+func (o *GetAttemptsResponse) GetEventAttemptPaginatedResult() *shared.EventAttemptPaginatedResult {
+	if o == nil {
+		return nil
+	}
+	return o.EventAttemptPaginatedResult
+}
+
+func (o *GetAttemptsResponse) GetStatusCode() int {
+	if o == nil {
+		return 0
+	}
+	return o.StatusCode
+}
+
+func (o *GetAttemptsResponse) GetRawResponse() *http.Response {
+	if o == nil {
+		return nil
+	}
+	return o.RawResponse
 }

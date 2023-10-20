@@ -39,3 +39,17 @@ type BasicAuth struct {
 	// Type of auth method
 	Type BasicAuthType `json:"type"`
 }
+
+func (o *BasicAuth) GetConfig() *DestinationAuthMethodBasicAuthConfig {
+	if o == nil {
+		return nil
+	}
+	return o.Config
+}
+
+func (o *BasicAuth) GetType() BasicAuthType {
+	if o == nil {
+		return BasicAuthType("")
+	}
+	return o.Type
+}

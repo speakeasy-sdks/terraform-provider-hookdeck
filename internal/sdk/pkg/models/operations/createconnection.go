@@ -43,7 +43,7 @@ func (e *CreateConnectionRequestBodyDestinationRateLimitPeriod) UnmarshalJSON(da
 // CreateConnectionRequestBodyDestination - Destination input object
 type CreateConnectionRequestBodyDestination struct {
 	// Config for the destination's auth method
-	AuthMethod interface{} `json:"auth_method,omitempty"`
+	AuthMethod *shared.DestinationAuthMethodConfig `json:"auth_method,omitempty"`
 	// Path for the CLI destination
 	CliPath *string `json:"cli_path,omitempty"`
 	// HTTP method used on requests sent to the destination, overrides the method used on requests sent to the source.
@@ -52,11 +52,67 @@ type CreateConnectionRequestBodyDestination struct {
 	Name                   string `json:"name"`
 	PathForwardingDisabled *bool  `json:"path_forwarding_disabled,omitempty"`
 	// Limit event attempts to receive per period
-	RateLimit interface{} `json:"rate_limit,omitempty"`
+	RateLimit *int64 `json:"rate_limit,omitempty"`
 	// Period to rate limit attempts
 	RateLimitPeriod *CreateConnectionRequestBodyDestinationRateLimitPeriod `json:"rate_limit_period,omitempty"`
 	// Endpoint of the destination
 	URL *string `json:"url,omitempty"`
+}
+
+func (o *CreateConnectionRequestBodyDestination) GetAuthMethod() *shared.DestinationAuthMethodConfig {
+	if o == nil {
+		return nil
+	}
+	return o.AuthMethod
+}
+
+func (o *CreateConnectionRequestBodyDestination) GetCliPath() *string {
+	if o == nil {
+		return nil
+	}
+	return o.CliPath
+}
+
+func (o *CreateConnectionRequestBodyDestination) GetHTTPMethod() *shared.DestinationHTTPMethod {
+	if o == nil {
+		return nil
+	}
+	return o.HTTPMethod
+}
+
+func (o *CreateConnectionRequestBodyDestination) GetName() string {
+	if o == nil {
+		return ""
+	}
+	return o.Name
+}
+
+func (o *CreateConnectionRequestBodyDestination) GetPathForwardingDisabled() *bool {
+	if o == nil {
+		return nil
+	}
+	return o.PathForwardingDisabled
+}
+
+func (o *CreateConnectionRequestBodyDestination) GetRateLimit() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.RateLimit
+}
+
+func (o *CreateConnectionRequestBodyDestination) GetRateLimitPeriod() *CreateConnectionRequestBodyDestinationRateLimitPeriod {
+	if o == nil {
+		return nil
+	}
+	return o.RateLimitPeriod
+}
+
+func (o *CreateConnectionRequestBodyDestination) GetURL() *string {
+	if o == nil {
+		return nil
+	}
+	return o.URL
 }
 
 // CreateConnectionRequestBodyRuleset - Ruleset input object
@@ -68,6 +124,27 @@ type CreateConnectionRequestBodyRuleset struct {
 	Rules []shared.Rule `json:"rules,omitempty"`
 }
 
+func (o *CreateConnectionRequestBodyRuleset) GetIsTeamDefault() *bool {
+	if o == nil {
+		return nil
+	}
+	return o.IsTeamDefault
+}
+
+func (o *CreateConnectionRequestBodyRuleset) GetName() string {
+	if o == nil {
+		return ""
+	}
+	return o.Name
+}
+
+func (o *CreateConnectionRequestBodyRuleset) GetRules() []shared.Rule {
+	if o == nil {
+		return nil
+	}
+	return o.Rules
+}
+
 // CreateConnectionRequestBodySource - Source input object
 type CreateConnectionRequestBodySource struct {
 	// List of allowed HTTP methods. Defaults to PUT, POST, PATCH, DELETE.
@@ -76,6 +153,27 @@ type CreateConnectionRequestBodySource struct {
 	CustomResponse *shared.SourceCustomResponse `json:"custom_response,omitempty"`
 	// A unique name for the source
 	Name string `json:"name"`
+}
+
+func (o *CreateConnectionRequestBodySource) GetAllowedHTTPMethods() []shared.SourceAllowedHTTPMethod {
+	if o == nil {
+		return nil
+	}
+	return o.AllowedHTTPMethods
+}
+
+func (o *CreateConnectionRequestBodySource) GetCustomResponse() *shared.SourceCustomResponse {
+	if o == nil {
+		return nil
+	}
+	return o.CustomResponse
+}
+
+func (o *CreateConnectionRequestBodySource) GetName() string {
+	if o == nil {
+		return ""
+	}
+	return o.Name
 }
 
 type CreateConnectionRequestBody struct {
@@ -97,12 +195,106 @@ type CreateConnectionRequestBody struct {
 	SourceID *string `json:"source_id,omitempty"`
 }
 
+func (o *CreateConnectionRequestBody) GetDestination() *CreateConnectionRequestBodyDestination {
+	if o == nil {
+		return nil
+	}
+	return o.Destination
+}
+
+func (o *CreateConnectionRequestBody) GetDestinationID() *string {
+	if o == nil {
+		return nil
+	}
+	return o.DestinationID
+}
+
+func (o *CreateConnectionRequestBody) GetName() string {
+	if o == nil {
+		return ""
+	}
+	return o.Name
+}
+
+func (o *CreateConnectionRequestBody) GetRules() []shared.Rule {
+	if o == nil {
+		return nil
+	}
+	return o.Rules
+}
+
+func (o *CreateConnectionRequestBody) GetRuleset() *CreateConnectionRequestBodyRuleset {
+	if o == nil {
+		return nil
+	}
+	return o.Ruleset
+}
+
+func (o *CreateConnectionRequestBody) GetRulesetID() *string {
+	if o == nil {
+		return nil
+	}
+	return o.RulesetID
+}
+
+func (o *CreateConnectionRequestBody) GetSource() *CreateConnectionRequestBodySource {
+	if o == nil {
+		return nil
+	}
+	return o.Source
+}
+
+func (o *CreateConnectionRequestBody) GetSourceID() *string {
+	if o == nil {
+		return nil
+	}
+	return o.SourceID
+}
+
 type CreateConnectionResponse struct {
 	// Bad Request
 	APIErrorResponse *shared.APIErrorResponse
 	// A single connection
-	Connection  *shared.Connection
+	Connection *shared.Connection
+	// HTTP response content type for this operation
 	ContentType string
-	StatusCode  int
+	// HTTP response status code for this operation
+	StatusCode int
+	// Raw HTTP response; suitable for custom response parsing
 	RawResponse *http.Response
+}
+
+func (o *CreateConnectionResponse) GetAPIErrorResponse() *shared.APIErrorResponse {
+	if o == nil {
+		return nil
+	}
+	return o.APIErrorResponse
+}
+
+func (o *CreateConnectionResponse) GetConnection() *shared.Connection {
+	if o == nil {
+		return nil
+	}
+	return o.Connection
+}
+
+func (o *CreateConnectionResponse) GetContentType() string {
+	if o == nil {
+		return ""
+	}
+	return o.ContentType
+}
+
+func (o *CreateConnectionResponse) GetStatusCode() int {
+	if o == nil {
+		return 0
+	}
+	return o.StatusCode
+}
+
+func (o *CreateConnectionResponse) GetRawResponse() *http.Response {
+	if o == nil {
+		return nil
+	}
+	return o.RawResponse
 }

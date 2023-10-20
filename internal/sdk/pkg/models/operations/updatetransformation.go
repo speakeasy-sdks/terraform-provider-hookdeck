@@ -3,17 +3,103 @@
 package operations
 
 import (
+	"errors"
 	"hashicups/internal/sdk/pkg/models/shared"
+	"hashicups/internal/sdk/pkg/utils"
 	"net/http"
 )
+
+type UpdateTransformationRequestBodyEnvType string
+
+const (
+	UpdateTransformationRequestBodyEnvTypeStr     UpdateTransformationRequestBodyEnvType = "str"
+	UpdateTransformationRequestBodyEnvTypeFloat32 UpdateTransformationRequestBodyEnvType = "float32"
+)
+
+type UpdateTransformationRequestBodyEnv struct {
+	Str     *string
+	Float32 *float32
+
+	Type UpdateTransformationRequestBodyEnvType
+}
+
+func CreateUpdateTransformationRequestBodyEnvStr(str string) UpdateTransformationRequestBodyEnv {
+	typ := UpdateTransformationRequestBodyEnvTypeStr
+
+	return UpdateTransformationRequestBodyEnv{
+		Str:  &str,
+		Type: typ,
+	}
+}
+
+func CreateUpdateTransformationRequestBodyEnvFloat32(float32T float32) UpdateTransformationRequestBodyEnv {
+	typ := UpdateTransformationRequestBodyEnvTypeFloat32
+
+	return UpdateTransformationRequestBodyEnv{
+		Float32: &float32T,
+		Type:    typ,
+	}
+}
+
+func (u *UpdateTransformationRequestBodyEnv) UnmarshalJSON(data []byte) error {
+
+	str := new(string)
+	if err := utils.UnmarshalJSON(data, &str, "", true, true); err == nil {
+		u.Str = str
+		u.Type = UpdateTransformationRequestBodyEnvTypeStr
+		return nil
+	}
+
+	float32Var := new(float32)
+	if err := utils.UnmarshalJSON(data, &float32Var, "", true, true); err == nil {
+		u.Float32 = float32Var
+		u.Type = UpdateTransformationRequestBodyEnvTypeFloat32
+		return nil
+	}
+
+	return errors.New("could not unmarshal into supported union types")
+}
+
+func (u UpdateTransformationRequestBodyEnv) MarshalJSON() ([]byte, error) {
+	if u.Str != nil {
+		return utils.MarshalJSON(u.Str, "", true)
+	}
+
+	if u.Float32 != nil {
+		return utils.MarshalJSON(u.Float32, "", true)
+	}
+
+	return nil, errors.New("could not marshal union type: all fields are null")
+}
 
 type UpdateTransformationRequestBody struct {
 	// JavaScript code to be executed
 	Code *string `json:"code,omitempty"`
 	// Key-value environment variables to be passed to the transformation
-	Env map[string]interface{} `json:"env,omitempty"`
+	Env map[string]UpdateTransformationRequestBodyEnv `json:"env,omitempty"`
 	// A unique, human-friendly name for the transformation
 	Name *string `json:"name,omitempty"`
+}
+
+func (o *UpdateTransformationRequestBody) GetCode() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Code
+}
+
+func (o *UpdateTransformationRequestBody) GetEnv() map[string]UpdateTransformationRequestBodyEnv {
+	if o == nil {
+		return nil
+	}
+	return o.Env
+}
+
+func (o *UpdateTransformationRequestBody) GetName() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Name
 }
 
 type UpdateTransformationRequest struct {
@@ -21,12 +107,64 @@ type UpdateTransformationRequest struct {
 	ID          string                          `pathParam:"style=simple,explode=false,name=id"`
 }
 
+func (o *UpdateTransformationRequest) GetRequestBody() UpdateTransformationRequestBody {
+	if o == nil {
+		return UpdateTransformationRequestBody{}
+	}
+	return o.RequestBody
+}
+
+func (o *UpdateTransformationRequest) GetID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ID
+}
+
 type UpdateTransformationResponse struct {
 	// Bad Request
 	APIErrorResponse *shared.APIErrorResponse
-	ContentType      string
-	StatusCode       int
-	RawResponse      *http.Response
+	// HTTP response content type for this operation
+	ContentType string
+	// HTTP response status code for this operation
+	StatusCode int
+	// Raw HTTP response; suitable for custom response parsing
+	RawResponse *http.Response
 	// A single transformation
 	Transformation *shared.Transformation
+}
+
+func (o *UpdateTransformationResponse) GetAPIErrorResponse() *shared.APIErrorResponse {
+	if o == nil {
+		return nil
+	}
+	return o.APIErrorResponse
+}
+
+func (o *UpdateTransformationResponse) GetContentType() string {
+	if o == nil {
+		return ""
+	}
+	return o.ContentType
+}
+
+func (o *UpdateTransformationResponse) GetStatusCode() int {
+	if o == nil {
+		return 0
+	}
+	return o.StatusCode
+}
+
+func (o *UpdateTransformationResponse) GetRawResponse() *http.Response {
+	if o == nil {
+		return nil
+	}
+	return o.RawResponse
+}
+
+func (o *UpdateTransformationResponse) GetTransformation() *shared.Transformation {
+	if o == nil {
+		return nil
+	}
+	return o.Transformation
 }
