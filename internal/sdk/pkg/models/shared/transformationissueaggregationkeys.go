@@ -8,3 +8,17 @@ type TransformationIssueAggregationKeys struct {
 	LogLevel         TransformationExecutionLogLevel `json:"log_level"`
 	TransformationID []string                        `json:"transformation_id"`
 }
+
+func (o *TransformationIssueAggregationKeys) GetLogLevel() TransformationExecutionLogLevel {
+	if o == nil {
+		return TransformationExecutionLogLevel("")
+	}
+	return o.LogLevel
+}
+
+func (o *TransformationIssueAggregationKeys) GetTransformationID() []string {
+	if o == nil {
+		return []string{}
+	}
+	return o.TransformationID
+}

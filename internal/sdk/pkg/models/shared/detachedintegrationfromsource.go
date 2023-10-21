@@ -2,6 +2,5 @@
 
 package shared
 
-// DetachedIntegrationFromSource - Detach operation success status
 type DetachedIntegrationFromSource struct {
 }

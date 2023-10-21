@@ -6,10 +6,9 @@ import (
 	"context"
 	"fmt"
 	"hashicups/internal/sdk"
-	"hashicups/internal/sdk/pkg/models/operations"
-	"hashicups/internal/sdk/pkg/models/shared"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
@@ -23,6 +22,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"hashicups/internal/sdk/pkg/models/operations"
 	"hashicups/internal/validators"
 )
 
@@ -41,32 +41,21 @@ type ConnectionResource struct {
 
 // ConnectionResourceModel describes the resource data model.
 type ConnectionResourceModel struct {
-	AllowedHTTPMethods     []types.String                          `tfsdk:"allowed_http_methods"`
-	ArchivedAt             types.String                            `tfsdk:"archived_at"`
-	AuthMethod             *AuthMethod                             `tfsdk:"auth_method"`
-	Body                   types.String                            `tfsdk:"body"`
-	CliPath                types.String                            `tfsdk:"cli_path"`
-	ContentType            types.String                            `tfsdk:"content_type"`
-	CreatedAt              types.String                            `tfsdk:"created_at"`
-	Destination            *CreateConnectionRequestBodyDestination `tfsdk:"destination"`
-	DestinationID          types.String                            `tfsdk:"destination_id"`
-	HTTPMethod             types.String                            `tfsdk:"http_method"`
-	ID                     types.String                            `tfsdk:"id"`
-	IsTeamDefault          types.Bool                              `tfsdk:"is_team_default"`
-	Name                   types.String                            `tfsdk:"name"`
-	PathForwardingDisabled types.Bool                              `tfsdk:"path_forwarding_disabled"`
-	PausedAt               types.String                            `tfsdk:"paused_at"`
-	RateLimit              *RateLimit                              `tfsdk:"rate_limit"`
-	RateLimitPeriod        types.String                            `tfsdk:"rate_limit_period"`
-	ResolvedRules          []Rule                                  `tfsdk:"resolved_rules"`
-	Rules                  []Rule1                                 `tfsdk:"rules"`
-	Ruleset                *CreateConnectionRequestBodyRuleset     `tfsdk:"ruleset"`
-	RulesetID              types.String                            `tfsdk:"ruleset_id"`
-	Source                 *CreateConnectionRequestBodySource      `tfsdk:"source"`
-	SourceID               types.String                            `tfsdk:"source_id"`
-	TeamID                 types.String                            `tfsdk:"team_id"`
-	UpdatedAt              types.String                            `tfsdk:"updated_at"`
-	URL                    types.String                            `tfsdk:"url"`
+	ArchivedAt    types.String `tfsdk:"archived_at"`
+	CreatedAt     types.String `tfsdk:"created_at"`
+	Destination   Destination  `tfsdk:"destination"`
+	DestinationID types.String `tfsdk:"destination_id"`
+	ID            types.String `tfsdk:"id"`
+	Name          types.String `tfsdk:"name"`
+	PausedAt      types.String `tfsdk:"paused_at"`
+	ResolvedRules []Rule       `tfsdk:"resolved_rules"`
+	Rules         []Rule       `tfsdk:"rules"`
+	Ruleset       *Ruleset     `tfsdk:"ruleset"`
+	RulesetID     types.String `tfsdk:"ruleset_id"`
+	Source        Source       `tfsdk:"source"`
+	SourceID      types.String `tfsdk:"source_id"`
+	TeamID        types.String `tfsdk:"team_id"`
+	UpdatedAt     types.String `tfsdk:"updated_at"`
 }
 
 func (r *ConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -78,282 +67,12 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 		MarkdownDescription: "Connection Resource",
 
 		Attributes: map[string]schema.Attribute{
-			"allowed_http_methods": schema.ListAttribute{
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.RequiresReplace(),
-				},
-				Optional:    true,
-				ElementType: types.StringType,
-				Description: `List of allowed HTTP methods. Defaults to PUT, POST, PATCH, DELETE.`,
-			},
 			"archived_at": schema.StringAttribute{
 				Computed: true,
 				Validators: []validator.String{
 					validators.IsRFC3339(),
 				},
 				Description: `Date the connection was archived`,
-			},
-			"auth_method": schema.StringAttribute{
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-				Optional: true,
-				Attributes: map[string]schema.Attribute{
-					"hookdeck_signature": schema.SingleNestedAttribute{
-						PlanModifiers: []planmodifier.Object{
-							objectplanmodifier.RequiresReplace(),
-						},
-						Optional: true,
-						Attributes: map[string]schema.Attribute{
-							"config": schema.SingleNestedAttribute{
-								PlanModifiers: []planmodifier.Object{
-									objectplanmodifier.RequiresReplace(),
-								},
-								Optional:    true,
-								Attributes:  map[string]schema.Attribute{},
-								Description: `Empty config for the destination's auth method`,
-							},
-							"type": schema.StringAttribute{
-								PlanModifiers: []planmodifier.String{
-									stringplanmodifier.RequiresReplace(),
-								},
-								Required: true,
-								Validators: []validator.String{
-									stringvalidator.OneOf(
-										"HOOKDECK_SIGNATURE",
-									),
-								},
-								MarkdownDescription: `must be one of [HOOKDECK_SIGNATURE]` + "\n" +
-									`Type of auth method`,
-							},
-						},
-						Description: `Hookdeck Signature`,
-					},
-					"basic_auth": schema.SingleNestedAttribute{
-						PlanModifiers: []planmodifier.Object{
-							objectplanmodifier.RequiresReplace(),
-						},
-						Optional: true,
-						Attributes: map[string]schema.Attribute{
-							"config": schema.SingleNestedAttribute{
-								PlanModifiers: []planmodifier.Object{
-									objectplanmodifier.RequiresReplace(),
-								},
-								Optional: true,
-								Attributes: map[string]schema.Attribute{
-									"password": schema.StringAttribute{
-										PlanModifiers: []planmodifier.String{
-											stringplanmodifier.RequiresReplace(),
-										},
-										Required:    true,
-										Description: `Password for basic auth`,
-									},
-									"username": schema.StringAttribute{
-										PlanModifiers: []planmodifier.String{
-											stringplanmodifier.RequiresReplace(),
-										},
-										Required:    true,
-										Description: `Username for basic auth`,
-									},
-								},
-								Description: `Basic auth config for the destination's auth method`,
-							},
-							"type": schema.StringAttribute{
-								PlanModifiers: []planmodifier.String{
-									stringplanmodifier.RequiresReplace(),
-								},
-								Required: true,
-								Validators: []validator.String{
-									stringvalidator.OneOf(
-										"BASIC_AUTH",
-									),
-								},
-								MarkdownDescription: `must be one of [BASIC_AUTH]` + "\n" +
-									`Type of auth method`,
-							},
-						},
-						Description: `Basic Auth`,
-					},
-					"api_key": schema.SingleNestedAttribute{
-						PlanModifiers: []planmodifier.Object{
-							objectplanmodifier.RequiresReplace(),
-						},
-						Optional: true,
-						Attributes: map[string]schema.Attribute{
-							"config": schema.SingleNestedAttribute{
-								PlanModifiers: []planmodifier.Object{
-									objectplanmodifier.RequiresReplace(),
-								},
-								Optional: true,
-								Attributes: map[string]schema.Attribute{
-									"api_key": schema.StringAttribute{
-										PlanModifiers: []planmodifier.String{
-											stringplanmodifier.RequiresReplace(),
-										},
-										Required:    true,
-										Description: `API key for the API key auth`,
-									},
-									"key": schema.StringAttribute{
-										PlanModifiers: []planmodifier.String{
-											stringplanmodifier.RequiresReplace(),
-										},
-										Required:    true,
-										Description: `Key for the API key auth`,
-									},
-									"to": schema.StringAttribute{
-										PlanModifiers: []planmodifier.String{
-											stringplanmodifier.RequiresReplace(),
-										},
-										Optional: true,
-										Validators: []validator.String{
-											stringvalidator.OneOf(
-												"header",
-												"query",
-											),
-										},
-										MarkdownDescription: `must be one of [header, query]` + "\n" +
-											`Whether the API key should be sent as a header or a query parameter`,
-									},
-								},
-								Description: `API key config for the destination's auth method`,
-							},
-							"type": schema.StringAttribute{
-								PlanModifiers: []planmodifier.String{
-									stringplanmodifier.RequiresReplace(),
-								},
-								Required: true,
-								Validators: []validator.String{
-									stringvalidator.OneOf(
-										"API_KEY",
-									),
-								},
-								MarkdownDescription: `must be one of [API_KEY]` + "\n" +
-									`Type of auth method`,
-							},
-						},
-						Description: `API Key`,
-					},
-					"bearer_token": schema.SingleNestedAttribute{
-						PlanModifiers: []planmodifier.Object{
-							objectplanmodifier.RequiresReplace(),
-						},
-						Optional: true,
-						Attributes: map[string]schema.Attribute{
-							"config": schema.SingleNestedAttribute{
-								PlanModifiers: []planmodifier.Object{
-									objectplanmodifier.RequiresReplace(),
-								},
-								Optional: true,
-								Attributes: map[string]schema.Attribute{
-									"token": schema.StringAttribute{
-										PlanModifiers: []planmodifier.String{
-											stringplanmodifier.RequiresReplace(),
-										},
-										Required:    true,
-										Description: `Token for the bearer token auth`,
-									},
-								},
-								Description: `Bearer token config for the destination's auth method`,
-							},
-							"type": schema.StringAttribute{
-								PlanModifiers: []planmodifier.String{
-									stringplanmodifier.RequiresReplace(),
-								},
-								Required: true,
-								Validators: []validator.String{
-									stringvalidator.OneOf(
-										"BEARER_TOKEN",
-									),
-								},
-								MarkdownDescription: `must be one of [BEARER_TOKEN]` + "\n" +
-									`Type of auth method`,
-							},
-						},
-						Description: `Bearer Token`,
-					},
-					"custom_signature": schema.SingleNestedAttribute{
-						PlanModifiers: []planmodifier.Object{
-							objectplanmodifier.RequiresReplace(),
-						},
-						Optional: true,
-						Attributes: map[string]schema.Attribute{
-							"config": schema.SingleNestedAttribute{
-								PlanModifiers: []planmodifier.Object{
-									objectplanmodifier.RequiresReplace(),
-								},
-								Required: true,
-								Attributes: map[string]schema.Attribute{
-									"key": schema.StringAttribute{
-										PlanModifiers: []planmodifier.String{
-											stringplanmodifier.RequiresReplace(),
-										},
-										Required:    true,
-										Description: `Key for the custom signature auth`,
-									},
-									"signing_secret": schema.StringAttribute{
-										PlanModifiers: []planmodifier.String{
-											stringplanmodifier.RequiresReplace(),
-										},
-										Optional:    true,
-										Description: `Signing secret for the custom signature auth. If left empty a secret will be generated for you.`,
-									},
-								},
-								Description: `Custom signature config for the destination's auth method`,
-							},
-							"type": schema.StringAttribute{
-								PlanModifiers: []planmodifier.String{
-									stringplanmodifier.RequiresReplace(),
-								},
-								Required: true,
-								Validators: []validator.String{
-									stringvalidator.OneOf(
-										"CUSTOM_SIGNATURE",
-									),
-								},
-								MarkdownDescription: `must be one of [CUSTOM_SIGNATURE]` + "\n" +
-									`Type of auth method`,
-							},
-						},
-						Description: `Custom Signature`,
-					},
-				},
-				Validators: []validator.Object{
-					validators.ExactlyOneChild(),
-				},
-				Validators: []validator.String{
-					validators.IsValidJSON(),
-				},
-				MarkdownDescription: `Parsed as JSON.` + "\n" +
-					`Config for the destination's auth method`,
-			},
-			"body": schema.StringAttribute{
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-				Required:    true,
-				Description: `Body of the custom response`,
-			},
-			"cli_path": schema.StringAttribute{
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-				Optional:    true,
-				Description: `Path for the CLI destination`,
-			},
-			"content_type": schema.StringAttribute{
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-				Required: true,
-				Validators: []validator.String{
-					stringvalidator.OneOf(
-						"json",
-						"text",
-						"xml",
-					),
-				},
-				MarkdownDescription: `must be one of [json, text, xml]` + "\n" +
-					`Content type of the custom response`,
 			},
 			"created_at": schema.StringAttribute{
 				Computed: true,
@@ -363,7 +82,10 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 				Description: `Date the connection was created`,
 			},
 			"destination": schema.SingleNestedAttribute{
-				Computed: true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.RequiresReplace(),
+				},
+				Required: true,
 				Attributes: map[string]schema.Attribute{
 					"archived_at": schema.StringAttribute{
 						Computed: true,
@@ -372,45 +94,70 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 						},
 						Description: `Date the destination was archived`,
 					},
-					"auth_method": schema.StringAttribute{
+					"auth_method": schema.SingleNestedAttribute{
 						Computed: true,
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.RequiresReplace(),
+						},
+						Optional: true,
 						Attributes: map[string]schema.Attribute{
 							"api_key": schema.SingleNestedAttribute{
 								Computed: true,
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.RequiresReplace(),
+								},
+								Optional: true,
 								Attributes: map[string]schema.Attribute{
 									"config": schema.SingleNestedAttribute{
 										Computed: true,
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.RequiresReplace(),
+										},
+										Optional: true,
 										Attributes: map[string]schema.Attribute{
 											"api_key": schema.StringAttribute{
-												Computed:    true,
+												PlanModifiers: []planmodifier.String{
+													stringplanmodifier.RequiresReplace(),
+												},
+												Required:    true,
 												Description: `API key for the API key auth`,
 											},
 											"key": schema.StringAttribute{
-												Computed:    true,
+												PlanModifiers: []planmodifier.String{
+													stringplanmodifier.RequiresReplace(),
+												},
+												Required:    true,
 												Description: `Key for the API key auth`,
 											},
 											"to": schema.StringAttribute{
 												Computed: true,
+												PlanModifiers: []planmodifier.String{
+													stringplanmodifier.RequiresReplace(),
+												},
+												Optional: true,
 												Validators: []validator.String{
 													stringvalidator.OneOf(
 														"header",
 														"query",
 													),
 												},
-												MarkdownDescription: `must be one of [header, query]` + "\n" +
+												MarkdownDescription: `must be one of ["header", "query"]; Default: "header"` + "\n" +
 													`Whether the API key should be sent as a header or a query parameter`,
 											},
 										},
 										Description: `API key config for the destination's auth method`,
 									},
 									"type": schema.StringAttribute{
-										Computed: true,
+										PlanModifiers: []planmodifier.String{
+											stringplanmodifier.RequiresReplace(),
+										},
+										Required: true,
 										Validators: []validator.String{
 											stringvalidator.OneOf(
 												"API_KEY",
 											),
 										},
-										MarkdownDescription: `must be one of [API_KEY]` + "\n" +
+										MarkdownDescription: `must be one of ["API_KEY"]` + "\n" +
 											`Type of auth method`,
 									},
 								},
@@ -418,29 +165,46 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 							},
 							"basic_auth": schema.SingleNestedAttribute{
 								Computed: true,
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.RequiresReplace(),
+								},
+								Optional: true,
 								Attributes: map[string]schema.Attribute{
 									"config": schema.SingleNestedAttribute{
 										Computed: true,
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.RequiresReplace(),
+										},
+										Optional: true,
 										Attributes: map[string]schema.Attribute{
 											"password": schema.StringAttribute{
-												Computed:    true,
+												PlanModifiers: []planmodifier.String{
+													stringplanmodifier.RequiresReplace(),
+												},
+												Required:    true,
 												Description: `Password for basic auth`,
 											},
 											"username": schema.StringAttribute{
-												Computed:    true,
+												PlanModifiers: []planmodifier.String{
+													stringplanmodifier.RequiresReplace(),
+												},
+												Required:    true,
 												Description: `Username for basic auth`,
 											},
 										},
 										Description: `Basic auth config for the destination's auth method`,
 									},
 									"type": schema.StringAttribute{
-										Computed: true,
+										PlanModifiers: []planmodifier.String{
+											stringplanmodifier.RequiresReplace(),
+										},
+										Required: true,
 										Validators: []validator.String{
 											stringvalidator.OneOf(
 												"BASIC_AUTH",
 											),
 										},
-										MarkdownDescription: `must be one of [BASIC_AUTH]` + "\n" +
+										MarkdownDescription: `must be one of ["BASIC_AUTH"]` + "\n" +
 											`Type of auth method`,
 									},
 								},
@@ -448,25 +212,39 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 							},
 							"bearer_token": schema.SingleNestedAttribute{
 								Computed: true,
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.RequiresReplace(),
+								},
+								Optional: true,
 								Attributes: map[string]schema.Attribute{
 									"config": schema.SingleNestedAttribute{
 										Computed: true,
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.RequiresReplace(),
+										},
+										Optional: true,
 										Attributes: map[string]schema.Attribute{
 											"token": schema.StringAttribute{
-												Computed:    true,
+												PlanModifiers: []planmodifier.String{
+													stringplanmodifier.RequiresReplace(),
+												},
+												Required:    true,
 												Description: `Token for the bearer token auth`,
 											},
 										},
 										Description: `Bearer token config for the destination's auth method`,
 									},
 									"type": schema.StringAttribute{
-										Computed: true,
+										PlanModifiers: []planmodifier.String{
+											stringplanmodifier.RequiresReplace(),
+										},
+										Required: true,
 										Validators: []validator.String{
 											stringvalidator.OneOf(
 												"BEARER_TOKEN",
 											),
 										},
-										MarkdownDescription: `must be one of [BEARER_TOKEN]` + "\n" +
+										MarkdownDescription: `must be one of ["BEARER_TOKEN"]` + "\n" +
 											`Type of auth method`,
 									},
 								},
@@ -474,29 +252,46 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 							},
 							"custom_signature": schema.SingleNestedAttribute{
 								Computed: true,
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.RequiresReplace(),
+								},
+								Optional: true,
 								Attributes: map[string]schema.Attribute{
 									"config": schema.SingleNestedAttribute{
-										Computed: true,
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.RequiresReplace(),
+										},
+										Required: true,
 										Attributes: map[string]schema.Attribute{
 											"key": schema.StringAttribute{
-												Computed:    true,
+												PlanModifiers: []planmodifier.String{
+													stringplanmodifier.RequiresReplace(),
+												},
+												Required:    true,
 												Description: `Key for the custom signature auth`,
 											},
 											"signing_secret": schema.StringAttribute{
-												Computed:    true,
+												Computed: true,
+												PlanModifiers: []planmodifier.String{
+													stringplanmodifier.RequiresReplace(),
+												},
+												Optional:    true,
 												Description: `Signing secret for the custom signature auth. If left empty a secret will be generated for you.`,
 											},
 										},
 										Description: `Custom signature config for the destination's auth method`,
 									},
 									"type": schema.StringAttribute{
-										Computed: true,
+										PlanModifiers: []planmodifier.String{
+											stringplanmodifier.RequiresReplace(),
+										},
+										Required: true,
 										Validators: []validator.String{
 											stringvalidator.OneOf(
 												"CUSTOM_SIGNATURE",
 											),
 										},
-										MarkdownDescription: `must be one of [CUSTOM_SIGNATURE]` + "\n" +
+										MarkdownDescription: `must be one of ["CUSTOM_SIGNATURE"]` + "\n" +
 											`Type of auth method`,
 									},
 								},
@@ -504,20 +299,31 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 							},
 							"hookdeck_signature": schema.SingleNestedAttribute{
 								Computed: true,
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.RequiresReplace(),
+								},
+								Optional: true,
 								Attributes: map[string]schema.Attribute{
 									"config": schema.SingleNestedAttribute{
-										Computed:    true,
+										Computed: true,
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.RequiresReplace(),
+										},
+										Optional:    true,
 										Attributes:  map[string]schema.Attribute{},
 										Description: `Empty config for the destination's auth method`,
 									},
 									"type": schema.StringAttribute{
-										Computed: true,
+										PlanModifiers: []planmodifier.String{
+											stringplanmodifier.RequiresReplace(),
+										},
+										Required: true,
 										Validators: []validator.String{
 											stringvalidator.OneOf(
 												"HOOKDECK_SIGNATURE",
 											),
 										},
-										MarkdownDescription: `must be one of [HOOKDECK_SIGNATURE]` + "\n" +
+										MarkdownDescription: `must be one of ["HOOKDECK_SIGNATURE"]` + "\n" +
 											`Type of auth method`,
 									},
 								},
@@ -527,14 +333,14 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 						Validators: []validator.Object{
 							validators.ExactlyOneChild(),
 						},
-						Validators: []validator.String{
-							validators.IsValidJSON(),
-						},
-						MarkdownDescription: `Parsed as JSON.` + "\n" +
-							`Config for the destination's auth method`,
+						Description: `Config for the destination's auth method`,
 					},
 					"cli_path": schema.StringAttribute{
-						Computed:    true,
+						Computed: true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
+						Optional:    true,
 						Description: `Path for the CLI destination`,
 					},
 					"created_at": schema.StringAttribute{
@@ -546,6 +352,10 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 					},
 					"http_method": schema.StringAttribute{
 						Computed: true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
+						Optional: true,
 						Validators: []validator.String{
 							stringvalidator.OneOf(
 								"<nil>",
@@ -556,7 +366,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 								"DELETE",
 							),
 						},
-						MarkdownDescription: `must be one of [<nil>, GET, POST, PUT, PATCH, DELETE]` + "\n" +
+						MarkdownDescription: `must be one of ["<nil>", "GET", "POST", "PUT", "PATCH", "DELETE"]` + "\n" +
 							`HTTP method used on requests sent to the destination, overrides the method used on requests sent to the source.`,
 					},
 					"id": schema.StringAttribute{
@@ -564,18 +374,33 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 						Description: `ID of the destination`,
 					},
 					"name": schema.StringAttribute{
-						Computed:    true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
+						Required:    true,
 						Description: `A unique, human-friendly name for the destination`,
 					},
 					"path_forwarding_disabled": schema.BoolAttribute{
 						Computed: true,
+						PlanModifiers: []planmodifier.Bool{
+							boolplanmodifier.RequiresReplace(),
+						},
+						Optional: true,
 					},
 					"rate_limit": schema.Int64Attribute{
-						Computed:    true,
+						Computed: true,
+						PlanModifiers: []planmodifier.Int64{
+							int64planmodifier.RequiresReplace(),
+						},
+						Optional:    true,
 						Description: `Limit event attempts to receive per period. Max value is workspace plan's max attempts thoughput.`,
 					},
 					"rate_limit_period": schema.StringAttribute{
 						Computed: true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
+						Optional: true,
 						Validators: []validator.String{
 							stringvalidator.OneOf(
 								"<nil>",
@@ -584,7 +409,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 								"hour",
 							),
 						},
-						MarkdownDescription: `must be one of [<nil>, second, minute, hour]` + "\n" +
+						MarkdownDescription: `must be one of ["<nil>", "second", "minute", "hour"]; Default: "second"` + "\n" +
 							`Period to rate limit attempts`,
 					},
 					"team_id": schema.StringAttribute{
@@ -599,7 +424,11 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 						Description: `Date the destination was last updated`,
 					},
 					"url": schema.StringAttribute{
-						Computed:    true,
+						Computed: true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
+						Optional:    true,
 						Description: `HTTP endpoint of the destination`,
 					},
 				},
@@ -612,33 +441,9 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 				Optional:    true,
 				Description: `ID of a destination to bind to the connection`,
 			},
-			"http_method": schema.StringAttribute{
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-				Optional: true,
-				Validators: []validator.String{
-					stringvalidator.OneOf(
-						"<nil>",
-						"GET",
-						"POST",
-						"PUT",
-						"PATCH",
-						"DELETE",
-					),
-				},
-				MarkdownDescription: `must be one of [<nil>, GET, POST, PUT, PATCH, DELETE]` + "\n" +
-					`HTTP method used on requests sent to the destination, overrides the method used on requests sent to the source.`,
-			},
 			"id": schema.StringAttribute{
 				Computed:    true,
 				Description: `ID of the connection`,
-			},
-			"is_team_default": schema.BoolAttribute{
-				PlanModifiers: []planmodifier.Bool{
-					boolplanmodifier.RequiresReplace(),
-				},
-				Optional: true,
 			},
 			"name": schema.StringAttribute{
 				PlanModifiers: []planmodifier.String{
@@ -647,12 +452,6 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 				Required:    true,
 				Description: `Unique name of the connection for this source`,
 			},
-			"path_forwarding_disabled": schema.BoolAttribute{
-				PlanModifiers: []planmodifier.Bool{
-					boolplanmodifier.RequiresReplace(),
-				},
-				Optional: true,
-			},
 			"paused_at": schema.StringAttribute{
 				Computed: true,
 				Validators: []validator.String{
@@ -660,128 +459,10 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 				},
 				Description: `Date the connection was paused`,
 			},
-			"rate_limit": schema.StringAttribute{
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-				Optional: true,
-				Attributes: map[string]schema.Attribute{
-					"integer": schema.Int64Attribute{
-						PlanModifiers: []planmodifier.Int64{
-							int64planmodifier.RequiresReplace(),
-						},
-						Optional: true,
-					},
-					"integer": schema.Int64Attribute{
-						PlanModifiers: []planmodifier.Int64{
-							int64planmodifier.RequiresReplace(),
-						},
-						Optional: true,
-					},
-					"integer": schema.Int64Attribute{
-						PlanModifiers: []planmodifier.Int64{
-							int64planmodifier.RequiresReplace(),
-						},
-						Optional: true,
-					},
-				},
-				Validators: []validator.Object{
-					validators.ExactlyOneChild(),
-				},
-				Validators: []validator.String{
-					validators.IsValidJSON(),
-				},
-				MarkdownDescription: `Parsed as JSON.` + "\n" +
-					`Limit event attempts to receive per period`,
-			},
-			"rate_limit_period": schema.StringAttribute{
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-				Optional: true,
-				Validators: []validator.String{
-					stringvalidator.OneOf(
-						"second",
-						"minute",
-						"hour",
-					),
-				},
-				MarkdownDescription: `must be one of [second, minute, hour]` + "\n" +
-					`Period to rate limit attempts`,
-			},
 			"resolved_rules": schema.ListNestedAttribute{
 				Computed: true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"any": schema.StringAttribute{
-							Computed: true,
-							Attributes: map[string]schema.Attribute{
-								"transform_full": schema.SingleNestedAttribute{
-									Computed: true,
-									Attributes: map[string]schema.Attribute{
-										"transformation": schema.SingleNestedAttribute{
-											Computed: true,
-											Attributes: map[string]schema.Attribute{
-												"code": schema.StringAttribute{
-													Computed:    true,
-													Description: `A string representation of your JavaScript (ES6) code to run`,
-												},
-												"env": schema.MapAttribute{
-													Computed:    true,
-													ElementType: types.StringType,
-													Description: `A key-value object of environment variables to encrypt and expose to your transformation code`,
-												},
-												"name": schema.StringAttribute{
-													Computed:    true,
-													Description: `The unique name of the transformation`,
-												},
-											},
-											Description: `You can optionally define a new transformation while creating a transform rule`,
-										},
-										"transformation_id": schema.StringAttribute{
-											Computed:    true,
-											Description: `ID of the attached transformation object. Optional input, always set once the rule is defined`,
-										},
-										"type": schema.StringAttribute{
-											Computed: true,
-											Validators: []validator.String{
-												stringvalidator.OneOf(
-													"transform",
-												),
-											},
-											MarkdownDescription: `must be one of [transform]` + "\n" +
-												`A transformation rule must be of type ` + "`" + `transformation` + "`" + ``,
-										},
-									},
-								},
-								"transform_reference": schema.SingleNestedAttribute{
-									Computed: true,
-									Attributes: map[string]schema.Attribute{
-										"transformation_id": schema.StringAttribute{
-											Computed:    true,
-											Description: `ID of the attached transformation object. Optional input, always set once the rule is defined`,
-										},
-										"type": schema.StringAttribute{
-											Computed: true,
-											Validators: []validator.String{
-												stringvalidator.OneOf(
-													"transform",
-												),
-											},
-											MarkdownDescription: `must be one of [transform]` + "\n" +
-												`A transformation rule must be of type ` + "`" + `transformation` + "`" + ``,
-										},
-									},
-								},
-							},
-							Validators: []validator.Object{
-								validators.ExactlyOneChild(),
-							},
-							Validators: []validator.String{
-								validators.IsValidJSON(),
-							},
-							Description: `Parsed as JSON.`,
-						},
 						"alert_rule": schema.SingleNestedAttribute{
 							Computed: true,
 							Attributes: map[string]schema.Attribute{
@@ -793,7 +474,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 											"last_attempt",
 										),
 									},
-									MarkdownDescription: `must be one of [each_attempt, last_attempt]` + "\n" +
+									MarkdownDescription: `must be one of ["each_attempt", "last_attempt"]` + "\n" +
 										`Alert strategy to use`,
 								},
 								"type": schema.StringAttribute{
@@ -803,7 +484,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 											"alert",
 										),
 									},
-									MarkdownDescription: `must be one of [alert]` + "\n" +
+									MarkdownDescription: `must be one of ["alert"]` + "\n" +
 										`An alert rule must be of type ` + "`" + `alert` + "`" + ``,
 								},
 							},
@@ -822,7 +503,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 											"delay",
 										),
 									},
-									MarkdownDescription: `must be one of [delay]` + "\n" +
+									MarkdownDescription: `must be one of ["delay"]` + "\n" +
 										`A delay rule must be of type ` + "`" + `delay` + "`" + ``,
 								},
 							},
@@ -929,7 +610,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 											"filter",
 										),
 									},
-									MarkdownDescription: `must be one of [filter]` + "\n" +
+									MarkdownDescription: `must be one of ["filter"]` + "\n" +
 										`A filter rule must be of type ` + "`" + `filter` + "`" + ``,
 								},
 							},
@@ -953,7 +634,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 											"exponential",
 										),
 									},
-									MarkdownDescription: `must be one of [linear, exponential]` + "\n" +
+									MarkdownDescription: `must be one of ["linear", "exponential"]` + "\n" +
 										`Algorithm to use when calculating delay between retries`,
 								},
 								"type": schema.StringAttribute{
@@ -963,9 +644,74 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 											"retry",
 										),
 									},
-									MarkdownDescription: `must be one of [retry]` + "\n" +
+									MarkdownDescription: `must be one of ["retry"]` + "\n" +
 										`A retry rule must be of type ` + "`" + `retry` + "`" + ``,
 								},
+							},
+						},
+						"transform_rule": schema.SingleNestedAttribute{
+							Computed: true,
+							Attributes: map[string]schema.Attribute{
+								"transform_full": schema.SingleNestedAttribute{
+									Computed: true,
+									Attributes: map[string]schema.Attribute{
+										"transformation": schema.SingleNestedAttribute{
+											Computed: true,
+											Attributes: map[string]schema.Attribute{
+												"code": schema.StringAttribute{
+													Computed:    true,
+													Description: `A string representation of your JavaScript (ES6) code to run`,
+												},
+												"env": schema.MapAttribute{
+													Computed:    true,
+													ElementType: types.StringType,
+													Description: `A key-value object of environment variables to encrypt and expose to your transformation code`,
+												},
+												"name": schema.StringAttribute{
+													Computed:    true,
+													Description: `The unique name of the transformation`,
+												},
+											},
+											Description: `You can optionally define a new transformation while creating a transform rule`,
+										},
+										"transformation_id": schema.StringAttribute{
+											Computed:    true,
+											Description: `ID of the attached transformation object. Optional input, always set once the rule is defined`,
+										},
+										"type": schema.StringAttribute{
+											Computed: true,
+											Validators: []validator.String{
+												stringvalidator.OneOf(
+													"transform",
+												),
+											},
+											MarkdownDescription: `must be one of ["transform"]` + "\n" +
+												`A transformation rule must be of type ` + "`" + `transformation` + "`" + ``,
+										},
+									},
+								},
+								"transform_reference": schema.SingleNestedAttribute{
+									Computed: true,
+									Attributes: map[string]schema.Attribute{
+										"transformation_id": schema.StringAttribute{
+											Computed:    true,
+											Description: `ID of the attached transformation object. Optional input, always set once the rule is defined`,
+										},
+										"type": schema.StringAttribute{
+											Computed: true,
+											Validators: []validator.String{
+												stringvalidator.OneOf(
+													"transform",
+												),
+											},
+											MarkdownDescription: `must be one of ["transform"]` + "\n" +
+												`A transformation rule must be of type ` + "`" + `transformation` + "`" + ``,
+										},
+									},
+								},
+							},
+							Validators: []validator.Object{
+								validators.ExactlyOneChild(),
 							},
 						},
 					},
@@ -983,10 +729,313 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 				Optional: true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"any": schema.StringAttribute{
+						"alert_rule": schema.SingleNestedAttribute{
 							Computed: true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.RequiresReplace(),
+							PlanModifiers: []planmodifier.Object{
+								objectplanmodifier.RequiresReplace(),
+							},
+							Optional: true,
+							Attributes: map[string]schema.Attribute{
+								"strategy": schema.StringAttribute{
+									PlanModifiers: []planmodifier.String{
+										stringplanmodifier.RequiresReplace(),
+									},
+									Required: true,
+									Validators: []validator.String{
+										stringvalidator.OneOf(
+											"each_attempt",
+											"last_attempt",
+										),
+									},
+									MarkdownDescription: `must be one of ["each_attempt", "last_attempt"]` + "\n" +
+										`Alert strategy to use`,
+								},
+								"type": schema.StringAttribute{
+									PlanModifiers: []planmodifier.String{
+										stringplanmodifier.RequiresReplace(),
+									},
+									Required: true,
+									Validators: []validator.String{
+										stringvalidator.OneOf(
+											"alert",
+										),
+									},
+									MarkdownDescription: `must be one of ["alert"]` + "\n" +
+										`An alert rule must be of type ` + "`" + `alert` + "`" + ``,
+								},
+							},
+						},
+						"delay_rule": schema.SingleNestedAttribute{
+							Computed: true,
+							PlanModifiers: []planmodifier.Object{
+								objectplanmodifier.RequiresReplace(),
+							},
+							Optional: true,
+							Attributes: map[string]schema.Attribute{
+								"delay": schema.Int64Attribute{
+									PlanModifiers: []planmodifier.Int64{
+										int64planmodifier.RequiresReplace(),
+									},
+									Required:    true,
+									Description: `Delay to introduce in MS`,
+								},
+								"type": schema.StringAttribute{
+									PlanModifiers: []planmodifier.String{
+										stringplanmodifier.RequiresReplace(),
+									},
+									Required: true,
+									Validators: []validator.String{
+										stringvalidator.OneOf(
+											"delay",
+										),
+									},
+									MarkdownDescription: `must be one of ["delay"]` + "\n" +
+										`A delay rule must be of type ` + "`" + `delay` + "`" + ``,
+								},
+							},
+						},
+						"filter_rule": schema.SingleNestedAttribute{
+							Computed: true,
+							PlanModifiers: []planmodifier.Object{
+								objectplanmodifier.RequiresReplace(),
+							},
+							Optional: true,
+							Attributes: map[string]schema.Attribute{
+								"body": schema.SingleNestedAttribute{
+									Computed: true,
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.RequiresReplace(),
+									},
+									Optional: true,
+									Attributes: map[string]schema.Attribute{
+										"str": schema.StringAttribute{
+											Computed: true,
+											PlanModifiers: []planmodifier.String{
+												stringplanmodifier.RequiresReplace(),
+											},
+											Optional: true,
+										},
+										"float32": schema.NumberAttribute{
+											PlanModifiers: []planmodifier.Number{
+												numberplanmodifier.RequiresReplace(),
+											},
+											Optional: true,
+										},
+										"boolean": schema.BoolAttribute{
+											PlanModifiers: []planmodifier.Bool{
+												boolplanmodifier.RequiresReplace(),
+											},
+											Optional: true,
+										},
+										"connection_filter_property_4": schema.SingleNestedAttribute{
+											Computed: true,
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.RequiresReplace(),
+											},
+											Optional:    true,
+											Attributes:  map[string]schema.Attribute{},
+											Description: `JSON using our filter syntax to filter on request headers`,
+										},
+									},
+									Validators: []validator.Object{
+										validators.ExactlyOneChild(),
+									},
+									Description: `JSON using our filter syntax to filter on request headers`,
+								},
+								"headers": schema.SingleNestedAttribute{
+									Computed: true,
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.RequiresReplace(),
+									},
+									Optional: true,
+									Attributes: map[string]schema.Attribute{
+										"str": schema.StringAttribute{
+											Computed: true,
+											PlanModifiers: []planmodifier.String{
+												stringplanmodifier.RequiresReplace(),
+											},
+											Optional: true,
+										},
+										"float32": schema.NumberAttribute{
+											PlanModifiers: []planmodifier.Number{
+												numberplanmodifier.RequiresReplace(),
+											},
+											Optional: true,
+										},
+										"boolean": schema.BoolAttribute{
+											PlanModifiers: []planmodifier.Bool{
+												boolplanmodifier.RequiresReplace(),
+											},
+											Optional: true,
+										},
+										"connection_filter_property_4": schema.SingleNestedAttribute{
+											Computed: true,
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.RequiresReplace(),
+											},
+											Optional:    true,
+											Attributes:  map[string]schema.Attribute{},
+											Description: `JSON using our filter syntax to filter on request headers`,
+										},
+									},
+									Validators: []validator.Object{
+										validators.ExactlyOneChild(),
+									},
+									Description: `JSON using our filter syntax to filter on request headers`,
+								},
+								"path": schema.SingleNestedAttribute{
+									Computed: true,
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.RequiresReplace(),
+									},
+									Optional: true,
+									Attributes: map[string]schema.Attribute{
+										"str": schema.StringAttribute{
+											Computed: true,
+											PlanModifiers: []planmodifier.String{
+												stringplanmodifier.RequiresReplace(),
+											},
+											Optional: true,
+										},
+										"float32": schema.NumberAttribute{
+											PlanModifiers: []planmodifier.Number{
+												numberplanmodifier.RequiresReplace(),
+											},
+											Optional: true,
+										},
+										"boolean": schema.BoolAttribute{
+											PlanModifiers: []planmodifier.Bool{
+												boolplanmodifier.RequiresReplace(),
+											},
+											Optional: true,
+										},
+										"connection_filter_property_4": schema.SingleNestedAttribute{
+											Computed: true,
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.RequiresReplace(),
+											},
+											Optional:    true,
+											Attributes:  map[string]schema.Attribute{},
+											Description: `JSON using our filter syntax to filter on request headers`,
+										},
+									},
+									Validators: []validator.Object{
+										validators.ExactlyOneChild(),
+									},
+									Description: `JSON using our filter syntax to filter on request headers`,
+								},
+								"query": schema.SingleNestedAttribute{
+									Computed: true,
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.RequiresReplace(),
+									},
+									Optional: true,
+									Attributes: map[string]schema.Attribute{
+										"str": schema.StringAttribute{
+											Computed: true,
+											PlanModifiers: []planmodifier.String{
+												stringplanmodifier.RequiresReplace(),
+											},
+											Optional: true,
+										},
+										"float32": schema.NumberAttribute{
+											PlanModifiers: []planmodifier.Number{
+												numberplanmodifier.RequiresReplace(),
+											},
+											Optional: true,
+										},
+										"boolean": schema.BoolAttribute{
+											PlanModifiers: []planmodifier.Bool{
+												boolplanmodifier.RequiresReplace(),
+											},
+											Optional: true,
+										},
+										"connection_filter_property_4": schema.SingleNestedAttribute{
+											Computed: true,
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.RequiresReplace(),
+											},
+											Optional:    true,
+											Attributes:  map[string]schema.Attribute{},
+											Description: `JSON using our filter syntax to filter on request headers`,
+										},
+									},
+									Validators: []validator.Object{
+										validators.ExactlyOneChild(),
+									},
+									Description: `JSON using our filter syntax to filter on request headers`,
+								},
+								"type": schema.StringAttribute{
+									PlanModifiers: []planmodifier.String{
+										stringplanmodifier.RequiresReplace(),
+									},
+									Required: true,
+									Validators: []validator.String{
+										stringvalidator.OneOf(
+											"filter",
+										),
+									},
+									MarkdownDescription: `must be one of ["filter"]` + "\n" +
+										`A filter rule must be of type ` + "`" + `filter` + "`" + ``,
+								},
+							},
+						},
+						"retry_rule": schema.SingleNestedAttribute{
+							Computed: true,
+							PlanModifiers: []planmodifier.Object{
+								objectplanmodifier.RequiresReplace(),
+							},
+							Optional: true,
+							Attributes: map[string]schema.Attribute{
+								"count": schema.Int64Attribute{
+									Computed: true,
+									PlanModifiers: []planmodifier.Int64{
+										int64planmodifier.RequiresReplace(),
+									},
+									Optional:    true,
+									Description: `Maximum number of retries to attempt`,
+								},
+								"interval": schema.Int64Attribute{
+									Computed: true,
+									PlanModifiers: []planmodifier.Int64{
+										int64planmodifier.RequiresReplace(),
+									},
+									Optional:    true,
+									Description: `Time in MS between each retry`,
+								},
+								"strategy": schema.StringAttribute{
+									PlanModifiers: []planmodifier.String{
+										stringplanmodifier.RequiresReplace(),
+									},
+									Required: true,
+									Validators: []validator.String{
+										stringvalidator.OneOf(
+											"linear",
+											"exponential",
+										),
+									},
+									MarkdownDescription: `must be one of ["linear", "exponential"]` + "\n" +
+										`Algorithm to use when calculating delay between retries`,
+								},
+								"type": schema.StringAttribute{
+									PlanModifiers: []planmodifier.String{
+										stringplanmodifier.RequiresReplace(),
+									},
+									Required: true,
+									Validators: []validator.String{
+										stringvalidator.OneOf(
+											"retry",
+										),
+									},
+									MarkdownDescription: `must be one of ["retry"]` + "\n" +
+										`A retry rule must be of type ` + "`" + `retry` + "`" + ``,
+								},
+							},
+						},
+						"transform_rule": schema.SingleNestedAttribute{
+							Computed: true,
+							PlanModifiers: []planmodifier.Object{
+								objectplanmodifier.RequiresReplace(),
 							},
 							Optional: true,
 							Attributes: map[string]schema.Attribute{
@@ -1048,7 +1097,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 													"transform",
 												),
 											},
-											MarkdownDescription: `must be one of [transform]` + "\n" +
+											MarkdownDescription: `must be one of ["transform"]` + "\n" +
 												`A transformation rule must be of type ` + "`" + `transformation` + "`" + ``,
 										},
 									},
@@ -1077,7 +1126,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 													"transform",
 												),
 											},
-											MarkdownDescription: `must be one of [transform]` + "\n" +
+											MarkdownDescription: `must be one of ["transform"]` + "\n" +
 												`A transformation rule must be of type ` + "`" + `transformation` + "`" + ``,
 										},
 									},
@@ -1085,313 +1134,6 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 							},
 							Validators: []validator.Object{
 								validators.ExactlyOneChild(),
-							},
-							Validators: []validator.String{
-								validators.IsValidJSON(),
-							},
-							Description: `Parsed as JSON.`,
-						},
-						"alert_rule": schema.SingleNestedAttribute{
-							Computed: true,
-							PlanModifiers: []planmodifier.Object{
-								objectplanmodifier.RequiresReplace(),
-							},
-							Optional: true,
-							Attributes: map[string]schema.Attribute{
-								"strategy": schema.StringAttribute{
-									PlanModifiers: []planmodifier.String{
-										stringplanmodifier.RequiresReplace(),
-									},
-									Required: true,
-									Validators: []validator.String{
-										stringvalidator.OneOf(
-											"each_attempt",
-											"last_attempt",
-										),
-									},
-									MarkdownDescription: `must be one of [each_attempt, last_attempt]` + "\n" +
-										`Alert strategy to use`,
-								},
-								"type": schema.StringAttribute{
-									PlanModifiers: []planmodifier.String{
-										stringplanmodifier.RequiresReplace(),
-									},
-									Required: true,
-									Validators: []validator.String{
-										stringvalidator.OneOf(
-											"alert",
-										),
-									},
-									MarkdownDescription: `must be one of [alert]` + "\n" +
-										`An alert rule must be of type ` + "`" + `alert` + "`" + ``,
-								},
-							},
-						},
-						"delay_rule": schema.SingleNestedAttribute{
-							Computed: true,
-							PlanModifiers: []planmodifier.Object{
-								objectplanmodifier.RequiresReplace(),
-							},
-							Optional: true,
-							Attributes: map[string]schema.Attribute{
-								"delay": schema.Int64Attribute{
-									PlanModifiers: []planmodifier.Int64{
-										int64planmodifier.RequiresReplace(),
-									},
-									Required:    true,
-									Description: `Delay to introduce in MS`,
-								},
-								"type": schema.StringAttribute{
-									PlanModifiers: []planmodifier.String{
-										stringplanmodifier.RequiresReplace(),
-									},
-									Required: true,
-									Validators: []validator.String{
-										stringvalidator.OneOf(
-											"delay",
-										),
-									},
-									MarkdownDescription: `must be one of [delay]` + "\n" +
-										`A delay rule must be of type ` + "`" + `delay` + "`" + ``,
-								},
-							},
-						},
-						"filter_rule": schema.SingleNestedAttribute{
-							Computed: true,
-							PlanModifiers: []planmodifier.Object{
-								objectplanmodifier.RequiresReplace(),
-							},
-							Optional: true,
-							Attributes: map[string]schema.Attribute{
-								"body": schema.SingleNestedAttribute{
-									Computed: true,
-									PlanModifiers: []planmodifier.Object{
-										objectplanmodifier.RequiresReplace(),
-									},
-									Optional: true,
-									Attributes: map[string]schema.Attribute{
-										"str": schema.StringAttribute{
-											Computed: true,
-											PlanModifiers: []planmodifier.String{
-												stringplanmodifier.RequiresReplace(),
-											},
-											Optional: true,
-										},
-										"float32": schema.NumberAttribute{
-											PlanModifiers: []planmodifier.Number{
-												numberplanmodifier.RequiresReplace(),
-											},
-											Optional: true,
-										},
-										"boolean": schema.BoolAttribute{
-											PlanModifiers: []planmodifier.Bool{
-												boolplanmodifier.RequiresReplace(),
-											},
-											Optional: true,
-										},
-										"connection_filter_property_4": schema.SingleNestedAttribute{
-											Computed: true,
-											PlanModifiers: []planmodifier.Object{
-												objectplanmodifier.RequiresReplace(),
-											},
-											Optional:    true,
-											Attributes:  map[string]schema.Attribute{},
-											Description: `JSON using our filter syntax to filter on request headers`,
-										},
-									},
-									Validators: []validator.Object{
-										validators.ExactlyOneChild(),
-									},
-									Description: `JSON using our filter syntax to filter on request headers`,
-								},
-								"headers": schema.SingleNestedAttribute{
-									Computed: true,
-									PlanModifiers: []planmodifier.Object{
-										objectplanmodifier.RequiresReplace(),
-									},
-									Optional: true,
-									Attributes: map[string]schema.Attribute{
-										"str": schema.StringAttribute{
-											Computed: true,
-											PlanModifiers: []planmodifier.String{
-												stringplanmodifier.RequiresReplace(),
-											},
-											Optional: true,
-										},
-										"float32": schema.NumberAttribute{
-											PlanModifiers: []planmodifier.Number{
-												numberplanmodifier.RequiresReplace(),
-											},
-											Optional: true,
-										},
-										"boolean": schema.BoolAttribute{
-											PlanModifiers: []planmodifier.Bool{
-												boolplanmodifier.RequiresReplace(),
-											},
-											Optional: true,
-										},
-										"connection_filter_property_4": schema.SingleNestedAttribute{
-											Computed: true,
-											PlanModifiers: []planmodifier.Object{
-												objectplanmodifier.RequiresReplace(),
-											},
-											Optional:    true,
-											Attributes:  map[string]schema.Attribute{},
-											Description: `JSON using our filter syntax to filter on request headers`,
-										},
-									},
-									Validators: []validator.Object{
-										validators.ExactlyOneChild(),
-									},
-									Description: `JSON using our filter syntax to filter on request headers`,
-								},
-								"path": schema.SingleNestedAttribute{
-									Computed: true,
-									PlanModifiers: []planmodifier.Object{
-										objectplanmodifier.RequiresReplace(),
-									},
-									Optional: true,
-									Attributes: map[string]schema.Attribute{
-										"str": schema.StringAttribute{
-											Computed: true,
-											PlanModifiers: []planmodifier.String{
-												stringplanmodifier.RequiresReplace(),
-											},
-											Optional: true,
-										},
-										"float32": schema.NumberAttribute{
-											PlanModifiers: []planmodifier.Number{
-												numberplanmodifier.RequiresReplace(),
-											},
-											Optional: true,
-										},
-										"boolean": schema.BoolAttribute{
-											PlanModifiers: []planmodifier.Bool{
-												boolplanmodifier.RequiresReplace(),
-											},
-											Optional: true,
-										},
-										"connection_filter_property_4": schema.SingleNestedAttribute{
-											Computed: true,
-											PlanModifiers: []planmodifier.Object{
-												objectplanmodifier.RequiresReplace(),
-											},
-											Optional:    true,
-											Attributes:  map[string]schema.Attribute{},
-											Description: `JSON using our filter syntax to filter on request headers`,
-										},
-									},
-									Validators: []validator.Object{
-										validators.ExactlyOneChild(),
-									},
-									Description: `JSON using our filter syntax to filter on request headers`,
-								},
-								"query": schema.SingleNestedAttribute{
-									Computed: true,
-									PlanModifiers: []planmodifier.Object{
-										objectplanmodifier.RequiresReplace(),
-									},
-									Optional: true,
-									Attributes: map[string]schema.Attribute{
-										"str": schema.StringAttribute{
-											Computed: true,
-											PlanModifiers: []planmodifier.String{
-												stringplanmodifier.RequiresReplace(),
-											},
-											Optional: true,
-										},
-										"float32": schema.NumberAttribute{
-											PlanModifiers: []planmodifier.Number{
-												numberplanmodifier.RequiresReplace(),
-											},
-											Optional: true,
-										},
-										"boolean": schema.BoolAttribute{
-											PlanModifiers: []planmodifier.Bool{
-												boolplanmodifier.RequiresReplace(),
-											},
-											Optional: true,
-										},
-										"connection_filter_property_4": schema.SingleNestedAttribute{
-											Computed: true,
-											PlanModifiers: []planmodifier.Object{
-												objectplanmodifier.RequiresReplace(),
-											},
-											Optional:    true,
-											Attributes:  map[string]schema.Attribute{},
-											Description: `JSON using our filter syntax to filter on request headers`,
-										},
-									},
-									Validators: []validator.Object{
-										validators.ExactlyOneChild(),
-									},
-									Description: `JSON using our filter syntax to filter on request headers`,
-								},
-								"type": schema.StringAttribute{
-									PlanModifiers: []planmodifier.String{
-										stringplanmodifier.RequiresReplace(),
-									},
-									Required: true,
-									Validators: []validator.String{
-										stringvalidator.OneOf(
-											"filter",
-										),
-									},
-									MarkdownDescription: `must be one of [filter]` + "\n" +
-										`A filter rule must be of type ` + "`" + `filter` + "`" + ``,
-								},
-							},
-						},
-						"retry_rule": schema.SingleNestedAttribute{
-							Computed: true,
-							PlanModifiers: []planmodifier.Object{
-								objectplanmodifier.RequiresReplace(),
-							},
-							Optional: true,
-							Attributes: map[string]schema.Attribute{
-								"count": schema.Int64Attribute{
-									Computed: true,
-									PlanModifiers: []planmodifier.Int64{
-										int64planmodifier.RequiresReplace(),
-									},
-									Optional:    true,
-									Description: `Maximum number of retries to attempt`,
-								},
-								"interval": schema.Int64Attribute{
-									Computed: true,
-									PlanModifiers: []planmodifier.Int64{
-										int64planmodifier.RequiresReplace(),
-									},
-									Optional:    true,
-									Description: `Time in MS between each retry`,
-								},
-								"strategy": schema.StringAttribute{
-									PlanModifiers: []planmodifier.String{
-										stringplanmodifier.RequiresReplace(),
-									},
-									Required: true,
-									Validators: []validator.String{
-										stringvalidator.OneOf(
-											"linear",
-											"exponential",
-										),
-									},
-									MarkdownDescription: `must be one of [linear, exponential]` + "\n" +
-										`Algorithm to use when calculating delay between retries`,
-								},
-								"type": schema.StringAttribute{
-									PlanModifiers: []planmodifier.String{
-										stringplanmodifier.RequiresReplace(),
-									},
-									Required: true,
-									Validators: []validator.String{
-										stringvalidator.OneOf(
-											"retry",
-										),
-									},
-									MarkdownDescription: `must be one of [retry]` + "\n" +
-										`A retry rule must be of type ` + "`" + `retry` + "`" + ``,
-								},
 							},
 						},
 					},
@@ -1403,6 +1145,10 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 			},
 			"ruleset": schema.SingleNestedAttribute{
 				Computed: true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.RequiresReplace(),
+				},
+				Optional: true,
 				Attributes: map[string]schema.Attribute{
 					"archived_at": schema.StringAttribute{
 						Computed: true,
@@ -1423,148 +1169,130 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 						Description: `ID of the ruleset`,
 					},
 					"is_team_default": schema.BoolAttribute{
-						Computed:    true,
+						PlanModifiers: []planmodifier.Bool{
+							boolplanmodifier.RequiresReplace(),
+						},
+						Required:    true,
 						Description: `Default ruleset of Workspace`,
 					},
 					"name": schema.StringAttribute{
-						Computed:    true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
+						Required:    true,
 						Description: `A unique name for the ruleset`,
 					},
 					"rules": schema.ListNestedAttribute{
-						Computed: true,
+						PlanModifiers: []planmodifier.List{
+							listplanmodifier.RequiresReplace(),
+						},
+						Required: true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
-								"any": schema.StringAttribute{
-									Computed: true,
-									Attributes: map[string]schema.Attribute{
-										"transform_full": schema.SingleNestedAttribute{
-											Computed: true,
-											Attributes: map[string]schema.Attribute{
-												"transformation": schema.SingleNestedAttribute{
-													Computed: true,
-													Attributes: map[string]schema.Attribute{
-														"code": schema.StringAttribute{
-															Computed:    true,
-															Description: `A string representation of your JavaScript (ES6) code to run`,
-														},
-														"env": schema.MapAttribute{
-															Computed:    true,
-															ElementType: types.StringType,
-															Description: `A key-value object of environment variables to encrypt and expose to your transformation code`,
-														},
-														"name": schema.StringAttribute{
-															Computed:    true,
-															Description: `The unique name of the transformation`,
-														},
-													},
-													Description: `You can optionally define a new transformation while creating a transform rule`,
-												},
-												"transformation_id": schema.StringAttribute{
-													Computed:    true,
-													Description: `ID of the attached transformation object. Optional input, always set once the rule is defined`,
-												},
-												"type": schema.StringAttribute{
-													Computed: true,
-													Validators: []validator.String{
-														stringvalidator.OneOf(
-															"transform",
-														),
-													},
-													MarkdownDescription: `must be one of [transform]` + "\n" +
-														`A transformation rule must be of type ` + "`" + `transformation` + "`" + ``,
-												},
-											},
-										},
-										"transform_reference": schema.SingleNestedAttribute{
-											Computed: true,
-											Attributes: map[string]schema.Attribute{
-												"transformation_id": schema.StringAttribute{
-													Computed:    true,
-													Description: `ID of the attached transformation object. Optional input, always set once the rule is defined`,
-												},
-												"type": schema.StringAttribute{
-													Computed: true,
-													Validators: []validator.String{
-														stringvalidator.OneOf(
-															"transform",
-														),
-													},
-													MarkdownDescription: `must be one of [transform]` + "\n" +
-														`A transformation rule must be of type ` + "`" + `transformation` + "`" + ``,
-												},
-											},
-										},
-									},
-									Validators: []validator.Object{
-										validators.ExactlyOneChild(),
-									},
-									Validators: []validator.String{
-										validators.IsValidJSON(),
-									},
-									Description: `Parsed as JSON.`,
-								},
 								"alert_rule": schema.SingleNestedAttribute{
 									Computed: true,
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.RequiresReplace(),
+									},
+									Optional: true,
 									Attributes: map[string]schema.Attribute{
 										"strategy": schema.StringAttribute{
-											Computed: true,
+											PlanModifiers: []planmodifier.String{
+												stringplanmodifier.RequiresReplace(),
+											},
+											Required: true,
 											Validators: []validator.String{
 												stringvalidator.OneOf(
 													"each_attempt",
 													"last_attempt",
 												),
 											},
-											MarkdownDescription: `must be one of [each_attempt, last_attempt]` + "\n" +
+											MarkdownDescription: `must be one of ["each_attempt", "last_attempt"]` + "\n" +
 												`Alert strategy to use`,
 										},
 										"type": schema.StringAttribute{
-											Computed: true,
+											PlanModifiers: []planmodifier.String{
+												stringplanmodifier.RequiresReplace(),
+											},
+											Required: true,
 											Validators: []validator.String{
 												stringvalidator.OneOf(
 													"alert",
 												),
 											},
-											MarkdownDescription: `must be one of [alert]` + "\n" +
+											MarkdownDescription: `must be one of ["alert"]` + "\n" +
 												`An alert rule must be of type ` + "`" + `alert` + "`" + ``,
 										},
 									},
 								},
 								"delay_rule": schema.SingleNestedAttribute{
 									Computed: true,
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.RequiresReplace(),
+									},
+									Optional: true,
 									Attributes: map[string]schema.Attribute{
 										"delay": schema.Int64Attribute{
-											Computed:    true,
+											PlanModifiers: []planmodifier.Int64{
+												int64planmodifier.RequiresReplace(),
+											},
+											Required:    true,
 											Description: `Delay to introduce in MS`,
 										},
 										"type": schema.StringAttribute{
-											Computed: true,
+											PlanModifiers: []planmodifier.String{
+												stringplanmodifier.RequiresReplace(),
+											},
+											Required: true,
 											Validators: []validator.String{
 												stringvalidator.OneOf(
 													"delay",
 												),
 											},
-											MarkdownDescription: `must be one of [delay]` + "\n" +
+											MarkdownDescription: `must be one of ["delay"]` + "\n" +
 												`A delay rule must be of type ` + "`" + `delay` + "`" + ``,
 										},
 									},
 								},
 								"filter_rule": schema.SingleNestedAttribute{
 									Computed: true,
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.RequiresReplace(),
+									},
+									Optional: true,
 									Attributes: map[string]schema.Attribute{
 										"body": schema.SingleNestedAttribute{
 											Computed: true,
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.RequiresReplace(),
+											},
+											Optional: true,
 											Attributes: map[string]schema.Attribute{
 												"str": schema.StringAttribute{
 													Computed: true,
+													PlanModifiers: []planmodifier.String{
+														stringplanmodifier.RequiresReplace(),
+													},
+													Optional: true,
 												},
 												"float32": schema.NumberAttribute{
-													Computed: true,
+													PlanModifiers: []planmodifier.Number{
+														numberplanmodifier.RequiresReplace(),
+													},
+													Optional: true,
 												},
 												"boolean": schema.BoolAttribute{
-													Computed: true,
+													PlanModifiers: []planmodifier.Bool{
+														boolplanmodifier.RequiresReplace(),
+													},
+													Optional: true,
 												},
 												"connection_filter_property_4": schema.SingleNestedAttribute{
-													Computed:    true,
+													Computed: true,
+													PlanModifiers: []planmodifier.Object{
+														objectplanmodifier.RequiresReplace(),
+													},
+													Optional:    true,
 													Attributes:  map[string]schema.Attribute{},
 													Description: `JSON using our filter syntax to filter on request headers`,
 												},
@@ -1576,18 +1304,36 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 										},
 										"headers": schema.SingleNestedAttribute{
 											Computed: true,
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.RequiresReplace(),
+											},
+											Optional: true,
 											Attributes: map[string]schema.Attribute{
 												"str": schema.StringAttribute{
 													Computed: true,
+													PlanModifiers: []planmodifier.String{
+														stringplanmodifier.RequiresReplace(),
+													},
+													Optional: true,
 												},
 												"float32": schema.NumberAttribute{
-													Computed: true,
+													PlanModifiers: []planmodifier.Number{
+														numberplanmodifier.RequiresReplace(),
+													},
+													Optional: true,
 												},
 												"boolean": schema.BoolAttribute{
-													Computed: true,
+													PlanModifiers: []planmodifier.Bool{
+														boolplanmodifier.RequiresReplace(),
+													},
+													Optional: true,
 												},
 												"connection_filter_property_4": schema.SingleNestedAttribute{
-													Computed:    true,
+													Computed: true,
+													PlanModifiers: []planmodifier.Object{
+														objectplanmodifier.RequiresReplace(),
+													},
+													Optional:    true,
 													Attributes:  map[string]schema.Attribute{},
 													Description: `JSON using our filter syntax to filter on request headers`,
 												},
@@ -1599,18 +1345,36 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 										},
 										"path": schema.SingleNestedAttribute{
 											Computed: true,
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.RequiresReplace(),
+											},
+											Optional: true,
 											Attributes: map[string]schema.Attribute{
 												"str": schema.StringAttribute{
 													Computed: true,
+													PlanModifiers: []planmodifier.String{
+														stringplanmodifier.RequiresReplace(),
+													},
+													Optional: true,
 												},
 												"float32": schema.NumberAttribute{
-													Computed: true,
+													PlanModifiers: []planmodifier.Number{
+														numberplanmodifier.RequiresReplace(),
+													},
+													Optional: true,
 												},
 												"boolean": schema.BoolAttribute{
-													Computed: true,
+													PlanModifiers: []planmodifier.Bool{
+														boolplanmodifier.RequiresReplace(),
+													},
+													Optional: true,
 												},
 												"connection_filter_property_4": schema.SingleNestedAttribute{
-													Computed:    true,
+													Computed: true,
+													PlanModifiers: []planmodifier.Object{
+														objectplanmodifier.RequiresReplace(),
+													},
+													Optional:    true,
 													Attributes:  map[string]schema.Attribute{},
 													Description: `JSON using our filter syntax to filter on request headers`,
 												},
@@ -1622,18 +1386,36 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 										},
 										"query": schema.SingleNestedAttribute{
 											Computed: true,
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.RequiresReplace(),
+											},
+											Optional: true,
 											Attributes: map[string]schema.Attribute{
 												"str": schema.StringAttribute{
 													Computed: true,
+													PlanModifiers: []planmodifier.String{
+														stringplanmodifier.RequiresReplace(),
+													},
+													Optional: true,
 												},
 												"float32": schema.NumberAttribute{
-													Computed: true,
+													PlanModifiers: []planmodifier.Number{
+														numberplanmodifier.RequiresReplace(),
+													},
+													Optional: true,
 												},
 												"boolean": schema.BoolAttribute{
-													Computed: true,
+													PlanModifiers: []planmodifier.Bool{
+														boolplanmodifier.RequiresReplace(),
+													},
+													Optional: true,
 												},
 												"connection_filter_property_4": schema.SingleNestedAttribute{
-													Computed:    true,
+													Computed: true,
+													PlanModifiers: []planmodifier.Object{
+														objectplanmodifier.RequiresReplace(),
+													},
+													Optional:    true,
 													Attributes:  map[string]schema.Attribute{},
 													Description: `JSON using our filter syntax to filter on request headers`,
 												},
@@ -1644,49 +1426,174 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 											Description: `JSON using our filter syntax to filter on request headers`,
 										},
 										"type": schema.StringAttribute{
-											Computed: true,
+											PlanModifiers: []planmodifier.String{
+												stringplanmodifier.RequiresReplace(),
+											},
+											Required: true,
 											Validators: []validator.String{
 												stringvalidator.OneOf(
 													"filter",
 												),
 											},
-											MarkdownDescription: `must be one of [filter]` + "\n" +
+											MarkdownDescription: `must be one of ["filter"]` + "\n" +
 												`A filter rule must be of type ` + "`" + `filter` + "`" + ``,
 										},
 									},
 								},
 								"retry_rule": schema.SingleNestedAttribute{
 									Computed: true,
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.RequiresReplace(),
+									},
+									Optional: true,
 									Attributes: map[string]schema.Attribute{
 										"count": schema.Int64Attribute{
-											Computed:    true,
+											Computed: true,
+											PlanModifiers: []planmodifier.Int64{
+												int64planmodifier.RequiresReplace(),
+											},
+											Optional:    true,
 											Description: `Maximum number of retries to attempt`,
 										},
 										"interval": schema.Int64Attribute{
-											Computed:    true,
+											Computed: true,
+											PlanModifiers: []planmodifier.Int64{
+												int64planmodifier.RequiresReplace(),
+											},
+											Optional:    true,
 											Description: `Time in MS between each retry`,
 										},
 										"strategy": schema.StringAttribute{
-											Computed: true,
+											PlanModifiers: []planmodifier.String{
+												stringplanmodifier.RequiresReplace(),
+											},
+											Required: true,
 											Validators: []validator.String{
 												stringvalidator.OneOf(
 													"linear",
 													"exponential",
 												),
 											},
-											MarkdownDescription: `must be one of [linear, exponential]` + "\n" +
+											MarkdownDescription: `must be one of ["linear", "exponential"]` + "\n" +
 												`Algorithm to use when calculating delay between retries`,
 										},
 										"type": schema.StringAttribute{
-											Computed: true,
+											PlanModifiers: []planmodifier.String{
+												stringplanmodifier.RequiresReplace(),
+											},
+											Required: true,
 											Validators: []validator.String{
 												stringvalidator.OneOf(
 													"retry",
 												),
 											},
-											MarkdownDescription: `must be one of [retry]` + "\n" +
+											MarkdownDescription: `must be one of ["retry"]` + "\n" +
 												`A retry rule must be of type ` + "`" + `retry` + "`" + ``,
 										},
+									},
+								},
+								"transform_rule": schema.SingleNestedAttribute{
+									Computed: true,
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.RequiresReplace(),
+									},
+									Optional: true,
+									Attributes: map[string]schema.Attribute{
+										"transform_full": schema.SingleNestedAttribute{
+											Computed: true,
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.RequiresReplace(),
+											},
+											Optional: true,
+											Attributes: map[string]schema.Attribute{
+												"transformation": schema.SingleNestedAttribute{
+													Computed: true,
+													PlanModifiers: []planmodifier.Object{
+														objectplanmodifier.RequiresReplace(),
+													},
+													Optional: true,
+													Attributes: map[string]schema.Attribute{
+														"code": schema.StringAttribute{
+															PlanModifiers: []planmodifier.String{
+																stringplanmodifier.RequiresReplace(),
+															},
+															Required:    true,
+															Description: `A string representation of your JavaScript (ES6) code to run`,
+														},
+														"env": schema.MapAttribute{
+															Computed: true,
+															PlanModifiers: []planmodifier.Map{
+																mapplanmodifier.RequiresReplace(),
+															},
+															Optional:    true,
+															ElementType: types.StringType,
+															Description: `A key-value object of environment variables to encrypt and expose to your transformation code`,
+														},
+														"name": schema.StringAttribute{
+															PlanModifiers: []planmodifier.String{
+																stringplanmodifier.RequiresReplace(),
+															},
+															Required:    true,
+															Description: `The unique name of the transformation`,
+														},
+													},
+													Description: `You can optionally define a new transformation while creating a transform rule`,
+												},
+												"transformation_id": schema.StringAttribute{
+													Computed: true,
+													PlanModifiers: []planmodifier.String{
+														stringplanmodifier.RequiresReplace(),
+													},
+													Optional:    true,
+													Description: `ID of the attached transformation object. Optional input, always set once the rule is defined`,
+												},
+												"type": schema.StringAttribute{
+													PlanModifiers: []planmodifier.String{
+														stringplanmodifier.RequiresReplace(),
+													},
+													Required: true,
+													Validators: []validator.String{
+														stringvalidator.OneOf(
+															"transform",
+														),
+													},
+													MarkdownDescription: `must be one of ["transform"]` + "\n" +
+														`A transformation rule must be of type ` + "`" + `transformation` + "`" + ``,
+												},
+											},
+										},
+										"transform_reference": schema.SingleNestedAttribute{
+											Computed: true,
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.RequiresReplace(),
+											},
+											Optional: true,
+											Attributes: map[string]schema.Attribute{
+												"transformation_id": schema.StringAttribute{
+													PlanModifiers: []planmodifier.String{
+														stringplanmodifier.RequiresReplace(),
+													},
+													Required:    true,
+													Description: `ID of the attached transformation object. Optional input, always set once the rule is defined`,
+												},
+												"type": schema.StringAttribute{
+													PlanModifiers: []planmodifier.String{
+														stringplanmodifier.RequiresReplace(),
+													},
+													Required: true,
+													Validators: []validator.String{
+														stringvalidator.OneOf(
+															"transform",
+														),
+													},
+													MarkdownDescription: `must be one of ["transform"]` + "\n" +
+														`A transformation rule must be of type ` + "`" + `transformation` + "`" + ``,
+												},
+											},
+										},
+									},
+									Validators: []validator.Object{
+										validators.ExactlyOneChild(),
 									},
 								},
 							},
@@ -1718,10 +1625,17 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 				Description: `ID of a rule to bind to the connection. Default to the Workspace default ruleset`,
 			},
 			"source": schema.SingleNestedAttribute{
-				Computed: true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.RequiresReplace(),
+				},
+				Required: true,
 				Attributes: map[string]schema.Attribute{
 					"allowed_http_methods": schema.ListAttribute{
-						Computed:    true,
+						Computed: true,
+						PlanModifiers: []planmodifier.List{
+							listplanmodifier.RequiresReplace(),
+						},
+						Optional:    true,
 						ElementType: types.StringType,
 						Description: `List of allowed HTTP methods. Defaults to PUT, POST, PATCH, DELETE.`,
 					},
@@ -1741,13 +1655,23 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 					},
 					"custom_response": schema.SingleNestedAttribute{
 						Computed: true,
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.RequiresReplace(),
+						},
+						Optional: true,
 						Attributes: map[string]schema.Attribute{
 							"body": schema.StringAttribute{
-								Computed:    true,
+								PlanModifiers: []planmodifier.String{
+									stringplanmodifier.RequiresReplace(),
+								},
+								Required:    true,
 								Description: `Body of the custom response`,
 							},
 							"content_type": schema.StringAttribute{
-								Computed: true,
+								PlanModifiers: []planmodifier.String{
+									stringplanmodifier.RequiresReplace(),
+								},
+								Required: true,
 								Validators: []validator.String{
 									stringvalidator.OneOf(
 										"json",
@@ -1755,7 +1679,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 										"xml",
 									),
 								},
-								MarkdownDescription: `must be one of [json, text, xml]` + "\n" +
+								MarkdownDescription: `must be one of ["json", "text", "xml"]` + "\n" +
 									`Content type of the custom response`,
 							},
 						},
@@ -1813,7 +1737,7 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 										"aws_sns",
 									),
 								},
-								MarkdownDescription: `must be one of [twitter, stripe, recharge, github, shopify, postmark, typeform, hmac, basic_auth, api_key, xero, svix, zoom, akeneo, adyen, gitlab, property-finder, woocommerce, oura, commercelayer, mailgun, pipedrive, sendgrid, workos, synctera, aws_sns]` + "\n" +
+								MarkdownDescription: `must be one of ["twitter", "stripe", "recharge", "github", "shopify", "postmark", "typeform", "hmac", "basic_auth", "api_key", "xero", "svix", "zoom", "akeneo", "adyen", "gitlab", "property-finder", "woocommerce", "oura", "commercelayer", "mailgun", "pipedrive", "sendgrid", "workos", "synctera", "aws_sns"]` + "\n" +
 									`The provider name`,
 							},
 						},
@@ -1824,7 +1748,10 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 						Description: `ID of the integration`,
 					},
 					"name": schema.StringAttribute{
-						Computed:    true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
+						Required:    true,
 						Description: `Name for the source`,
 					},
 					"team_id": schema.StringAttribute{
@@ -1862,13 +1789,6 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 					validators.IsRFC3339(),
 				},
 				Description: `Date the connection was last updated`,
-			},
-			"url": schema.StringAttribute{
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-				Optional:    true,
-				Description: `Endpoint of the destination`,
 			},
 		},
 	}
@@ -1912,367 +1832,13 @@ func (r *ConnectionResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
-	var destination *operations.CreateConnectionRequestBodyDestination
-	if data != nil {
-		var authMethod interface{}
-		var hookdeckSignature *shared.HookdeckSignature
-		if data.AuthMethod != nil {
-			var config *shared.DestinationAuthMethodSignatureConfig
-			if data.AuthMethod != nil {
-				config = &shared.DestinationAuthMethodSignatureConfig{}
-			}
-			type1 := shared.HookdeckSignatureType(data.AuthMethod.Type.ValueString())
-			hookdeckSignature = &shared.HookdeckSignature{
-				Config: config,
-				Type:   type1,
-			}
-		}
-		if hookdeckSignature != nil {
-			authMethod = hookdeckSignature
-		}
-		var basicAuth *shared.BasicAuth
-		if data.AuthMethod != nil {
-			var config1 *shared.DestinationAuthMethodBasicAuthConfig
-			if data.AuthMethod != nil {
-				password := data.AuthMethod.Password.ValueString()
-				username := data.AuthMethod.Username.ValueString()
-				config1 = &shared.DestinationAuthMethodBasicAuthConfig{
-					Password: password,
-					Username: username,
-				}
-			}
-			type2 := shared.BasicAuthType(data.AuthMethod.Type.ValueString())
-			basicAuth = &shared.BasicAuth{
-				Config: config1,
-				Type:   type2,
-			}
-		}
-		if basicAuth != nil {
-			authMethod = basicAuth
-		}
-		var apiKey *shared.APIKey
-		if data.AuthMethod != nil {
-			var config2 *shared.DestinationAuthMethodAPIKeyConfig
-			if data.AuthMethod != nil {
-				apiKey1 := data.AuthMethod.Config.ValueString()
-				key := data.AuthMethod.Config.ValueString()
-				to := new(shared.DestinationAuthMethodAPIKeyConfigTo)
-				if !data.AuthMethod.Config.IsUnknown() && !data.AuthMethod.Config.IsNull() {
-					*to = shared.DestinationAuthMethodAPIKeyConfigTo(data.AuthMethod.Config.ValueString())
-				} else {
-					to = nil
-				}
-				config2 = &shared.DestinationAuthMethodAPIKeyConfig{
-					APIKey: apiKey1,
-					Key:    key,
-					To:     to,
-				}
-			}
-			type3 := shared.APIKeyType(data.AuthMethod.Type.ValueString())
-			apiKey = &shared.APIKey{
-				Config: config2,
-				Type:   type3,
-			}
-		}
-		if apiKey != nil {
-			authMethod = apiKey
-		}
-		var bearerToken *shared.BearerToken
-		if data.AuthMethod != nil {
-			var config3 *shared.DestinationAuthMethodBearerTokenConfig
-			token := data.AuthMethod.Config.ValueString()
-			config3 = &shared.DestinationAuthMethodBearerTokenConfig{
-				Token: token,
-			}
-			type4 := shared.BearerTokenType(data.AuthMethod.Type.ValueString())
-			bearerToken = &shared.BearerToken{
-				Config: config3,
-				Type:   type4,
-			}
-		}
-		if bearerToken != nil {
-			authMethod = bearerToken
-		}
-		var customSignature *shared.CustomSignature
-		if data.AuthMethod != nil {
-			key1 := data.AuthMethod.Config.ValueString()
-			signingSecret := new(string)
-			if !data.AuthMethod.Config.IsUnknown() && !data.AuthMethod.Config.IsNull() {
-				*signingSecret = data.AuthMethod.Config.ValueString()
-			} else {
-				signingSecret = nil
-			}
-			config4 := shared.DestinationAuthMethodCustomSignatureConfig{
-				Key:           key1,
-				SigningSecret: signingSecret,
-			}
-			type5 := shared.CustomSignatureType(data.AuthMethod.Type.ValueString())
-			customSignature = &shared.CustomSignature{
-				Config: config4,
-				Type:   type5,
-			}
-		}
-		if customSignature != nil {
-			authMethod = customSignature
-		}
-		cliPath := new(string)
-		if !data.CliPath.IsUnknown() && !data.CliPath.IsNull() {
-			*cliPath = data.CliPath.ValueString()
-		} else {
-			cliPath = nil
-		}
-		httpMethod := new(shared.DestinationHTTPMethod)
-		if !data.HTTPMethod.IsUnknown() && !data.HTTPMethod.IsNull() {
-			*httpMethod = shared.DestinationHTTPMethod(data.HTTPMethod.ValueString())
-		} else {
-			httpMethod = nil
-		}
-		name := data.Name.ValueString()
-		pathForwardingDisabled := new(bool)
-		if !data.PathForwardingDisabled.IsUnknown() && !data.PathForwardingDisabled.IsNull() {
-			*pathForwardingDisabled = data.PathForwardingDisabled.ValueBool()
-		} else {
-			pathForwardingDisabled = nil
-		}
-		var rateLimit interface{}
-		rateLimitPeriod := new(operations.CreateConnectionRequestBodyDestinationRateLimitPeriod)
-		if !data.RateLimitPeriod.IsUnknown() && !data.RateLimitPeriod.IsNull() {
-			*rateLimitPeriod = operations.CreateConnectionRequestBodyDestinationRateLimitPeriod(data.RateLimitPeriod.ValueString())
-		} else {
-			rateLimitPeriod = nil
-		}
-		url := new(string)
-		if !data.URL.IsUnknown() && !data.URL.IsNull() {
-			*url = data.URL.ValueString()
-		} else {
-			url = nil
-		}
-		destination = &operations.CreateConnectionRequestBodyDestination{
-			AuthMethod:             authMethod,
-			CliPath:                cliPath,
-			HTTPMethod:             httpMethod,
-			Name:                   name,
-			PathForwardingDisabled: pathForwardingDisabled,
-			RateLimit:              rateLimit,
-			RateLimitPeriod:        rateLimitPeriod,
-			URL:                    url,
-		}
-	}
-	destinationID := new(string)
-	if !data.DestinationID.IsUnknown() && !data.DestinationID.IsNull() {
-		*destinationID = data.DestinationID.ValueString()
-	} else {
-		destinationID = nil
-	}
-	name1 := data.Name.ValueString()
-	rules := make([]shared.Rule, 0)
-	for _, rulesItem := range data.Rules {
-		if rulesItem.RetryRule != nil {
-			count := new(int64)
-			if !rulesItem.Any.IsUnknown() && !rulesItem.Any.IsNull() {
-				*count = rulesItem.Any.ValueInt64()
-			} else {
-				count = nil
-			}
-			interval := new(int64)
-			if !rulesItem.Any.IsUnknown() && !rulesItem.Any.IsNull() {
-				*interval = rulesItem.Any.ValueInt64()
-			} else {
-				interval = nil
-			}
-			strategy := shared.RetryStrategy(rulesItem.Any.ValueString())
-			type6 := shared.RetryRuleType(rulesItem.Any.ValueString())
-			retryRule := shared.RetryRule{
-				Count:    count,
-				Interval: interval,
-				Strategy: strategy,
-				Type:     type6,
-			}
-			rules = append(rules, shared.Rule{
-				RetryRule: &retryRule,
-			})
-		}
-		if rulesItem.AlertRule != nil {
-			strategy1 := shared.AlertStrategy(rulesItem.Strategy.ValueString())
-			type7 := shared.AlertRuleType(rulesItem.Type.ValueString())
-			alertRule := shared.AlertRule{
-				Strategy: strategy1,
-				Type:     type7,
-			}
-			rules = append(rules, shared.Rule{
-				AlertRule: &alertRule,
-			})
-		}
-		if rulesItem.FilterRule != nil {
-			var body *shared.ConnectionFilterProperty
-			var headers *shared.ConnectionFilterProperty
-			var path *shared.ConnectionFilterProperty
-			var query *shared.ConnectionFilterProperty
-			type8 := shared.FilterRuleType(rulesItem.Type.ValueString())
-			filterRule := shared.FilterRule{
-				Body:    body,
-				Headers: headers,
-				Path:    path,
-				Query:   query,
-				Type:    type8,
-			}
-			rules = append(rules, shared.Rule{
-				FilterRule: &filterRule,
-			})
-		}
-		if rulesItem.Any != nil {
-			var any interface{}
-			rules = append(rules, shared.Rule{
-				Any: &any,
-			})
-		}
-		if rulesItem.DelayRule != nil {
-			delay := rulesItem.RetryRule.ValueInt64()
-			type9 := shared.DelayRuleType(rulesItem.Type.ValueString())
-			delayRule := shared.DelayRule{
-				Delay: delay,
-				Type:  type9,
-			}
-			rules = append(rules, shared.Rule{
-				DelayRule: &delayRule,
-			})
-		}
-	}
-	var ruleset *operations.CreateConnectionRequestBodyRuleset
-	if data != nil {
-		isTeamDefault := new(bool)
-		if !data.IsTeamDefault.IsUnknown() && !data.IsTeamDefault.IsNull() {
-			*isTeamDefault = data.IsTeamDefault.ValueBool()
-		} else {
-			isTeamDefault = nil
-		}
-		name2 := data.Name.ValueString()
-		rules1 := make([]shared.Rule, 0)
-		for _, rulesItem1 := range data.Rules {
-			if rulesItem1.RetryRule != nil {
-				count1 := new(int64)
-				if !rulesItem1.Any.IsUnknown() && !rulesItem1.Any.IsNull() {
-					*count1 = rulesItem1.Any.ValueInt64()
-				} else {
-					count1 = nil
-				}
-				interval1 := new(int64)
-				if !rulesItem1.Any.IsUnknown() && !rulesItem1.Any.IsNull() {
-					*interval1 = rulesItem1.Any.ValueInt64()
-				} else {
-					interval1 = nil
-				}
-				strategy2 := shared.RetryStrategy(rulesItem1.Any.ValueString())
-				type10 := shared.RetryRuleType(rulesItem1.Any.ValueString())
-				retryRule1 := shared.RetryRule{
-					Count:    count1,
-					Interval: interval1,
-					Strategy: strategy2,
-					Type:     type10,
-				}
-				rules1 = append(rules1, shared.Rule{
-					RetryRule: &retryRule1,
-				})
-			}
-			if rulesItem1.AlertRule != nil {
-				strategy3 := shared.AlertStrategy(rulesItem1.Strategy.ValueString())
-				type11 := shared.AlertRuleType(rulesItem1.Type.ValueString())
-				alertRule1 := shared.AlertRule{
-					Strategy: strategy3,
-					Type:     type11,
-				}
-				rules1 = append(rules1, shared.Rule{
-					AlertRule: &alertRule1,
-				})
-			}
-			if rulesItem1.FilterRule != nil {
-				var body1 *shared.ConnectionFilterProperty
-				var headers1 *shared.ConnectionFilterProperty
-				var path1 *shared.ConnectionFilterProperty
-				var query1 *shared.ConnectionFilterProperty
-				type12 := shared.FilterRuleType(rulesItem1.Type.ValueString())
-				filterRule1 := shared.FilterRule{
-					Body:    body1,
-					Headers: headers1,
-					Path:    path1,
-					Query:   query1,
-					Type:    type12,
-				}
-				rules1 = append(rules1, shared.Rule{
-					FilterRule: &filterRule1,
-				})
-			}
-			if rulesItem1.Any != nil {
-				var any1 interface{}
-				rules1 = append(rules1, shared.Rule{
-					Any: &any1,
-				})
-			}
-			if rulesItem1.DelayRule != nil {
-				delay1 := rulesItem1.RetryRule.ValueInt64()
-				type13 := shared.DelayRuleType(rulesItem1.Type.ValueString())
-				delayRule1 := shared.DelayRule{
-					Delay: delay1,
-					Type:  type13,
-				}
-				rules1 = append(rules1, shared.Rule{
-					DelayRule: &delayRule1,
-				})
-			}
-		}
-		ruleset = &operations.CreateConnectionRequestBodyRuleset{
-			IsTeamDefault: isTeamDefault,
-			Name:          name2,
-			Rules:         rules1,
-		}
-	}
-	rulesetID := new(string)
-	if !data.RulesetID.IsUnknown() && !data.RulesetID.IsNull() {
-		*rulesetID = data.RulesetID.ValueString()
-	} else {
-		rulesetID = nil
-	}
-	var source *operations.CreateConnectionRequestBodySource
-	if data != nil {
-		allowedHTTPMethods := make([]shared.SourceAllowedHTTPMethod, 0)
-		for _, allowedHTTPMethodsItem := range data.AllowedHTTPMethods {
-			allowedHTTPMethods = append(allowedHTTPMethods, shared.SourceAllowedHTTPMethod(allowedHTTPMethodsItem.ValueString()))
-		}
-		var customResponse *shared.SourceCustomResponse
-		if data != nil {
-			body2 := data.Body.ValueString()
-			contentType := shared.SourceCustomResponseContentType(data.ContentType.ValueString())
-			customResponse = &shared.SourceCustomResponse{
-				Body:        body2,
-				ContentType: contentType,
-			}
-		}
-		name3 := data.Name.ValueString()
-		source = &operations.CreateConnectionRequestBodySource{
-			AllowedHTTPMethods: allowedHTTPMethods,
-			CustomResponse:     customResponse,
-			Name:               name3,
-		}
-	}
-	sourceID := new(string)
-	if !data.SourceID.IsUnknown() && !data.SourceID.IsNull() {
-		*sourceID = data.SourceID.ValueString()
-	} else {
-		sourceID = nil
-	}
-	request := operations.CreateConnectionRequestBody{
-		Destination:   destination,
-		DestinationID: destinationID,
-		Name:          name1,
-		Rules:         rules,
-		Ruleset:       ruleset,
-		RulesetID:     rulesetID,
-		Source:        source,
-		SourceID:      sourceID,
-	}
+	request := *data.ToCreateSDKType()
 	res, err := r.client.Connection.Create(ctx, request)
 	if err != nil {
 		resp.Diagnostics.AddError("failure to invoke API", err.Error())
+		if res != nil && res.RawResponse != nil {
+			resp.Diagnostics.AddError("unexpected http request/response", debugResponse(res.RawResponse))
+		}
 		return
 	}
 	if res == nil {
@@ -2311,41 +1877,16 @@ func (r *ConnectionResource) Read(ctx context.Context, req resource.ReadRequest,
 		return
 	}
 
-	archived := new(bool)
-	if !data.IsTeamDefault.IsUnknown() && !data.IsTeamDefault.IsNull() {
-		*archived = data.IsTeamDefault.ValueBool()
-	} else {
-		archived = nil
+	id := data.ID.ValueString()
+	request := operations.GetConnectionRequest{
+		ID: id,
 	}
-	var archivedAt *operations.GetConnectionsArchivedAt
-	var destinationID *operations.GetConnectionsDestinationID
-	var dir *operations.GetConnectionsDir
-	fullName := new(string)
-	if !data.Name.IsUnknown() && !data.Name.IsNull() {
-		*fullName = data.Name.ValueString()
-	} else {
-		fullName = nil
-	}
-	var id *operations.GetConnectionsID
-	var name *operations.GetConnectionsName
-	var orderBy *operations.GetConnectionsOrderBy
-	var pausedAt *operations.GetConnectionsPausedAt
-	var sourceID *operations.GetConnectionsSourceID
-	request := operations.GetConnectionsRequest{
-		Archived:      archived,
-		ArchivedAt:    archivedAt,
-		DestinationID: destinationID,
-		Dir:           dir,
-		FullName:      fullName,
-		ID:            id,
-		Name:          name,
-		OrderBy:       orderBy,
-		PausedAt:      pausedAt,
-		SourceID:      sourceID,
-	}
-	res, err := r.client.Connections.Get(ctx, request)
+	res, err := r.client.Connection.Get(ctx, request)
 	if err != nil {
 		resp.Diagnostics.AddError("failure to invoke API", err.Error())
+		if res != nil && res.RawResponse != nil {
+			resp.Diagnostics.AddError("unexpected http request/response", debugResponse(res.RawResponse))
+		}
 		return
 	}
 	if res == nil {
@@ -2356,11 +1897,11 @@ func (r *ConnectionResource) Read(ctx context.Context, req resource.ReadRequest,
 		resp.Diagnostics.AddError(fmt.Sprintf("unexpected response from API. Got an unexpected response code %v", res.StatusCode), debugResponse(res.RawResponse))
 		return
 	}
-	if res.APIErrorResponse == nil {
+	if res.Connection == nil {
 		resp.Diagnostics.AddError("unexpected response from API. No response body", debugResponse(res.RawResponse))
 		return
 	}
-	data.RefreshFromGetResponse(res.APIErrorResponse)
+	data.RefreshFromGetResponse(res.Connection)
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -2404,6 +1945,9 @@ func (r *ConnectionResource) Delete(ctx context.Context, req resource.DeleteRequ
 	res, err := r.client.Connection.Delete(ctx, request)
 	if err != nil {
 		resp.Diagnostics.AddError("failure to invoke API", err.Error())
+		if res != nil && res.RawResponse != nil {
+			resp.Diagnostics.AddError("unexpected http request/response", debugResponse(res.RawResponse))
+		}
 		return
 	}
 	if res == nil {
@@ -2418,5 +1962,5 @@ func (r *ConnectionResource) Delete(ctx context.Context, req resource.DeleteRequ
 }
 
 func (r *ConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.AddError("Not Implemented", "No available import state operation is available for resource connection.")
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

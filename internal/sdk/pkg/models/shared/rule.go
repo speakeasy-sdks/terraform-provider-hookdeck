@@ -3,27 +3,26 @@
 package shared
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
+	"hashicups/internal/sdk/pkg/utils"
 )
 
 type RuleType string
 
 const (
-	RuleTypeRetryRule  RuleType = "RetryRule"
-	RuleTypeAlertRule  RuleType = "AlertRule"
-	RuleTypeFilterRule RuleType = "FilterRule"
-	RuleTypeAny        RuleType = "any"
-	RuleTypeDelayRule  RuleType = "DelayRule"
+	RuleTypeRetryRule     RuleType = "RetryRule"
+	RuleTypeAlertRule     RuleType = "AlertRule"
+	RuleTypeFilterRule    RuleType = "FilterRule"
+	RuleTypeTransformRule RuleType = "TransformRule"
+	RuleTypeDelayRule     RuleType = "DelayRule"
 )
 
 type Rule struct {
-	RetryRule  *RetryRule
-	AlertRule  *AlertRule
-	FilterRule *FilterRule
-	Any        interface{}
-	DelayRule  *DelayRule
+	RetryRule     *RetryRule
+	AlertRule     *AlertRule
+	FilterRule    *FilterRule
+	TransformRule *TransformRule
+	DelayRule     *DelayRule
 
 	Type RuleType
 }
@@ -55,12 +54,12 @@ func CreateRuleFilterRule(filterRule FilterRule) Rule {
 	}
 }
 
-func CreateRuleAny(any interface{}) Rule {
-	typ := RuleTypeAny
+func CreateRuleTransformRule(transformRule TransformRule) Rule {
+	typ := RuleTypeTransformRule
 
 	return Rule{
-		Any:  &any,
-		Type: typ,
+		TransformRule: &transformRule,
+		Type:          typ,
 	}
 }
 
@@ -74,50 +73,39 @@ func CreateRuleDelayRule(delayRule DelayRule) Rule {
 }
 
 func (u *Rule) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
-
-	retryRule := new(RetryRule)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&retryRule); err == nil {
-		u.RetryRule = retryRule
-		u.Type = RuleTypeRetryRule
-		return nil
-	}
 
 	alertRule := new(AlertRule)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&alertRule); err == nil {
+	if err := utils.UnmarshalJSON(data, &alertRule, "", true, true); err == nil {
 		u.AlertRule = alertRule
 		u.Type = RuleTypeAlertRule
 		return nil
 	}
 
+	delayRule := new(DelayRule)
+	if err := utils.UnmarshalJSON(data, &delayRule, "", true, true); err == nil {
+		u.DelayRule = delayRule
+		u.Type = RuleTypeDelayRule
+		return nil
+	}
+
+	retryRule := new(RetryRule)
+	if err := utils.UnmarshalJSON(data, &retryRule, "", true, true); err == nil {
+		u.RetryRule = retryRule
+		u.Type = RuleTypeRetryRule
+		return nil
+	}
+
 	filterRule := new(FilterRule)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&filterRule); err == nil {
+	if err := utils.UnmarshalJSON(data, &filterRule, "", true, true); err == nil {
 		u.FilterRule = filterRule
 		u.Type = RuleTypeFilterRule
 		return nil
 	}
 
-	any := new(interface{})
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&any); err == nil {
-		u.Any = any
-		u.Type = RuleTypeAny
-		return nil
-	}
-
-	delayRule := new(DelayRule)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&delayRule); err == nil {
-		u.DelayRule = delayRule
-		u.Type = RuleTypeDelayRule
+	transformRule := new(TransformRule)
+	if err := utils.UnmarshalJSON(data, &transformRule, "", true, true); err == nil {
+		u.TransformRule = transformRule
+		u.Type = RuleTypeTransformRule
 		return nil
 	}
 
@@ -126,24 +114,24 @@ func (u *Rule) UnmarshalJSON(data []byte) error {
 
 func (u Rule) MarshalJSON() ([]byte, error) {
 	if u.RetryRule != nil {
-		return json.Marshal(u.RetryRule)
+		return utils.MarshalJSON(u.RetryRule, "", true)
 	}
 
 	if u.AlertRule != nil {
-		return json.Marshal(u.AlertRule)
+		return utils.MarshalJSON(u.AlertRule, "", true)
 	}
 
 	if u.FilterRule != nil {
-		return json.Marshal(u.FilterRule)
+		return utils.MarshalJSON(u.FilterRule, "", true)
 	}
 
-	if u.Any != nil {
-		return json.Marshal(u.Any)
+	if u.TransformRule != nil {
+		return utils.MarshalJSON(u.TransformRule, "", true)
 	}
 
 	if u.DelayRule != nil {
-		return json.Marshal(u.DelayRule)
+		return utils.MarshalJSON(u.DelayRule, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }

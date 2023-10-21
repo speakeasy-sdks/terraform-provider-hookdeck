@@ -3,10 +3,10 @@
 package shared
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"hashicups/internal/sdk/pkg/utils"
 )
 
 type OrderByDirection4 string
@@ -160,39 +160,30 @@ func CreateOrderByDirectionOrderByDirection4(orderByDirection4 OrderByDirection4
 }
 
 func (u *OrderByDirection) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
 	orderByDirection1 := new(OrderByDirection1)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&orderByDirection1); err == nil {
+	if err := utils.UnmarshalJSON(data, &orderByDirection1, "", true, true); err == nil {
 		u.OrderByDirection1 = orderByDirection1
 		u.Type = OrderByDirectionTypeOrderByDirection1
 		return nil
 	}
 
 	orderByDirection2 := new(OrderByDirection2)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&orderByDirection2); err == nil {
+	if err := utils.UnmarshalJSON(data, &orderByDirection2, "", true, true); err == nil {
 		u.OrderByDirection2 = orderByDirection2
 		u.Type = OrderByDirectionTypeOrderByDirection2
 		return nil
 	}
 
 	orderByDirection3 := new(OrderByDirection3)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&orderByDirection3); err == nil {
+	if err := utils.UnmarshalJSON(data, &orderByDirection3, "", true, true); err == nil {
 		u.OrderByDirection3 = orderByDirection3
 		u.Type = OrderByDirectionTypeOrderByDirection3
 		return nil
 	}
 
 	orderByDirection4 := new(OrderByDirection4)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&orderByDirection4); err == nil {
+	if err := utils.UnmarshalJSON(data, &orderByDirection4, "", true, true); err == nil {
 		u.OrderByDirection4 = orderByDirection4
 		u.Type = OrderByDirectionTypeOrderByDirection4
 		return nil
@@ -203,20 +194,20 @@ func (u *OrderByDirection) UnmarshalJSON(data []byte) error {
 
 func (u OrderByDirection) MarshalJSON() ([]byte, error) {
 	if u.OrderByDirection1 != nil {
-		return json.Marshal(u.OrderByDirection1)
+		return utils.MarshalJSON(u.OrderByDirection1, "", true)
 	}
 
 	if u.OrderByDirection2 != nil {
-		return json.Marshal(u.OrderByDirection2)
+		return utils.MarshalJSON(u.OrderByDirection2, "", true)
 	}
 
 	if u.OrderByDirection3 != nil {
-		return json.Marshal(u.OrderByDirection3)
+		return utils.MarshalJSON(u.OrderByDirection3, "", true)
 	}
 
 	if u.OrderByDirection4 != nil {
-		return json.Marshal(u.OrderByDirection4)
+		return utils.MarshalJSON(u.OrderByDirection4, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }

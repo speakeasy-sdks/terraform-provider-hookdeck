@@ -2,9 +2,29 @@
 
 package shared
 
-// BatchOperationPaginatedResult - List of ignored events bulk retries
 type BatchOperationPaginatedResult struct {
 	Count      *int64           `json:"count,omitempty"`
 	Models     []BatchOperation `json:"models,omitempty"`
 	Pagination *SeekPagination  `json:"pagination,omitempty"`
+}
+
+func (o *BatchOperationPaginatedResult) GetCount() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.Count
+}
+
+func (o *BatchOperationPaginatedResult) GetModels() []BatchOperation {
+	if o == nil {
+		return nil
+	}
+	return o.Models
+}
+
+func (o *BatchOperationPaginatedResult) GetPagination() *SeekPagination {
+	if o == nil {
+		return nil
+	}
+	return o.Pagination
 }
