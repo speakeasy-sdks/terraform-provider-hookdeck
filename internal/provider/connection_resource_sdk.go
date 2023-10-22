@@ -3,44 +3,937 @@
 package provider
 
 import (
-	"encoding/json"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"hashicups/internal/sdk/pkg/models/operations"
 	"hashicups/internal/sdk/pkg/models/shared"
 	"math/big"
 	"time"
 )
 
-func (r *ConnectionResourceModel) RefreshFromGetResponse(resp *shared.APIErrorResponse) {
-
+func (r *ConnectionResourceModel) ToCreateSDKType() *operations.CreateConnectionRequestBody {
+	var destination *operations.CreateConnectionRequestBodyDestination
+	var authMethod *shared.DestinationAuthMethodConfig
+	if r.Destination.AuthMethod != nil {
+		var hookdeckSignature *shared.HookdeckSignature
+		if r.Destination.AuthMethod.HookdeckSignature != nil {
+			var config *shared.DestinationAuthMethodSignatureConfig
+			if r.Destination.AuthMethod.HookdeckSignature.Config != nil {
+				config = &shared.DestinationAuthMethodSignatureConfig{}
+			}
+			typeVar := shared.HookdeckSignatureType(r.Destination.AuthMethod.HookdeckSignature.Type.ValueString())
+			hookdeckSignature = &shared.HookdeckSignature{
+				Config: config,
+				Type:   typeVar,
+			}
+		}
+		if hookdeckSignature != nil {
+			authMethod = &shared.DestinationAuthMethodConfig{
+				HookdeckSignature: hookdeckSignature,
+			}
+		}
+		var basicAuth *shared.BasicAuth
+		if r.Destination.AuthMethod.BasicAuth != nil {
+			var config1 *shared.DestinationAuthMethodBasicAuthConfig
+			if r.Destination.AuthMethod.BasicAuth.Config != nil {
+				password := r.Destination.AuthMethod.BasicAuth.Config.Password.ValueString()
+				username := r.Destination.AuthMethod.BasicAuth.Config.Username.ValueString()
+				config1 = &shared.DestinationAuthMethodBasicAuthConfig{
+					Password: password,
+					Username: username,
+				}
+			}
+			typeVar1 := shared.BasicAuthType(r.Destination.AuthMethod.BasicAuth.Type.ValueString())
+			basicAuth = &shared.BasicAuth{
+				Config: config1,
+				Type:   typeVar1,
+			}
+		}
+		if basicAuth != nil {
+			authMethod = &shared.DestinationAuthMethodConfig{
+				BasicAuth: basicAuth,
+			}
+		}
+		var apiKey *shared.APIKey
+		if r.Destination.AuthMethod.APIKey != nil {
+			var config2 *shared.DestinationAuthMethodAPIKeyConfig
+			if r.Destination.AuthMethod.APIKey.Config != nil {
+				apiKey1 := r.Destination.AuthMethod.APIKey.Config.APIKey.ValueString()
+				key := r.Destination.AuthMethod.APIKey.Config.Key.ValueString()
+				to := new(shared.DestinationAuthMethodAPIKeyConfigTo)
+				if !r.Destination.AuthMethod.APIKey.Config.To.IsUnknown() && !r.Destination.AuthMethod.APIKey.Config.To.IsNull() {
+					*to = shared.DestinationAuthMethodAPIKeyConfigTo(r.Destination.AuthMethod.APIKey.Config.To.ValueString())
+				} else {
+					to = nil
+				}
+				config2 = &shared.DestinationAuthMethodAPIKeyConfig{
+					APIKey: apiKey1,
+					Key:    key,
+					To:     to,
+				}
+			}
+			typeVar2 := shared.APIKeyType(r.Destination.AuthMethod.APIKey.Type.ValueString())
+			apiKey = &shared.APIKey{
+				Config: config2,
+				Type:   typeVar2,
+			}
+		}
+		if apiKey != nil {
+			authMethod = &shared.DestinationAuthMethodConfig{
+				APIKey: apiKey,
+			}
+		}
+		var bearerToken *shared.BearerToken
+		if r.Destination.AuthMethod.BearerToken != nil {
+			var config3 *shared.DestinationAuthMethodBearerTokenConfig
+			if r.Destination.AuthMethod.BearerToken.Config != nil {
+				token := r.Destination.AuthMethod.BearerToken.Config.Token.ValueString()
+				config3 = &shared.DestinationAuthMethodBearerTokenConfig{
+					Token: token,
+				}
+			}
+			typeVar3 := shared.BearerTokenType(r.Destination.AuthMethod.BearerToken.Type.ValueString())
+			bearerToken = &shared.BearerToken{
+				Config: config3,
+				Type:   typeVar3,
+			}
+		}
+		if bearerToken != nil {
+			authMethod = &shared.DestinationAuthMethodConfig{
+				BearerToken: bearerToken,
+			}
+		}
+		var customSignature *shared.CustomSignature
+		if r.Destination.AuthMethod.CustomSignature != nil {
+			key1 := r.Destination.AuthMethod.CustomSignature.Config.Key.ValueString()
+			signingSecret := new(string)
+			if !r.Destination.AuthMethod.CustomSignature.Config.SigningSecret.IsUnknown() && !r.Destination.AuthMethod.CustomSignature.Config.SigningSecret.IsNull() {
+				*signingSecret = r.Destination.AuthMethod.CustomSignature.Config.SigningSecret.ValueString()
+			} else {
+				signingSecret = nil
+			}
+			config4 := shared.DestinationAuthMethodCustomSignatureConfig{
+				Key:           key1,
+				SigningSecret: signingSecret,
+			}
+			typeVar4 := shared.CustomSignatureType(r.Destination.AuthMethod.CustomSignature.Type.ValueString())
+			customSignature = &shared.CustomSignature{
+				Config: config4,
+				Type:   typeVar4,
+			}
+		}
+		if customSignature != nil {
+			authMethod = &shared.DestinationAuthMethodConfig{
+				CustomSignature: customSignature,
+			}
+		}
+	}
+	cliPath := new(string)
+	if !r.Destination.CliPath.IsUnknown() && !r.Destination.CliPath.IsNull() {
+		*cliPath = r.Destination.CliPath.ValueString()
+	} else {
+		cliPath = nil
+	}
+	httpMethod := new(shared.DestinationHTTPMethod)
+	if !r.Destination.HTTPMethod.IsUnknown() && !r.Destination.HTTPMethod.IsNull() {
+		*httpMethod = shared.DestinationHTTPMethod(r.Destination.HTTPMethod.ValueString())
+	} else {
+		httpMethod = nil
+	}
+	name := r.Destination.Name.ValueString()
+	pathForwardingDisabled := new(bool)
+	if !r.Destination.PathForwardingDisabled.IsUnknown() && !r.Destination.PathForwardingDisabled.IsNull() {
+		*pathForwardingDisabled = r.Destination.PathForwardingDisabled.ValueBool()
+	} else {
+		pathForwardingDisabled = nil
+	}
+	rateLimit := new(int64)
+	if !r.Destination.RateLimit.IsUnknown() && !r.Destination.RateLimit.IsNull() {
+		*rateLimit = r.Destination.RateLimit.ValueInt64()
+	} else {
+		rateLimit = nil
+	}
+	rateLimitPeriod := new(operations.CreateConnectionRequestBodyDestinationRateLimitPeriod)
+	if !r.Destination.RateLimitPeriod.IsUnknown() && !r.Destination.RateLimitPeriod.IsNull() {
+		*rateLimitPeriod = operations.CreateConnectionRequestBodyDestinationRateLimitPeriod(r.Destination.RateLimitPeriod.ValueString())
+	} else {
+		rateLimitPeriod = nil
+	}
+	url := new(string)
+	if !r.Destination.URL.IsUnknown() && !r.Destination.URL.IsNull() {
+		*url = r.Destination.URL.ValueString()
+	} else {
+		url = nil
+	}
+	destination = &operations.CreateConnectionRequestBodyDestination{
+		AuthMethod:             authMethod,
+		CliPath:                cliPath,
+		HTTPMethod:             httpMethod,
+		Name:                   name,
+		PathForwardingDisabled: pathForwardingDisabled,
+		RateLimit:              rateLimit,
+		RateLimitPeriod:        rateLimitPeriod,
+		URL:                    url,
+	}
+	destinationID := new(string)
+	if !r.DestinationID.IsUnknown() && !r.DestinationID.IsNull() {
+		*destinationID = r.DestinationID.ValueString()
+	} else {
+		destinationID = nil
+	}
+	name1 := r.Name.ValueString()
+	var rules []shared.Rule = nil
+	for _, rulesItem := range r.Rules {
+		if rulesItem.RetryRule != nil {
+			count := new(int64)
+			if !rulesItem.RetryRule.Count.IsUnknown() && !rulesItem.RetryRule.Count.IsNull() {
+				*count = rulesItem.RetryRule.Count.ValueInt64()
+			} else {
+				count = nil
+			}
+			interval := new(int64)
+			if !rulesItem.RetryRule.Interval.IsUnknown() && !rulesItem.RetryRule.Interval.IsNull() {
+				*interval = rulesItem.RetryRule.Interval.ValueInt64()
+			} else {
+				interval = nil
+			}
+			strategy := shared.RetryStrategy(rulesItem.RetryRule.Strategy.ValueString())
+			typeVar5 := shared.RetryRuleType(rulesItem.RetryRule.Type.ValueString())
+			retryRule := shared.RetryRule{
+				Count:    count,
+				Interval: interval,
+				Strategy: strategy,
+				Type:     typeVar5,
+			}
+			rules = append(rules, shared.Rule{
+				RetryRule: &retryRule,
+			})
+		}
+		if rulesItem.AlertRule != nil {
+			strategy1 := shared.AlertStrategy(rulesItem.AlertRule.Strategy.ValueString())
+			typeVar6 := shared.AlertRuleType(rulesItem.AlertRule.Type.ValueString())
+			alertRule := shared.AlertRule{
+				Strategy: strategy1,
+				Type:     typeVar6,
+			}
+			rules = append(rules, shared.Rule{
+				AlertRule: &alertRule,
+			})
+		}
+		if rulesItem.FilterRule != nil {
+			var body *shared.ConnectionFilterProperty
+			if rulesItem.FilterRule.Body != nil {
+				str := new(string)
+				if !rulesItem.FilterRule.Body.Str.IsUnknown() && !rulesItem.FilterRule.Body.Str.IsNull() {
+					*str = rulesItem.FilterRule.Body.Str.ValueString()
+				} else {
+					str = nil
+				}
+				if str != nil {
+					body = &shared.ConnectionFilterProperty{
+						Str: str,
+					}
+				}
+				float32Var := new(float32)
+				if !rulesItem.FilterRule.Body.Float32.IsUnknown() && !rulesItem.FilterRule.Body.Float32.IsNull() {
+					float32Tmp, _ := rulesItem.FilterRule.Body.Float32.ValueBigFloat().Float64()
+					*float32Var = float32(float32Tmp)
+				} else {
+					float32Var = nil
+				}
+				if float32Var != nil {
+					body = &shared.ConnectionFilterProperty{
+						Float32: float32Var,
+					}
+				}
+				boolean := new(bool)
+				if !rulesItem.FilterRule.Body.Boolean.IsUnknown() && !rulesItem.FilterRule.Body.Boolean.IsNull() {
+					*boolean = rulesItem.FilterRule.Body.Boolean.ValueBool()
+				} else {
+					boolean = nil
+				}
+				if boolean != nil {
+					body = &shared.ConnectionFilterProperty{
+						Boolean: boolean,
+					}
+				}
+				var connectionFilterProperty4 *shared.ConnectionFilterProperty4
+				if rulesItem.FilterRule.Body.ConnectionFilterProperty4 != nil {
+					connectionFilterProperty4 = &shared.ConnectionFilterProperty4{}
+				}
+				if connectionFilterProperty4 != nil {
+					body = &shared.ConnectionFilterProperty{
+						ConnectionFilterProperty4: connectionFilterProperty4,
+					}
+				}
+			}
+			var headers *shared.ConnectionFilterProperty
+			if rulesItem.FilterRule.Headers != nil {
+				str1 := new(string)
+				if !rulesItem.FilterRule.Headers.Str.IsUnknown() && !rulesItem.FilterRule.Headers.Str.IsNull() {
+					*str1 = rulesItem.FilterRule.Headers.Str.ValueString()
+				} else {
+					str1 = nil
+				}
+				if str1 != nil {
+					headers = &shared.ConnectionFilterProperty{
+						Str: str1,
+					}
+				}
+				float321 := new(float32)
+				if !rulesItem.FilterRule.Headers.Float32.IsUnknown() && !rulesItem.FilterRule.Headers.Float32.IsNull() {
+					float32Tmp1, _ := rulesItem.FilterRule.Headers.Float32.ValueBigFloat().Float64()
+					*float321 = float32(float32Tmp1)
+				} else {
+					float321 = nil
+				}
+				if float321 != nil {
+					headers = &shared.ConnectionFilterProperty{
+						Float32: float321,
+					}
+				}
+				boolean1 := new(bool)
+				if !rulesItem.FilterRule.Headers.Boolean.IsUnknown() && !rulesItem.FilterRule.Headers.Boolean.IsNull() {
+					*boolean1 = rulesItem.FilterRule.Headers.Boolean.ValueBool()
+				} else {
+					boolean1 = nil
+				}
+				if boolean1 != nil {
+					headers = &shared.ConnectionFilterProperty{
+						Boolean: boolean1,
+					}
+				}
+				var connectionFilterProperty41 *shared.ConnectionFilterProperty4
+				if rulesItem.FilterRule.Headers.ConnectionFilterProperty4 != nil {
+					connectionFilterProperty41 = &shared.ConnectionFilterProperty4{}
+				}
+				if connectionFilterProperty41 != nil {
+					headers = &shared.ConnectionFilterProperty{
+						ConnectionFilterProperty4: connectionFilterProperty41,
+					}
+				}
+			}
+			var path *shared.ConnectionFilterProperty
+			if rulesItem.FilterRule.Path != nil {
+				str2 := new(string)
+				if !rulesItem.FilterRule.Path.Str.IsUnknown() && !rulesItem.FilterRule.Path.Str.IsNull() {
+					*str2 = rulesItem.FilterRule.Path.Str.ValueString()
+				} else {
+					str2 = nil
+				}
+				if str2 != nil {
+					path = &shared.ConnectionFilterProperty{
+						Str: str2,
+					}
+				}
+				float322 := new(float32)
+				if !rulesItem.FilterRule.Path.Float32.IsUnknown() && !rulesItem.FilterRule.Path.Float32.IsNull() {
+					float32Tmp2, _ := rulesItem.FilterRule.Path.Float32.ValueBigFloat().Float64()
+					*float322 = float32(float32Tmp2)
+				} else {
+					float322 = nil
+				}
+				if float322 != nil {
+					path = &shared.ConnectionFilterProperty{
+						Float32: float322,
+					}
+				}
+				boolean2 := new(bool)
+				if !rulesItem.FilterRule.Path.Boolean.IsUnknown() && !rulesItem.FilterRule.Path.Boolean.IsNull() {
+					*boolean2 = rulesItem.FilterRule.Path.Boolean.ValueBool()
+				} else {
+					boolean2 = nil
+				}
+				if boolean2 != nil {
+					path = &shared.ConnectionFilterProperty{
+						Boolean: boolean2,
+					}
+				}
+				var connectionFilterProperty42 *shared.ConnectionFilterProperty4
+				if rulesItem.FilterRule.Path.ConnectionFilterProperty4 != nil {
+					connectionFilterProperty42 = &shared.ConnectionFilterProperty4{}
+				}
+				if connectionFilterProperty42 != nil {
+					path = &shared.ConnectionFilterProperty{
+						ConnectionFilterProperty4: connectionFilterProperty42,
+					}
+				}
+			}
+			var query *shared.ConnectionFilterProperty
+			if rulesItem.FilterRule.Query != nil {
+				str3 := new(string)
+				if !rulesItem.FilterRule.Query.Str.IsUnknown() && !rulesItem.FilterRule.Query.Str.IsNull() {
+					*str3 = rulesItem.FilterRule.Query.Str.ValueString()
+				} else {
+					str3 = nil
+				}
+				if str3 != nil {
+					query = &shared.ConnectionFilterProperty{
+						Str: str3,
+					}
+				}
+				float323 := new(float32)
+				if !rulesItem.FilterRule.Query.Float32.IsUnknown() && !rulesItem.FilterRule.Query.Float32.IsNull() {
+					float32Tmp3, _ := rulesItem.FilterRule.Query.Float32.ValueBigFloat().Float64()
+					*float323 = float32(float32Tmp3)
+				} else {
+					float323 = nil
+				}
+				if float323 != nil {
+					query = &shared.ConnectionFilterProperty{
+						Float32: float323,
+					}
+				}
+				boolean3 := new(bool)
+				if !rulesItem.FilterRule.Query.Boolean.IsUnknown() && !rulesItem.FilterRule.Query.Boolean.IsNull() {
+					*boolean3 = rulesItem.FilterRule.Query.Boolean.ValueBool()
+				} else {
+					boolean3 = nil
+				}
+				if boolean3 != nil {
+					query = &shared.ConnectionFilterProperty{
+						Boolean: boolean3,
+					}
+				}
+				var connectionFilterProperty43 *shared.ConnectionFilterProperty4
+				if rulesItem.FilterRule.Query.ConnectionFilterProperty4 != nil {
+					connectionFilterProperty43 = &shared.ConnectionFilterProperty4{}
+				}
+				if connectionFilterProperty43 != nil {
+					query = &shared.ConnectionFilterProperty{
+						ConnectionFilterProperty4: connectionFilterProperty43,
+					}
+				}
+			}
+			typeVar7 := shared.FilterRuleType(rulesItem.FilterRule.Type.ValueString())
+			filterRule := shared.FilterRule{
+				Body:    body,
+				Headers: headers,
+				Path:    path,
+				Query:   query,
+				Type:    typeVar7,
+			}
+			rules = append(rules, shared.Rule{
+				FilterRule: &filterRule,
+			})
+		}
+		if rulesItem.TransformRule != nil {
+			var transformRule shared.TransformRule
+			var transformReference *shared.TransformReference
+			if rulesItem.TransformRule.TransformReference != nil {
+				transformationID := rulesItem.TransformRule.TransformReference.TransformationID.ValueString()
+				typeVar8 := shared.TransformReferenceType(rulesItem.TransformRule.TransformReference.Type.ValueString())
+				transformReference = &shared.TransformReference{
+					TransformationID: transformationID,
+					Type:             typeVar8,
+				}
+			}
+			if transformReference != nil {
+				transformRule = shared.TransformRule{
+					TransformReference: transformReference,
+				}
+			}
+			var transformFull *shared.TransformFull
+			if rulesItem.TransformRule.TransformFull != nil {
+				var transformation *shared.TransformFullTransformation
+				if rulesItem.TransformRule.TransformFull.Transformation != nil {
+					code := rulesItem.TransformRule.TransformFull.Transformation.Code.ValueString()
+					env := make(map[string]string)
+					for envKey, envValue := range rulesItem.TransformRule.TransformFull.Transformation.Env {
+						envInst := envValue.ValueString()
+						env[envKey] = envInst
+					}
+					name2 := rulesItem.TransformRule.TransformFull.Transformation.Name.ValueString()
+					transformation = &shared.TransformFullTransformation{
+						Code: code,
+						Env:  env,
+						Name: name2,
+					}
+				}
+				transformationId1 := new(string)
+				if !rulesItem.TransformRule.TransformFull.TransformationID.IsUnknown() && !rulesItem.TransformRule.TransformFull.TransformationID.IsNull() {
+					*transformationId1 = rulesItem.TransformRule.TransformFull.TransformationID.ValueString()
+				} else {
+					transformationId1 = nil
+				}
+				typeVar9 := shared.TransformFullType(rulesItem.TransformRule.TransformFull.Type.ValueString())
+				transformFull = &shared.TransformFull{
+					Transformation:   transformation,
+					TransformationID: transformationId1,
+					Type:             typeVar9,
+				}
+			}
+			if transformFull != nil {
+				transformRule = shared.TransformRule{
+					TransformFull: transformFull,
+				}
+			}
+			rules = append(rules, shared.Rule{
+				TransformRule: &transformRule,
+			})
+		}
+		if rulesItem.DelayRule != nil {
+			delay := rulesItem.DelayRule.Delay.ValueInt64()
+			typeVar10 := shared.DelayRuleType(rulesItem.DelayRule.Type.ValueString())
+			delayRule := shared.DelayRule{
+				Delay: delay,
+				Type:  typeVar10,
+			}
+			rules = append(rules, shared.Rule{
+				DelayRule: &delayRule,
+			})
+		}
+	}
+	var ruleset *operations.CreateConnectionRequestBodyRuleset
+	if r.Ruleset != nil {
+		isTeamDefault := new(bool)
+		if !r.Ruleset.IsTeamDefault.IsUnknown() && !r.Ruleset.IsTeamDefault.IsNull() {
+			*isTeamDefault = r.Ruleset.IsTeamDefault.ValueBool()
+		} else {
+			isTeamDefault = nil
+		}
+		name3 := r.Ruleset.Name.ValueString()
+		var rules1 []shared.Rule = nil
+		for _, rulesItem1 := range r.Ruleset.Rules {
+			if rulesItem1.RetryRule != nil {
+				count1 := new(int64)
+				if !rulesItem1.RetryRule.Count.IsUnknown() && !rulesItem1.RetryRule.Count.IsNull() {
+					*count1 = rulesItem1.RetryRule.Count.ValueInt64()
+				} else {
+					count1 = nil
+				}
+				interval1 := new(int64)
+				if !rulesItem1.RetryRule.Interval.IsUnknown() && !rulesItem1.RetryRule.Interval.IsNull() {
+					*interval1 = rulesItem1.RetryRule.Interval.ValueInt64()
+				} else {
+					interval1 = nil
+				}
+				strategy2 := shared.RetryStrategy(rulesItem1.RetryRule.Strategy.ValueString())
+				typeVar11 := shared.RetryRuleType(rulesItem1.RetryRule.Type.ValueString())
+				retryRule1 := shared.RetryRule{
+					Count:    count1,
+					Interval: interval1,
+					Strategy: strategy2,
+					Type:     typeVar11,
+				}
+				rules1 = append(rules1, shared.Rule{
+					RetryRule: &retryRule1,
+				})
+			}
+			if rulesItem1.AlertRule != nil {
+				strategy3 := shared.AlertStrategy(rulesItem1.AlertRule.Strategy.ValueString())
+				typeVar12 := shared.AlertRuleType(rulesItem1.AlertRule.Type.ValueString())
+				alertRule1 := shared.AlertRule{
+					Strategy: strategy3,
+					Type:     typeVar12,
+				}
+				rules1 = append(rules1, shared.Rule{
+					AlertRule: &alertRule1,
+				})
+			}
+			if rulesItem1.FilterRule != nil {
+				var body1 *shared.ConnectionFilterProperty
+				if rulesItem1.FilterRule.Body != nil {
+					str4 := new(string)
+					if !rulesItem1.FilterRule.Body.Str.IsUnknown() && !rulesItem1.FilterRule.Body.Str.IsNull() {
+						*str4 = rulesItem1.FilterRule.Body.Str.ValueString()
+					} else {
+						str4 = nil
+					}
+					if str4 != nil {
+						body1 = &shared.ConnectionFilterProperty{
+							Str: str4,
+						}
+					}
+					float324 := new(float32)
+					if !rulesItem1.FilterRule.Body.Float32.IsUnknown() && !rulesItem1.FilterRule.Body.Float32.IsNull() {
+						float32Tmp4, _ := rulesItem1.FilterRule.Body.Float32.ValueBigFloat().Float64()
+						*float324 = float32(float32Tmp4)
+					} else {
+						float324 = nil
+					}
+					if float324 != nil {
+						body1 = &shared.ConnectionFilterProperty{
+							Float32: float324,
+						}
+					}
+					boolean4 := new(bool)
+					if !rulesItem1.FilterRule.Body.Boolean.IsUnknown() && !rulesItem1.FilterRule.Body.Boolean.IsNull() {
+						*boolean4 = rulesItem1.FilterRule.Body.Boolean.ValueBool()
+					} else {
+						boolean4 = nil
+					}
+					if boolean4 != nil {
+						body1 = &shared.ConnectionFilterProperty{
+							Boolean: boolean4,
+						}
+					}
+					var connectionFilterProperty44 *shared.ConnectionFilterProperty4
+					if rulesItem1.FilterRule.Body.ConnectionFilterProperty4 != nil {
+						connectionFilterProperty44 = &shared.ConnectionFilterProperty4{}
+					}
+					if connectionFilterProperty44 != nil {
+						body1 = &shared.ConnectionFilterProperty{
+							ConnectionFilterProperty4: connectionFilterProperty44,
+						}
+					}
+				}
+				var headers1 *shared.ConnectionFilterProperty
+				if rulesItem1.FilterRule.Headers != nil {
+					str5 := new(string)
+					if !rulesItem1.FilterRule.Headers.Str.IsUnknown() && !rulesItem1.FilterRule.Headers.Str.IsNull() {
+						*str5 = rulesItem1.FilterRule.Headers.Str.ValueString()
+					} else {
+						str5 = nil
+					}
+					if str5 != nil {
+						headers1 = &shared.ConnectionFilterProperty{
+							Str: str5,
+						}
+					}
+					float325 := new(float32)
+					if !rulesItem1.FilterRule.Headers.Float32.IsUnknown() && !rulesItem1.FilterRule.Headers.Float32.IsNull() {
+						float32Tmp5, _ := rulesItem1.FilterRule.Headers.Float32.ValueBigFloat().Float64()
+						*float325 = float32(float32Tmp5)
+					} else {
+						float325 = nil
+					}
+					if float325 != nil {
+						headers1 = &shared.ConnectionFilterProperty{
+							Float32: float325,
+						}
+					}
+					boolean5 := new(bool)
+					if !rulesItem1.FilterRule.Headers.Boolean.IsUnknown() && !rulesItem1.FilterRule.Headers.Boolean.IsNull() {
+						*boolean5 = rulesItem1.FilterRule.Headers.Boolean.ValueBool()
+					} else {
+						boolean5 = nil
+					}
+					if boolean5 != nil {
+						headers1 = &shared.ConnectionFilterProperty{
+							Boolean: boolean5,
+						}
+					}
+					var connectionFilterProperty45 *shared.ConnectionFilterProperty4
+					if rulesItem1.FilterRule.Headers.ConnectionFilterProperty4 != nil {
+						connectionFilterProperty45 = &shared.ConnectionFilterProperty4{}
+					}
+					if connectionFilterProperty45 != nil {
+						headers1 = &shared.ConnectionFilterProperty{
+							ConnectionFilterProperty4: connectionFilterProperty45,
+						}
+					}
+				}
+				var path1 *shared.ConnectionFilterProperty
+				if rulesItem1.FilterRule.Path != nil {
+					str6 := new(string)
+					if !rulesItem1.FilterRule.Path.Str.IsUnknown() && !rulesItem1.FilterRule.Path.Str.IsNull() {
+						*str6 = rulesItem1.FilterRule.Path.Str.ValueString()
+					} else {
+						str6 = nil
+					}
+					if str6 != nil {
+						path1 = &shared.ConnectionFilterProperty{
+							Str: str6,
+						}
+					}
+					float326 := new(float32)
+					if !rulesItem1.FilterRule.Path.Float32.IsUnknown() && !rulesItem1.FilterRule.Path.Float32.IsNull() {
+						float32Tmp6, _ := rulesItem1.FilterRule.Path.Float32.ValueBigFloat().Float64()
+						*float326 = float32(float32Tmp6)
+					} else {
+						float326 = nil
+					}
+					if float326 != nil {
+						path1 = &shared.ConnectionFilterProperty{
+							Float32: float326,
+						}
+					}
+					boolean6 := new(bool)
+					if !rulesItem1.FilterRule.Path.Boolean.IsUnknown() && !rulesItem1.FilterRule.Path.Boolean.IsNull() {
+						*boolean6 = rulesItem1.FilterRule.Path.Boolean.ValueBool()
+					} else {
+						boolean6 = nil
+					}
+					if boolean6 != nil {
+						path1 = &shared.ConnectionFilterProperty{
+							Boolean: boolean6,
+						}
+					}
+					var connectionFilterProperty46 *shared.ConnectionFilterProperty4
+					if rulesItem1.FilterRule.Path.ConnectionFilterProperty4 != nil {
+						connectionFilterProperty46 = &shared.ConnectionFilterProperty4{}
+					}
+					if connectionFilterProperty46 != nil {
+						path1 = &shared.ConnectionFilterProperty{
+							ConnectionFilterProperty4: connectionFilterProperty46,
+						}
+					}
+				}
+				var query1 *shared.ConnectionFilterProperty
+				if rulesItem1.FilterRule.Query != nil {
+					str7 := new(string)
+					if !rulesItem1.FilterRule.Query.Str.IsUnknown() && !rulesItem1.FilterRule.Query.Str.IsNull() {
+						*str7 = rulesItem1.FilterRule.Query.Str.ValueString()
+					} else {
+						str7 = nil
+					}
+					if str7 != nil {
+						query1 = &shared.ConnectionFilterProperty{
+							Str: str7,
+						}
+					}
+					float327 := new(float32)
+					if !rulesItem1.FilterRule.Query.Float32.IsUnknown() && !rulesItem1.FilterRule.Query.Float32.IsNull() {
+						float32Tmp7, _ := rulesItem1.FilterRule.Query.Float32.ValueBigFloat().Float64()
+						*float327 = float32(float32Tmp7)
+					} else {
+						float327 = nil
+					}
+					if float327 != nil {
+						query1 = &shared.ConnectionFilterProperty{
+							Float32: float327,
+						}
+					}
+					boolean7 := new(bool)
+					if !rulesItem1.FilterRule.Query.Boolean.IsUnknown() && !rulesItem1.FilterRule.Query.Boolean.IsNull() {
+						*boolean7 = rulesItem1.FilterRule.Query.Boolean.ValueBool()
+					} else {
+						boolean7 = nil
+					}
+					if boolean7 != nil {
+						query1 = &shared.ConnectionFilterProperty{
+							Boolean: boolean7,
+						}
+					}
+					var connectionFilterProperty47 *shared.ConnectionFilterProperty4
+					if rulesItem1.FilterRule.Query.ConnectionFilterProperty4 != nil {
+						connectionFilterProperty47 = &shared.ConnectionFilterProperty4{}
+					}
+					if connectionFilterProperty47 != nil {
+						query1 = &shared.ConnectionFilterProperty{
+							ConnectionFilterProperty4: connectionFilterProperty47,
+						}
+					}
+				}
+				typeVar13 := shared.FilterRuleType(rulesItem1.FilterRule.Type.ValueString())
+				filterRule1 := shared.FilterRule{
+					Body:    body1,
+					Headers: headers1,
+					Path:    path1,
+					Query:   query1,
+					Type:    typeVar13,
+				}
+				rules1 = append(rules1, shared.Rule{
+					FilterRule: &filterRule1,
+				})
+			}
+			if rulesItem1.TransformRule != nil {
+				var transformRule1 shared.TransformRule
+				var transformReference1 *shared.TransformReference
+				if rulesItem1.TransformRule.TransformReference != nil {
+					transformationId2 := rulesItem1.TransformRule.TransformReference.TransformationID.ValueString()
+					typeVar14 := shared.TransformReferenceType(rulesItem1.TransformRule.TransformReference.Type.ValueString())
+					transformReference1 = &shared.TransformReference{
+						TransformationID: transformationId2,
+						Type:             typeVar14,
+					}
+				}
+				if transformReference1 != nil {
+					transformRule1 = shared.TransformRule{
+						TransformReference: transformReference1,
+					}
+				}
+				var transformFull1 *shared.TransformFull
+				if rulesItem1.TransformRule.TransformFull != nil {
+					var transformation1 *shared.TransformFullTransformation
+					if rulesItem1.TransformRule.TransformFull.Transformation != nil {
+						code1 := rulesItem1.TransformRule.TransformFull.Transformation.Code.ValueString()
+						env1 := make(map[string]string)
+						for envKey1, envValue1 := range rulesItem1.TransformRule.TransformFull.Transformation.Env {
+							envInst1 := envValue1.ValueString()
+							env1[envKey1] = envInst1
+						}
+						name4 := rulesItem1.TransformRule.TransformFull.Transformation.Name.ValueString()
+						transformation1 = &shared.TransformFullTransformation{
+							Code: code1,
+							Env:  env1,
+							Name: name4,
+						}
+					}
+					transformationId3 := new(string)
+					if !rulesItem1.TransformRule.TransformFull.TransformationID.IsUnknown() && !rulesItem1.TransformRule.TransformFull.TransformationID.IsNull() {
+						*transformationId3 = rulesItem1.TransformRule.TransformFull.TransformationID.ValueString()
+					} else {
+						transformationId3 = nil
+					}
+					typeVar15 := shared.TransformFullType(rulesItem1.TransformRule.TransformFull.Type.ValueString())
+					transformFull1 = &shared.TransformFull{
+						Transformation:   transformation1,
+						TransformationID: transformationId3,
+						Type:             typeVar15,
+					}
+				}
+				if transformFull1 != nil {
+					transformRule1 = shared.TransformRule{
+						TransformFull: transformFull1,
+					}
+				}
+				rules1 = append(rules1, shared.Rule{
+					TransformRule: &transformRule1,
+				})
+			}
+			if rulesItem1.DelayRule != nil {
+				delay1 := rulesItem1.DelayRule.Delay.ValueInt64()
+				typeVar16 := shared.DelayRuleType(rulesItem1.DelayRule.Type.ValueString())
+				delayRule1 := shared.DelayRule{
+					Delay: delay1,
+					Type:  typeVar16,
+				}
+				rules1 = append(rules1, shared.Rule{
+					DelayRule: &delayRule1,
+				})
+			}
+		}
+		ruleset = &operations.CreateConnectionRequestBodyRuleset{
+			IsTeamDefault: isTeamDefault,
+			Name:          name3,
+			Rules:         rules1,
+		}
+	}
+	rulesetID := new(string)
+	if !r.RulesetID.IsUnknown() && !r.RulesetID.IsNull() {
+		*rulesetID = r.RulesetID.ValueString()
+	} else {
+		rulesetID = nil
+	}
+	var source *operations.CreateConnectionRequestBodySource
+	var allowedHTTPMethods []shared.SourceAllowedHTTPMethod = nil
+	for _, allowedHTTPMethodsItem := range r.Source.AllowedHTTPMethods {
+		allowedHTTPMethods = append(allowedHTTPMethods, shared.SourceAllowedHTTPMethod(allowedHTTPMethodsItem.ValueString()))
+	}
+	var customResponse *shared.SourceCustomResponse
+	if r.Source.CustomResponse != nil {
+		body2 := r.Source.CustomResponse.Body.ValueString()
+		contentType := shared.SourceCustomResponseContentType(r.Source.CustomResponse.ContentType.ValueString())
+		customResponse = &shared.SourceCustomResponse{
+			Body:        body2,
+			ContentType: contentType,
+		}
+	}
+	name5 := r.Source.Name.ValueString()
+	source = &operations.CreateConnectionRequestBodySource{
+		AllowedHTTPMethods: allowedHTTPMethods,
+		CustomResponse:     customResponse,
+		Name:               name5,
+	}
+	sourceID := new(string)
+	if !r.SourceID.IsUnknown() && !r.SourceID.IsNull() {
+		*sourceID = r.SourceID.ValueString()
+	} else {
+		sourceID = nil
+	}
+	out := operations.CreateConnectionRequestBody{
+		Destination:   destination,
+		DestinationID: destinationID,
+		Name:          name1,
+		Rules:         rules,
+		Ruleset:       ruleset,
+		RulesetID:     rulesetID,
+		Source:        source,
+		SourceID:      sourceID,
+	}
+	return &out
 }
 
-func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connection) {
+func (r *ConnectionResourceModel) ToGetSDKType() *operations.CreateConnectionRequestBody {
+	out := r.ToCreateSDKType()
+	return out
+}
+
+func (r *ConnectionResourceModel) ToDeleteSDKType() *operations.CreateConnectionRequestBody {
+	out := r.ToCreateSDKType()
+	return out
+}
+
+func (r *ConnectionResourceModel) RefreshFromGetResponse(resp *shared.Connection) {
 	if resp.ArchivedAt != nil {
-		r.ArchivedAt = types.StringValue(resp.ArchivedAt.Format(time.RFC3339))
+		r.ArchivedAt = types.StringValue(resp.ArchivedAt.Format(time.RFC3339Nano))
 	} else {
 		r.ArchivedAt = types.StringNull()
 	}
-	r.CreatedAt = types.StringValue(resp.CreatedAt.Format(time.RFC3339))
-	if r.Destination == nil {
-		r.Destination = &CreateConnectionRequestBodyDestination{}
-	}
+	r.CreatedAt = types.StringValue(resp.CreatedAt.Format(time.RFC3339Nano))
 	if resp.Destination.ArchivedAt != nil {
-		r.Destination.ArchivedAt = types.StringValue(resp.Destination.ArchivedAt.Format(time.RFC3339))
+		r.Destination.ArchivedAt = types.StringValue(resp.Destination.ArchivedAt.Format(time.RFC3339Nano))
 	} else {
 		r.Destination.ArchivedAt = types.StringNull()
 	}
 	if resp.Destination.AuthMethod == nil {
-		r.Destination.AuthMethod = types.StringNull()
+		r.Destination.AuthMethod = nil
 	} else {
-		authMethodResult, _ := json.Marshal(resp.Destination.AuthMethod)
-		r.Destination.AuthMethod = types.StringValue(string(authMethodResult))
+		r.Destination.AuthMethod = &DestinationAuthMethodConfig{}
+		if resp.Destination.AuthMethod.APIKey != nil {
+			r.Destination.AuthMethod.APIKey = &APIKey{}
+			if resp.Destination.AuthMethod.APIKey.Config == nil {
+				r.Destination.AuthMethod.APIKey.Config = nil
+			} else {
+				r.Destination.AuthMethod.APIKey.Config = &DestinationAuthMethodAPIKeyConfig{}
+				r.Destination.AuthMethod.APIKey.Config.APIKey = types.StringValue(resp.Destination.AuthMethod.APIKey.Config.APIKey)
+				r.Destination.AuthMethod.APIKey.Config.Key = types.StringValue(resp.Destination.AuthMethod.APIKey.Config.Key)
+				if resp.Destination.AuthMethod.APIKey.Config.To != nil {
+					r.Destination.AuthMethod.APIKey.Config.To = types.StringValue(string(*resp.Destination.AuthMethod.APIKey.Config.To))
+				} else {
+					r.Destination.AuthMethod.APIKey.Config.To = types.StringNull()
+				}
+			}
+			r.Destination.AuthMethod.APIKey.Type = types.StringValue(string(resp.Destination.AuthMethod.APIKey.Type))
+		}
+		if resp.Destination.AuthMethod.BasicAuth != nil {
+			r.Destination.AuthMethod.BasicAuth = &BasicAuth{}
+			if resp.Destination.AuthMethod.BasicAuth.Config == nil {
+				r.Destination.AuthMethod.BasicAuth.Config = nil
+			} else {
+				r.Destination.AuthMethod.BasicAuth.Config = &DestinationAuthMethodBasicAuthConfig{}
+				r.Destination.AuthMethod.BasicAuth.Config.Password = types.StringValue(resp.Destination.AuthMethod.BasicAuth.Config.Password)
+				r.Destination.AuthMethod.BasicAuth.Config.Username = types.StringValue(resp.Destination.AuthMethod.BasicAuth.Config.Username)
+			}
+			r.Destination.AuthMethod.BasicAuth.Type = types.StringValue(string(resp.Destination.AuthMethod.BasicAuth.Type))
+		}
+		if resp.Destination.AuthMethod.BearerToken != nil {
+			r.Destination.AuthMethod.BearerToken = &BearerToken{}
+			if resp.Destination.AuthMethod.BearerToken.Config == nil {
+				r.Destination.AuthMethod.BearerToken.Config = nil
+			} else {
+				r.Destination.AuthMethod.BearerToken.Config = &DestinationAuthMethodBearerTokenConfig{}
+				r.Destination.AuthMethod.BearerToken.Config.Token = types.StringValue(resp.Destination.AuthMethod.BearerToken.Config.Token)
+			}
+			r.Destination.AuthMethod.BearerToken.Type = types.StringValue(string(resp.Destination.AuthMethod.BearerToken.Type))
+		}
+		if resp.Destination.AuthMethod.CustomSignature != nil {
+			r.Destination.AuthMethod.CustomSignature = &CustomSignature{}
+			r.Destination.AuthMethod.CustomSignature.Config.Key = types.StringValue(resp.Destination.AuthMethod.CustomSignature.Config.Key)
+			if resp.Destination.AuthMethod.CustomSignature.Config.SigningSecret != nil {
+				r.Destination.AuthMethod.CustomSignature.Config.SigningSecret = types.StringValue(*resp.Destination.AuthMethod.CustomSignature.Config.SigningSecret)
+			} else {
+				r.Destination.AuthMethod.CustomSignature.Config.SigningSecret = types.StringNull()
+			}
+			r.Destination.AuthMethod.CustomSignature.Type = types.StringValue(string(resp.Destination.AuthMethod.CustomSignature.Type))
+		}
+		if resp.Destination.AuthMethod.HookdeckSignature != nil {
+			r.Destination.AuthMethod.HookdeckSignature = &HookdeckSignature{}
+			if resp.Destination.AuthMethod.HookdeckSignature.Config == nil {
+				r.Destination.AuthMethod.HookdeckSignature.Config = nil
+			} else {
+				r.Destination.AuthMethod.HookdeckSignature.Config = &DestinationAuthMethodSignatureConfig{}
+			}
+			r.Destination.AuthMethod.HookdeckSignature.Type = types.StringValue(string(resp.Destination.AuthMethod.HookdeckSignature.Type))
+		}
 	}
 	if resp.Destination.CliPath != nil {
 		r.Destination.CliPath = types.StringValue(*resp.Destination.CliPath)
 	} else {
 		r.Destination.CliPath = types.StringNull()
 	}
-	r.Destination.CreatedAt = types.StringValue(resp.Destination.CreatedAt.Format(time.RFC3339))
+	r.Destination.CreatedAt = types.StringValue(resp.Destination.CreatedAt.Format(time.RFC3339Nano))
 	if resp.Destination.HTTPMethod != nil {
 		r.Destination.HTTPMethod = types.StringValue(string(*resp.Destination.HTTPMethod))
 	} else {
@@ -64,7 +957,7 @@ func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connect
 		r.Destination.RateLimitPeriod = types.StringNull()
 	}
 	r.Destination.TeamID = types.StringValue(resp.Destination.TeamID)
-	r.Destination.UpdatedAt = types.StringValue(resp.Destination.UpdatedAt.Format(time.RFC3339))
+	r.Destination.UpdatedAt = types.StringValue(resp.Destination.UpdatedAt.Format(time.RFC3339Nano))
 	if resp.Destination.URL != nil {
 		r.Destination.URL = types.StringValue(*resp.Destination.URL)
 	} else {
@@ -73,18 +966,13 @@ func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connect
 	r.ID = types.StringValue(resp.ID)
 	r.Name = types.StringValue(resp.Name)
 	if resp.PausedAt != nil {
-		r.PausedAt = types.StringValue(resp.PausedAt.Format(time.RFC3339))
+		r.PausedAt = types.StringValue(resp.PausedAt.Format(time.RFC3339Nano))
 	} else {
 		r.PausedAt = types.StringNull()
 	}
 	r.ResolvedRules = nil
 	for _, resolvedRulesItem := range resp.ResolvedRules {
 		var resolvedRules1 Rule
-		if resolvedRulesItem.Any != nil {
-			resolvedRules1.Any = &Any{}
-			anyResult, _ := json.Marshal(resolvedRulesItem.Any)
-			resolvedRules1.Any = types.StringValue(string(anyResult))
-		}
 		if resolvedRulesItem.AlertRule != nil {
 			resolvedRules1.AlertRule = &AlertRule{}
 			resolvedRules1.AlertRule.Strategy = types.StringValue(string(resolvedRulesItem.AlertRule.Strategy))
@@ -110,7 +998,7 @@ func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connect
 				}
 				if resolvedRulesItem.FilterRule.Body.Float32 != nil {
 					if resolvedRulesItem.FilterRule.Body.Float32 != nil {
-						resolvedRules1.FilterRule.Body.Float32 = types.NumberValue(big.NewFloat(*resolvedRulesItem.FilterRule.Body.Float32))
+						resolvedRules1.FilterRule.Body.Float32 = types.NumberValue(big.NewFloat(float64(*resolvedRulesItem.FilterRule.Body.Float32)))
 					} else {
 						resolvedRules1.FilterRule.Body.Float32 = types.NumberNull()
 					}
@@ -123,13 +1011,13 @@ func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connect
 					}
 				}
 				if resolvedRulesItem.FilterRule.Body.ConnectionFilterProperty4 != nil {
-					resolvedRules1.FilterRule.Body.ConnectionFilterProperty4 = &ConnectionFilterProperty4{}
+					resolvedRules1.FilterRule.Body.ConnectionFilterProperty4 = &DestinationAuthMethodSignatureConfig{}
 				}
 			}
 			if resolvedRulesItem.FilterRule.Headers == nil {
 				resolvedRules1.FilterRule.Headers = nil
 			} else {
-				resolvedRules1.FilterRule.Headers = &ConnectionFilterProperty1{}
+				resolvedRules1.FilterRule.Headers = &ConnectionFilterProperty{}
 				if resolvedRulesItem.FilterRule.Headers.Str != nil {
 					if resolvedRulesItem.FilterRule.Headers.Str != nil {
 						resolvedRules1.FilterRule.Headers.Str = types.StringValue(*resolvedRulesItem.FilterRule.Headers.Str)
@@ -139,7 +1027,7 @@ func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connect
 				}
 				if resolvedRulesItem.FilterRule.Headers.Float32 != nil {
 					if resolvedRulesItem.FilterRule.Headers.Float32 != nil {
-						resolvedRules1.FilterRule.Headers.Float32 = types.NumberValue(big.NewFloat(*resolvedRulesItem.FilterRule.Headers.Float32))
+						resolvedRules1.FilterRule.Headers.Float32 = types.NumberValue(big.NewFloat(float64(*resolvedRulesItem.FilterRule.Headers.Float32)))
 					} else {
 						resolvedRules1.FilterRule.Headers.Float32 = types.NumberNull()
 					}
@@ -152,13 +1040,13 @@ func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connect
 					}
 				}
 				if resolvedRulesItem.FilterRule.Headers.ConnectionFilterProperty4 != nil {
-					resolvedRules1.FilterRule.Headers.ConnectionFilterProperty4 = &ConnectionFilterProperty4{}
+					resolvedRules1.FilterRule.Headers.ConnectionFilterProperty4 = &DestinationAuthMethodSignatureConfig{}
 				}
 			}
 			if resolvedRulesItem.FilterRule.Path == nil {
 				resolvedRules1.FilterRule.Path = nil
 			} else {
-				resolvedRules1.FilterRule.Path = &ConnectionFilterProperty2{}
+				resolvedRules1.FilterRule.Path = &ConnectionFilterProperty{}
 				if resolvedRulesItem.FilterRule.Path.Str != nil {
 					if resolvedRulesItem.FilterRule.Path.Str != nil {
 						resolvedRules1.FilterRule.Path.Str = types.StringValue(*resolvedRulesItem.FilterRule.Path.Str)
@@ -168,7 +1056,7 @@ func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connect
 				}
 				if resolvedRulesItem.FilterRule.Path.Float32 != nil {
 					if resolvedRulesItem.FilterRule.Path.Float32 != nil {
-						resolvedRules1.FilterRule.Path.Float32 = types.NumberValue(big.NewFloat(*resolvedRulesItem.FilterRule.Path.Float32))
+						resolvedRules1.FilterRule.Path.Float32 = types.NumberValue(big.NewFloat(float64(*resolvedRulesItem.FilterRule.Path.Float32)))
 					} else {
 						resolvedRules1.FilterRule.Path.Float32 = types.NumberNull()
 					}
@@ -181,13 +1069,13 @@ func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connect
 					}
 				}
 				if resolvedRulesItem.FilterRule.Path.ConnectionFilterProperty4 != nil {
-					resolvedRules1.FilterRule.Path.ConnectionFilterProperty4 = &ConnectionFilterProperty4{}
+					resolvedRules1.FilterRule.Path.ConnectionFilterProperty4 = &DestinationAuthMethodSignatureConfig{}
 				}
 			}
 			if resolvedRulesItem.FilterRule.Query == nil {
 				resolvedRules1.FilterRule.Query = nil
 			} else {
-				resolvedRules1.FilterRule.Query = &ConnectionFilterProperty3{}
+				resolvedRules1.FilterRule.Query = &ConnectionFilterProperty{}
 				if resolvedRulesItem.FilterRule.Query.Str != nil {
 					if resolvedRulesItem.FilterRule.Query.Str != nil {
 						resolvedRules1.FilterRule.Query.Str = types.StringValue(*resolvedRulesItem.FilterRule.Query.Str)
@@ -197,7 +1085,7 @@ func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connect
 				}
 				if resolvedRulesItem.FilterRule.Query.Float32 != nil {
 					if resolvedRulesItem.FilterRule.Query.Float32 != nil {
-						resolvedRules1.FilterRule.Query.Float32 = types.NumberValue(big.NewFloat(*resolvedRulesItem.FilterRule.Query.Float32))
+						resolvedRules1.FilterRule.Query.Float32 = types.NumberValue(big.NewFloat(float64(*resolvedRulesItem.FilterRule.Query.Float32)))
 					} else {
 						resolvedRules1.FilterRule.Query.Float32 = types.NumberNull()
 					}
@@ -210,7 +1098,7 @@ func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connect
 					}
 				}
 				if resolvedRulesItem.FilterRule.Query.ConnectionFilterProperty4 != nil {
-					resolvedRules1.FilterRule.Query.ConnectionFilterProperty4 = &ConnectionFilterProperty4{}
+					resolvedRules1.FilterRule.Query.ConnectionFilterProperty4 = &DestinationAuthMethodSignatureConfig{}
 				}
 			}
 			resolvedRules1.FilterRule.Type = types.StringValue(string(resolvedRulesItem.FilterRule.Type))
@@ -230,32 +1118,57 @@ func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connect
 			resolvedRules1.RetryRule.Strategy = types.StringValue(string(resolvedRulesItem.RetryRule.Strategy))
 			resolvedRules1.RetryRule.Type = types.StringValue(string(resolvedRulesItem.RetryRule.Type))
 		}
+		if resolvedRulesItem.TransformRule != nil {
+			resolvedRules1.TransformRule = &TransformRule{}
+			if resolvedRulesItem.TransformRule.TransformFull != nil {
+				resolvedRules1.TransformRule.TransformFull = &TransformFull{}
+				if resolvedRulesItem.TransformRule.TransformFull.Transformation == nil {
+					resolvedRules1.TransformRule.TransformFull.Transformation = nil
+				} else {
+					resolvedRules1.TransformRule.TransformFull.Transformation = &TransformFullTransformation{}
+					resolvedRules1.TransformRule.TransformFull.Transformation.Code = types.StringValue(resolvedRulesItem.TransformRule.TransformFull.Transformation.Code)
+					if resolvedRules1.TransformRule.TransformFull.Transformation.Env == nil && len(resolvedRulesItem.TransformRule.TransformFull.Transformation.Env) > 0 {
+						resolvedRules1.TransformRule.TransformFull.Transformation.Env = make(map[string]types.String)
+						for key2, value := range resolvedRulesItem.TransformRule.TransformFull.Transformation.Env {
+							resolvedRules1.TransformRule.TransformFull.Transformation.Env[key2] = types.StringValue(value)
+						}
+					}
+					resolvedRules1.TransformRule.TransformFull.Transformation.Name = types.StringValue(resolvedRulesItem.TransformRule.TransformFull.Transformation.Name)
+				}
+				if resolvedRulesItem.TransformRule.TransformFull.TransformationID != nil {
+					resolvedRules1.TransformRule.TransformFull.TransformationID = types.StringValue(*resolvedRulesItem.TransformRule.TransformFull.TransformationID)
+				} else {
+					resolvedRules1.TransformRule.TransformFull.TransformationID = types.StringNull()
+				}
+				resolvedRules1.TransformRule.TransformFull.Type = types.StringValue(string(resolvedRulesItem.TransformRule.TransformFull.Type))
+			}
+			if resolvedRulesItem.TransformRule.TransformReference != nil {
+				resolvedRules1.TransformRule.TransformReference = &TransformReference{}
+				resolvedRules1.TransformRule.TransformReference.TransformationID = types.StringValue(resolvedRulesItem.TransformRule.TransformReference.TransformationID)
+				resolvedRules1.TransformRule.TransformReference.Type = types.StringValue(string(resolvedRulesItem.TransformRule.TransformReference.Type))
+			}
+		}
 		r.ResolvedRules = append(r.ResolvedRules, resolvedRules1)
 	}
 	r.Rules = nil
 	for _, rulesItem := range resp.Rules {
-		var rules1 Rule1
-		if rulesItem.Any != nil {
-			rules1.Any = &Any1{}
-			anyResult1, _ := json.Marshal(rulesItem.Any)
-			rules1.Any = types.StringValue(string(anyResult1))
-		}
+		var rules1 Rule
 		if rulesItem.AlertRule != nil {
-			rules1.AlertRule = &AlertRule1{}
+			rules1.AlertRule = &AlertRule{}
 			rules1.AlertRule.Strategy = types.StringValue(string(rulesItem.AlertRule.Strategy))
 			rules1.AlertRule.Type = types.StringValue(string(rulesItem.AlertRule.Type))
 		}
 		if rulesItem.DelayRule != nil {
-			rules1.DelayRule = &DelayRule1{}
+			rules1.DelayRule = &DelayRule{}
 			rules1.DelayRule.Delay = types.Int64Value(rulesItem.DelayRule.Delay)
 			rules1.DelayRule.Type = types.StringValue(string(rulesItem.DelayRule.Type))
 		}
 		if rulesItem.FilterRule != nil {
-			rules1.FilterRule = &FilterRule1{}
+			rules1.FilterRule = &FilterRule{}
 			if rulesItem.FilterRule.Body == nil {
 				rules1.FilterRule.Body = nil
 			} else {
-				rules1.FilterRule.Body = &ConnectionFilterProperty5{}
+				rules1.FilterRule.Body = &ConnectionFilterProperty{}
 				if rulesItem.FilterRule.Body.Str != nil {
 					if rulesItem.FilterRule.Body.Str != nil {
 						rules1.FilterRule.Body.Str = types.StringValue(*rulesItem.FilterRule.Body.Str)
@@ -265,7 +1178,7 @@ func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connect
 				}
 				if rulesItem.FilterRule.Body.Float32 != nil {
 					if rulesItem.FilterRule.Body.Float32 != nil {
-						rules1.FilterRule.Body.Float32 = types.NumberValue(big.NewFloat(*rulesItem.FilterRule.Body.Float32))
+						rules1.FilterRule.Body.Float32 = types.NumberValue(big.NewFloat(float64(*rulesItem.FilterRule.Body.Float32)))
 					} else {
 						rules1.FilterRule.Body.Float32 = types.NumberNull()
 					}
@@ -278,13 +1191,13 @@ func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connect
 					}
 				}
 				if rulesItem.FilterRule.Body.ConnectionFilterProperty4 != nil {
-					rules1.FilterRule.Body.ConnectionFilterProperty4 = &ConnectionFilterProperty41{}
+					rules1.FilterRule.Body.ConnectionFilterProperty4 = &DestinationAuthMethodSignatureConfig{}
 				}
 			}
 			if rulesItem.FilterRule.Headers == nil {
 				rules1.FilterRule.Headers = nil
 			} else {
-				rules1.FilterRule.Headers = &ConnectionFilterProperty6{}
+				rules1.FilterRule.Headers = &ConnectionFilterProperty{}
 				if rulesItem.FilterRule.Headers.Str != nil {
 					if rulesItem.FilterRule.Headers.Str != nil {
 						rules1.FilterRule.Headers.Str = types.StringValue(*rulesItem.FilterRule.Headers.Str)
@@ -294,7 +1207,7 @@ func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connect
 				}
 				if rulesItem.FilterRule.Headers.Float32 != nil {
 					if rulesItem.FilterRule.Headers.Float32 != nil {
-						rules1.FilterRule.Headers.Float32 = types.NumberValue(big.NewFloat(*rulesItem.FilterRule.Headers.Float32))
+						rules1.FilterRule.Headers.Float32 = types.NumberValue(big.NewFloat(float64(*rulesItem.FilterRule.Headers.Float32)))
 					} else {
 						rules1.FilterRule.Headers.Float32 = types.NumberNull()
 					}
@@ -307,13 +1220,13 @@ func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connect
 					}
 				}
 				if rulesItem.FilterRule.Headers.ConnectionFilterProperty4 != nil {
-					rules1.FilterRule.Headers.ConnectionFilterProperty4 = &ConnectionFilterProperty41{}
+					rules1.FilterRule.Headers.ConnectionFilterProperty4 = &DestinationAuthMethodSignatureConfig{}
 				}
 			}
 			if rulesItem.FilterRule.Path == nil {
 				rules1.FilterRule.Path = nil
 			} else {
-				rules1.FilterRule.Path = &ConnectionFilterProperty7{}
+				rules1.FilterRule.Path = &ConnectionFilterProperty{}
 				if rulesItem.FilterRule.Path.Str != nil {
 					if rulesItem.FilterRule.Path.Str != nil {
 						rules1.FilterRule.Path.Str = types.StringValue(*rulesItem.FilterRule.Path.Str)
@@ -323,7 +1236,7 @@ func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connect
 				}
 				if rulesItem.FilterRule.Path.Float32 != nil {
 					if rulesItem.FilterRule.Path.Float32 != nil {
-						rules1.FilterRule.Path.Float32 = types.NumberValue(big.NewFloat(*rulesItem.FilterRule.Path.Float32))
+						rules1.FilterRule.Path.Float32 = types.NumberValue(big.NewFloat(float64(*rulesItem.FilterRule.Path.Float32)))
 					} else {
 						rules1.FilterRule.Path.Float32 = types.NumberNull()
 					}
@@ -336,13 +1249,13 @@ func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connect
 					}
 				}
 				if rulesItem.FilterRule.Path.ConnectionFilterProperty4 != nil {
-					rules1.FilterRule.Path.ConnectionFilterProperty4 = &ConnectionFilterProperty41{}
+					rules1.FilterRule.Path.ConnectionFilterProperty4 = &DestinationAuthMethodSignatureConfig{}
 				}
 			}
 			if rulesItem.FilterRule.Query == nil {
 				rules1.FilterRule.Query = nil
 			} else {
-				rules1.FilterRule.Query = &ConnectionFilterProperty8{}
+				rules1.FilterRule.Query = &ConnectionFilterProperty{}
 				if rulesItem.FilterRule.Query.Str != nil {
 					if rulesItem.FilterRule.Query.Str != nil {
 						rules1.FilterRule.Query.Str = types.StringValue(*rulesItem.FilterRule.Query.Str)
@@ -352,7 +1265,7 @@ func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connect
 				}
 				if rulesItem.FilterRule.Query.Float32 != nil {
 					if rulesItem.FilterRule.Query.Float32 != nil {
-						rules1.FilterRule.Query.Float32 = types.NumberValue(big.NewFloat(*rulesItem.FilterRule.Query.Float32))
+						rules1.FilterRule.Query.Float32 = types.NumberValue(big.NewFloat(float64(*rulesItem.FilterRule.Query.Float32)))
 					} else {
 						rules1.FilterRule.Query.Float32 = types.NumberNull()
 					}
@@ -365,13 +1278,13 @@ func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connect
 					}
 				}
 				if rulesItem.FilterRule.Query.ConnectionFilterProperty4 != nil {
-					rules1.FilterRule.Query.ConnectionFilterProperty4 = &ConnectionFilterProperty41{}
+					rules1.FilterRule.Query.ConnectionFilterProperty4 = &DestinationAuthMethodSignatureConfig{}
 				}
 			}
 			rules1.FilterRule.Type = types.StringValue(string(rulesItem.FilterRule.Type))
 		}
 		if rulesItem.RetryRule != nil {
-			rules1.RetryRule = &RetryRule1{}
+			rules1.RetryRule = &RetryRule{}
 			if rulesItem.RetryRule.Count != nil {
 				rules1.RetryRule.Count = types.Int64Value(*rulesItem.RetryRule.Count)
 			} else {
@@ -385,32 +1298,54 @@ func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connect
 			rules1.RetryRule.Strategy = types.StringValue(string(rulesItem.RetryRule.Strategy))
 			rules1.RetryRule.Type = types.StringValue(string(rulesItem.RetryRule.Type))
 		}
+		if rulesItem.TransformRule != nil {
+			rules1.TransformRule = &TransformRule{}
+			if rulesItem.TransformRule.TransformFull != nil {
+				rules1.TransformRule.TransformFull = &TransformFull{}
+				if rulesItem.TransformRule.TransformFull.Transformation == nil {
+					rules1.TransformRule.TransformFull.Transformation = nil
+				} else {
+					rules1.TransformRule.TransformFull.Transformation = &TransformFullTransformation{}
+					rules1.TransformRule.TransformFull.Transformation.Code = types.StringValue(rulesItem.TransformRule.TransformFull.Transformation.Code)
+					if rules1.TransformRule.TransformFull.Transformation.Env == nil && len(rulesItem.TransformRule.TransformFull.Transformation.Env) > 0 {
+						rules1.TransformRule.TransformFull.Transformation.Env = make(map[string]types.String)
+						for key3, value1 := range rulesItem.TransformRule.TransformFull.Transformation.Env {
+							rules1.TransformRule.TransformFull.Transformation.Env[key3] = types.StringValue(value1)
+						}
+					}
+					rules1.TransformRule.TransformFull.Transformation.Name = types.StringValue(rulesItem.TransformRule.TransformFull.Transformation.Name)
+				}
+				if rulesItem.TransformRule.TransformFull.TransformationID != nil {
+					rules1.TransformRule.TransformFull.TransformationID = types.StringValue(*rulesItem.TransformRule.TransformFull.TransformationID)
+				} else {
+					rules1.TransformRule.TransformFull.TransformationID = types.StringNull()
+				}
+				rules1.TransformRule.TransformFull.Type = types.StringValue(string(rulesItem.TransformRule.TransformFull.Type))
+			}
+			if rulesItem.TransformRule.TransformReference != nil {
+				rules1.TransformRule.TransformReference = &TransformReference{}
+				rules1.TransformRule.TransformReference.TransformationID = types.StringValue(rulesItem.TransformRule.TransformReference.TransformationID)
+				rules1.TransformRule.TransformReference.Type = types.StringValue(string(rulesItem.TransformRule.TransformReference.Type))
+			}
+		}
 		r.Rules = append(r.Rules, rules1)
-	}
-	if r.Ruleset == nil {
-		r.Ruleset = &CreateConnectionRequestBodyRuleset{}
 	}
 	if resp.Ruleset == nil {
 		r.Ruleset = nil
 	} else {
-		r.Ruleset = &CreateConnectionRequestBodyRuleset{}
+		r.Ruleset = &Ruleset{}
 		if resp.Ruleset.ArchivedAt != nil {
-			r.Ruleset.ArchivedAt = types.StringValue(resp.Ruleset.ArchivedAt.Format(time.RFC3339))
+			r.Ruleset.ArchivedAt = types.StringValue(resp.Ruleset.ArchivedAt.Format(time.RFC3339Nano))
 		} else {
 			r.Ruleset.ArchivedAt = types.StringNull()
 		}
-		r.Ruleset.CreatedAt = types.StringValue(resp.Ruleset.CreatedAt.Format(time.RFC3339))
+		r.Ruleset.CreatedAt = types.StringValue(resp.Ruleset.CreatedAt.Format(time.RFC3339Nano))
 		r.Ruleset.ID = types.StringValue(resp.Ruleset.ID)
 		r.Ruleset.IsTeamDefault = types.BoolValue(resp.Ruleset.IsTeamDefault)
 		r.Ruleset.Name = types.StringValue(resp.Ruleset.Name)
 		r.Ruleset.Rules = nil
 		for _, rulesItem1 := range resp.Ruleset.Rules {
-			var rules3 Rule2
-			if rulesItem1.Any != nil {
-				rules3.Any = &Any{}
-				anyResult2, _ := json.Marshal(rulesItem1.Any)
-				rules3.Any = types.StringValue(string(anyResult2))
-			}
+			var rules3 Rule
 			if rulesItem1.AlertRule != nil {
 				rules3.AlertRule = &AlertRule{}
 				rules3.AlertRule.Strategy = types.StringValue(string(rulesItem1.AlertRule.Strategy))
@@ -422,11 +1357,11 @@ func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connect
 				rules3.DelayRule.Type = types.StringValue(string(rulesItem1.DelayRule.Type))
 			}
 			if rulesItem1.FilterRule != nil {
-				rules3.FilterRule = &FilterRule2{}
+				rules3.FilterRule = &FilterRule{}
 				if rulesItem1.FilterRule.Body == nil {
 					rules3.FilterRule.Body = nil
 				} else {
-					rules3.FilterRule.Body = &ConnectionFilterProperty9{}
+					rules3.FilterRule.Body = &ConnectionFilterProperty{}
 					if rulesItem1.FilterRule.Body.Str != nil {
 						if rulesItem1.FilterRule.Body.Str != nil {
 							rules3.FilterRule.Body.Str = types.StringValue(*rulesItem1.FilterRule.Body.Str)
@@ -436,7 +1371,7 @@ func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connect
 					}
 					if rulesItem1.FilterRule.Body.Float32 != nil {
 						if rulesItem1.FilterRule.Body.Float32 != nil {
-							rules3.FilterRule.Body.Float32 = types.NumberValue(big.NewFloat(*rulesItem1.FilterRule.Body.Float32))
+							rules3.FilterRule.Body.Float32 = types.NumberValue(big.NewFloat(float64(*rulesItem1.FilterRule.Body.Float32)))
 						} else {
 							rules3.FilterRule.Body.Float32 = types.NumberNull()
 						}
@@ -449,13 +1384,13 @@ func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connect
 						}
 					}
 					if rulesItem1.FilterRule.Body.ConnectionFilterProperty4 != nil {
-						rules3.FilterRule.Body.ConnectionFilterProperty4 = &ConnectionFilterProperty4{}
+						rules3.FilterRule.Body.ConnectionFilterProperty4 = &DestinationAuthMethodSignatureConfig{}
 					}
 				}
 				if rulesItem1.FilterRule.Headers == nil {
 					rules3.FilterRule.Headers = nil
 				} else {
-					rules3.FilterRule.Headers = &ConnectionFilterProperty10{}
+					rules3.FilterRule.Headers = &ConnectionFilterProperty{}
 					if rulesItem1.FilterRule.Headers.Str != nil {
 						if rulesItem1.FilterRule.Headers.Str != nil {
 							rules3.FilterRule.Headers.Str = types.StringValue(*rulesItem1.FilterRule.Headers.Str)
@@ -465,7 +1400,7 @@ func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connect
 					}
 					if rulesItem1.FilterRule.Headers.Float32 != nil {
 						if rulesItem1.FilterRule.Headers.Float32 != nil {
-							rules3.FilterRule.Headers.Float32 = types.NumberValue(big.NewFloat(*rulesItem1.FilterRule.Headers.Float32))
+							rules3.FilterRule.Headers.Float32 = types.NumberValue(big.NewFloat(float64(*rulesItem1.FilterRule.Headers.Float32)))
 						} else {
 							rules3.FilterRule.Headers.Float32 = types.NumberNull()
 						}
@@ -478,13 +1413,13 @@ func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connect
 						}
 					}
 					if rulesItem1.FilterRule.Headers.ConnectionFilterProperty4 != nil {
-						rules3.FilterRule.Headers.ConnectionFilterProperty4 = &ConnectionFilterProperty4{}
+						rules3.FilterRule.Headers.ConnectionFilterProperty4 = &DestinationAuthMethodSignatureConfig{}
 					}
 				}
 				if rulesItem1.FilterRule.Path == nil {
 					rules3.FilterRule.Path = nil
 				} else {
-					rules3.FilterRule.Path = &ConnectionFilterProperty11{}
+					rules3.FilterRule.Path = &ConnectionFilterProperty{}
 					if rulesItem1.FilterRule.Path.Str != nil {
 						if rulesItem1.FilterRule.Path.Str != nil {
 							rules3.FilterRule.Path.Str = types.StringValue(*rulesItem1.FilterRule.Path.Str)
@@ -494,7 +1429,7 @@ func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connect
 					}
 					if rulesItem1.FilterRule.Path.Float32 != nil {
 						if rulesItem1.FilterRule.Path.Float32 != nil {
-							rules3.FilterRule.Path.Float32 = types.NumberValue(big.NewFloat(*rulesItem1.FilterRule.Path.Float32))
+							rules3.FilterRule.Path.Float32 = types.NumberValue(big.NewFloat(float64(*rulesItem1.FilterRule.Path.Float32)))
 						} else {
 							rules3.FilterRule.Path.Float32 = types.NumberNull()
 						}
@@ -507,13 +1442,13 @@ func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connect
 						}
 					}
 					if rulesItem1.FilterRule.Path.ConnectionFilterProperty4 != nil {
-						rules3.FilterRule.Path.ConnectionFilterProperty4 = &ConnectionFilterProperty4{}
+						rules3.FilterRule.Path.ConnectionFilterProperty4 = &DestinationAuthMethodSignatureConfig{}
 					}
 				}
 				if rulesItem1.FilterRule.Query == nil {
 					rules3.FilterRule.Query = nil
 				} else {
-					rules3.FilterRule.Query = &ConnectionFilterProperty12{}
+					rules3.FilterRule.Query = &ConnectionFilterProperty{}
 					if rulesItem1.FilterRule.Query.Str != nil {
 						if rulesItem1.FilterRule.Query.Str != nil {
 							rules3.FilterRule.Query.Str = types.StringValue(*rulesItem1.FilterRule.Query.Str)
@@ -523,7 +1458,7 @@ func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connect
 					}
 					if rulesItem1.FilterRule.Query.Float32 != nil {
 						if rulesItem1.FilterRule.Query.Float32 != nil {
-							rules3.FilterRule.Query.Float32 = types.NumberValue(big.NewFloat(*rulesItem1.FilterRule.Query.Float32))
+							rules3.FilterRule.Query.Float32 = types.NumberValue(big.NewFloat(float64(*rulesItem1.FilterRule.Query.Float32)))
 						} else {
 							rules3.FilterRule.Query.Float32 = types.NumberNull()
 						}
@@ -536,7 +1471,7 @@ func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connect
 						}
 					}
 					if rulesItem1.FilterRule.Query.ConnectionFilterProperty4 != nil {
-						rules3.FilterRule.Query.ConnectionFilterProperty4 = &ConnectionFilterProperty4{}
+						rules3.FilterRule.Query.ConnectionFilterProperty4 = &DestinationAuthMethodSignatureConfig{}
 					}
 				}
 				rules3.FilterRule.Type = types.StringValue(string(rulesItem1.FilterRule.Type))
@@ -556,27 +1491,51 @@ func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connect
 				rules3.RetryRule.Strategy = types.StringValue(string(rulesItem1.RetryRule.Strategy))
 				rules3.RetryRule.Type = types.StringValue(string(rulesItem1.RetryRule.Type))
 			}
+			if rulesItem1.TransformRule != nil {
+				rules3.TransformRule = &TransformRule{}
+				if rulesItem1.TransformRule.TransformFull != nil {
+					rules3.TransformRule.TransformFull = &TransformFull{}
+					if rulesItem1.TransformRule.TransformFull.Transformation == nil {
+						rules3.TransformRule.TransformFull.Transformation = nil
+					} else {
+						rules3.TransformRule.TransformFull.Transformation = &TransformFullTransformation{}
+						rules3.TransformRule.TransformFull.Transformation.Code = types.StringValue(rulesItem1.TransformRule.TransformFull.Transformation.Code)
+						if rules3.TransformRule.TransformFull.Transformation.Env == nil && len(rulesItem1.TransformRule.TransformFull.Transformation.Env) > 0 {
+							rules3.TransformRule.TransformFull.Transformation.Env = make(map[string]types.String)
+							for key4, value2 := range rulesItem1.TransformRule.TransformFull.Transformation.Env {
+								rules3.TransformRule.TransformFull.Transformation.Env[key4] = types.StringValue(value2)
+							}
+						}
+						rules3.TransformRule.TransformFull.Transformation.Name = types.StringValue(rulesItem1.TransformRule.TransformFull.Transformation.Name)
+					}
+					if rulesItem1.TransformRule.TransformFull.TransformationID != nil {
+						rules3.TransformRule.TransformFull.TransformationID = types.StringValue(*rulesItem1.TransformRule.TransformFull.TransformationID)
+					} else {
+						rules3.TransformRule.TransformFull.TransformationID = types.StringNull()
+					}
+					rules3.TransformRule.TransformFull.Type = types.StringValue(string(rulesItem1.TransformRule.TransformFull.Type))
+				}
+				if rulesItem1.TransformRule.TransformReference != nil {
+					rules3.TransformRule.TransformReference = &TransformReference{}
+					rules3.TransformRule.TransformReference.TransformationID = types.StringValue(rulesItem1.TransformRule.TransformReference.TransformationID)
+					rules3.TransformRule.TransformReference.Type = types.StringValue(string(rulesItem1.TransformRule.TransformReference.Type))
+				}
+			}
 			r.Ruleset.Rules = append(r.Ruleset.Rules, rules3)
 		}
 		r.Ruleset.TeamID = types.StringValue(resp.Ruleset.TeamID)
-		r.Ruleset.UpdatedAt = types.StringValue(resp.Ruleset.UpdatedAt.Format(time.RFC3339))
-	}
-	if r.Source == nil {
-		r.Source = &CreateConnectionRequestBodySource{}
+		r.Ruleset.UpdatedAt = types.StringValue(resp.Ruleset.UpdatedAt.Format(time.RFC3339Nano))
 	}
 	r.Source.AllowedHTTPMethods = nil
 	for _, v := range resp.Source.AllowedHTTPMethods {
 		r.Source.AllowedHTTPMethods = append(r.Source.AllowedHTTPMethods, types.StringValue(string(v)))
 	}
 	if resp.Source.ArchivedAt != nil {
-		r.Source.ArchivedAt = types.StringValue(resp.Source.ArchivedAt.Format(time.RFC3339))
+		r.Source.ArchivedAt = types.StringValue(resp.Source.ArchivedAt.Format(time.RFC3339Nano))
 	} else {
 		r.Source.ArchivedAt = types.StringNull()
 	}
-	r.Source.CreatedAt = types.StringValue(resp.Source.CreatedAt.Format(time.RFC3339))
-	if r.Source.CustomResponse == nil {
-		r.Source.CustomResponse = &SourceCustomResponse{}
-	}
+	r.Source.CreatedAt = types.StringValue(resp.Source.CreatedAt.Format(time.RFC3339Nano))
 	if resp.Source.CustomResponse == nil {
 		r.Source.CustomResponse = nil
 	} else {
@@ -585,9 +1544,6 @@ func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connect
 		r.Source.CustomResponse.ContentType = types.StringValue(string(resp.Source.CustomResponse.ContentType))
 	}
 	r.Source.ID = types.StringValue(resp.Source.ID)
-	if r.Source.Integration == nil {
-		r.Source.Integration = &SourceIntegration{}
-	}
 	if resp.Source.Integration == nil {
 		r.Source.Integration = nil
 	} else {
@@ -607,8 +1563,12 @@ func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connect
 	}
 	r.Source.Name = types.StringValue(resp.Source.Name)
 	r.Source.TeamID = types.StringValue(resp.Source.TeamID)
-	r.Source.UpdatedAt = types.StringValue(resp.Source.UpdatedAt.Format(time.RFC3339))
+	r.Source.UpdatedAt = types.StringValue(resp.Source.UpdatedAt.Format(time.RFC3339Nano))
 	r.Source.URL = types.StringValue(resp.Source.URL)
 	r.TeamID = types.StringValue(resp.TeamID)
-	r.UpdatedAt = types.StringValue(resp.UpdatedAt.Format(time.RFC3339))
+	r.UpdatedAt = types.StringValue(resp.UpdatedAt.Format(time.RFC3339Nano))
+}
+
+func (r *ConnectionResourceModel) RefreshFromCreateResponse(resp *shared.Connection) {
+	r.RefreshFromGetResponse(resp)
 }

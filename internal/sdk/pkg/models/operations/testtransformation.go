@@ -3,10 +3,9 @@
 package operations
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
 	"hashicups/internal/sdk/pkg/models/shared"
+	"hashicups/internal/sdk/pkg/utils"
 	"net/http"
 )
 
@@ -51,21 +50,16 @@ func CreateTestTransformationRequestBodyRequestBodyStr(str string) TestTransform
 }
 
 func (u *TestTransformationRequestBodyRequestBody) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
 	testTransformationRequestBodyRequestBody1 := new(TestTransformationRequestBodyRequestBody1)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&testTransformationRequestBodyRequestBody1); err == nil {
+	if err := utils.UnmarshalJSON(data, &testTransformationRequestBodyRequestBody1, "", true, true); err == nil {
 		u.TestTransformationRequestBodyRequestBody1 = testTransformationRequestBodyRequestBody1
 		u.Type = TestTransformationRequestBodyRequestBodyTypeTestTransformationRequestBodyRequestBody1
 		return nil
 	}
 
 	str := new(string)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&str); err == nil {
+	if err := utils.UnmarshalJSON(data, &str, "", true, true); err == nil {
 		u.Str = str
 		u.Type = TestTransformationRequestBodyRequestBodyTypeStr
 		return nil
@@ -76,14 +70,14 @@ func (u *TestTransformationRequestBodyRequestBody) UnmarshalJSON(data []byte) er
 
 func (u TestTransformationRequestBodyRequestBody) MarshalJSON() ([]byte, error) {
 	if u.TestTransformationRequestBodyRequestBody1 != nil {
-		return json.Marshal(u.TestTransformationRequestBodyRequestBody1)
+		return utils.MarshalJSON(u.TestTransformationRequestBodyRequestBody1, "", true)
 	}
 
 	if u.Str != nil {
-		return json.Marshal(u.Str)
+		return utils.MarshalJSON(u.Str, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 // TestTransformationRequestBodyRequestParsedQuery - JSON representation of the query params
@@ -104,6 +98,41 @@ type TestTransformationRequestBodyRequest struct {
 	Query *string `json:"query,omitempty"`
 }
 
+func (o *TestTransformationRequestBodyRequest) GetBody() *TestTransformationRequestBodyRequestBody {
+	if o == nil {
+		return nil
+	}
+	return o.Body
+}
+
+func (o *TestTransformationRequestBodyRequest) GetHeaders() map[string]string {
+	if o == nil {
+		return map[string]string{}
+	}
+	return o.Headers
+}
+
+func (o *TestTransformationRequestBodyRequest) GetParsedQuery() *TestTransformationRequestBodyRequestParsedQuery {
+	if o == nil {
+		return nil
+	}
+	return o.ParsedQuery
+}
+
+func (o *TestTransformationRequestBodyRequest) GetPath() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Path
+}
+
+func (o *TestTransformationRequestBodyRequest) GetQuery() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Query
+}
+
 type TestTransformationRequestBody struct {
 	// JavaScript code to be executed
 	Code *string `json:"code,omitempty"`
@@ -118,12 +147,92 @@ type TestTransformationRequestBody struct {
 	WebhookID *string `json:"webhook_id,omitempty"`
 }
 
+func (o *TestTransformationRequestBody) GetCode() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Code
+}
+
+func (o *TestTransformationRequestBody) GetEnv() *TestTransformationRequestBodyEnv {
+	if o == nil {
+		return nil
+	}
+	return o.Env
+}
+
+func (o *TestTransformationRequestBody) GetEventID() *string {
+	if o == nil {
+		return nil
+	}
+	return o.EventID
+}
+
+func (o *TestTransformationRequestBody) GetRequest() *TestTransformationRequestBodyRequest {
+	if o == nil {
+		return nil
+	}
+	return o.Request
+}
+
+func (o *TestTransformationRequestBody) GetTransformationID() *string {
+	if o == nil {
+		return nil
+	}
+	return o.TransformationID
+}
+
+func (o *TestTransformationRequestBody) GetWebhookID() *string {
+	if o == nil {
+		return nil
+	}
+	return o.WebhookID
+}
+
 type TestTransformationResponse struct {
 	// Bad Request
 	APIErrorResponse *shared.APIErrorResponse
-	ContentType      string
-	StatusCode       int
-	RawResponse      *http.Response
+	// HTTP response content type for this operation
+	ContentType string
+	// HTTP response status code for this operation
+	StatusCode int
+	// Raw HTTP response; suitable for custom response parsing
+	RawResponse *http.Response
 	// Transformation run output
 	TransformationExecutorOutput *shared.TransformationExecutorOutput
+}
+
+func (o *TestTransformationResponse) GetAPIErrorResponse() *shared.APIErrorResponse {
+	if o == nil {
+		return nil
+	}
+	return o.APIErrorResponse
+}
+
+func (o *TestTransformationResponse) GetContentType() string {
+	if o == nil {
+		return ""
+	}
+	return o.ContentType
+}
+
+func (o *TestTransformationResponse) GetStatusCode() int {
+	if o == nil {
+		return 0
+	}
+	return o.StatusCode
+}
+
+func (o *TestTransformationResponse) GetRawResponse() *http.Response {
+	if o == nil {
+		return nil
+	}
+	return o.RawResponse
+}
+
+func (o *TestTransformationResponse) GetTransformationExecutorOutput() *shared.TransformationExecutorOutput {
+	if o == nil {
+		return nil
+	}
+	return o.TransformationExecutorOutput
 }

@@ -3,10 +3,9 @@
 package operations
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
 	"hashicups/internal/sdk/pkg/models/shared"
+	"hashicups/internal/sdk/pkg/utils"
 	"net/http"
 )
 
@@ -43,21 +42,16 @@ func CreateGenerateIgnoredEventBulkRetryPlanQueryCauseArrayOfstr(arrayOfstr []st
 }
 
 func (u *GenerateIgnoredEventBulkRetryPlanQueryCause) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
 	str := new(string)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&str); err == nil {
+	if err := utils.UnmarshalJSON(data, &str, "", true, true); err == nil {
 		u.Str = str
 		u.Type = GenerateIgnoredEventBulkRetryPlanQueryCauseTypeStr
 		return nil
 	}
 
 	arrayOfstr := []string{}
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&arrayOfstr); err == nil {
+	if err := utils.UnmarshalJSON(data, &arrayOfstr, "", true, true); err == nil {
 		u.ArrayOfstr = arrayOfstr
 		u.Type = GenerateIgnoredEventBulkRetryPlanQueryCauseTypeArrayOfstr
 		return nil
@@ -68,14 +62,14 @@ func (u *GenerateIgnoredEventBulkRetryPlanQueryCause) UnmarshalJSON(data []byte)
 
 func (u GenerateIgnoredEventBulkRetryPlanQueryCause) MarshalJSON() ([]byte, error) {
 	if u.Str != nil {
-		return json.Marshal(u.Str)
+		return utils.MarshalJSON(u.Str, "", true)
 	}
 
 	if u.ArrayOfstr != nil {
-		return json.Marshal(u.ArrayOfstr)
+		return utils.MarshalJSON(u.ArrayOfstr, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 type GenerateIgnoredEventBulkRetryPlanQueryWebhookIDType string
@@ -111,21 +105,16 @@ func CreateGenerateIgnoredEventBulkRetryPlanQueryWebhookIDArrayOfstr(arrayOfstr 
 }
 
 func (u *GenerateIgnoredEventBulkRetryPlanQueryWebhookID) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
 	str := new(string)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&str); err == nil {
+	if err := utils.UnmarshalJSON(data, &str, "", true, true); err == nil {
 		u.Str = str
 		u.Type = GenerateIgnoredEventBulkRetryPlanQueryWebhookIDTypeStr
 		return nil
 	}
 
 	arrayOfstr := []string{}
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&arrayOfstr); err == nil {
+	if err := utils.UnmarshalJSON(data, &arrayOfstr, "", true, true); err == nil {
 		u.ArrayOfstr = arrayOfstr
 		u.Type = GenerateIgnoredEventBulkRetryPlanQueryWebhookIDTypeArrayOfstr
 		return nil
@@ -136,14 +125,14 @@ func (u *GenerateIgnoredEventBulkRetryPlanQueryWebhookID) UnmarshalJSON(data []b
 
 func (u GenerateIgnoredEventBulkRetryPlanQueryWebhookID) MarshalJSON() ([]byte, error) {
 	if u.Str != nil {
-		return json.Marshal(u.Str)
+		return utils.MarshalJSON(u.Str, "", true)
 	}
 
 	if u.ArrayOfstr != nil {
-		return json.Marshal(u.ArrayOfstr)
+		return utils.MarshalJSON(u.ArrayOfstr, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 // GenerateIgnoredEventBulkRetryPlanQuery - Filter by the bulk retry ignored event query object
@@ -156,9 +145,37 @@ type GenerateIgnoredEventBulkRetryPlanQuery struct {
 	WebhookID *GenerateIgnoredEventBulkRetryPlanQueryWebhookID `queryParam:"name=webhook_id"`
 }
 
+func (o *GenerateIgnoredEventBulkRetryPlanQuery) GetCause() *GenerateIgnoredEventBulkRetryPlanQueryCause {
+	if o == nil {
+		return nil
+	}
+	return o.Cause
+}
+
+func (o *GenerateIgnoredEventBulkRetryPlanQuery) GetTransformationID() *string {
+	if o == nil {
+		return nil
+	}
+	return o.TransformationID
+}
+
+func (o *GenerateIgnoredEventBulkRetryPlanQuery) GetWebhookID() *GenerateIgnoredEventBulkRetryPlanQueryWebhookID {
+	if o == nil {
+		return nil
+	}
+	return o.WebhookID
+}
+
 type GenerateIgnoredEventBulkRetryPlanRequest struct {
 	// Filter by the bulk retry ignored event query object
 	Query *GenerateIgnoredEventBulkRetryPlanQuery `queryParam:"style=form,explode=true,name=query"`
+}
+
+func (o *GenerateIgnoredEventBulkRetryPlanRequest) GetQuery() *GenerateIgnoredEventBulkRetryPlanQuery {
+	if o == nil {
+		return nil
+	}
+	return o.Query
 }
 
 type GenerateIgnoredEventBulkRetryPlanResponse struct {
@@ -166,7 +183,45 @@ type GenerateIgnoredEventBulkRetryPlanResponse struct {
 	APIErrorResponse *shared.APIErrorResponse
 	// Ignored events bulk retry plan
 	BatchOperationPlan *shared.BatchOperationPlan
-	ContentType        string
-	StatusCode         int
-	RawResponse        *http.Response
+	// HTTP response content type for this operation
+	ContentType string
+	// HTTP response status code for this operation
+	StatusCode int
+	// Raw HTTP response; suitable for custom response parsing
+	RawResponse *http.Response
+}
+
+func (o *GenerateIgnoredEventBulkRetryPlanResponse) GetAPIErrorResponse() *shared.APIErrorResponse {
+	if o == nil {
+		return nil
+	}
+	return o.APIErrorResponse
+}
+
+func (o *GenerateIgnoredEventBulkRetryPlanResponse) GetBatchOperationPlan() *shared.BatchOperationPlan {
+	if o == nil {
+		return nil
+	}
+	return o.BatchOperationPlan
+}
+
+func (o *GenerateIgnoredEventBulkRetryPlanResponse) GetContentType() string {
+	if o == nil {
+		return ""
+	}
+	return o.ContentType
+}
+
+func (o *GenerateIgnoredEventBulkRetryPlanResponse) GetStatusCode() int {
+	if o == nil {
+		return 0
+	}
+	return o.StatusCode
+}
+
+func (o *GenerateIgnoredEventBulkRetryPlanResponse) GetRawResponse() *http.Response {
+	if o == nil {
+		return nil
+	}
+	return o.RawResponse
 }

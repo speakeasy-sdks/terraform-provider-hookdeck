@@ -3,13 +3,19 @@
 package shared
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
+	"hashicups/internal/sdk/pkg/utils"
 )
 
 type SeekPaginationDir struct {
 	Schema *OrderByDirection `json:"schema,omitempty"`
+}
+
+func (o *SeekPaginationDir) GetSchema() *OrderByDirection {
+	if o == nil {
+		return nil
+	}
+	return o.Schema
 }
 
 type SeekPaginationOrderByType string
@@ -45,21 +51,16 @@ func CreateSeekPaginationOrderByArrayOfstr(arrayOfstr []string) SeekPaginationOr
 }
 
 func (u *SeekPaginationOrderBy) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
 	str := new(string)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&str); err == nil {
+	if err := utils.UnmarshalJSON(data, &str, "", true, true); err == nil {
 		u.Str = str
 		u.Type = SeekPaginationOrderByTypeStr
 		return nil
 	}
 
 	arrayOfstr := []string{}
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&arrayOfstr); err == nil {
+	if err := utils.UnmarshalJSON(data, &arrayOfstr, "", true, true); err == nil {
 		u.ArrayOfstr = arrayOfstr
 		u.Type = SeekPaginationOrderByTypeArrayOfstr
 		return nil
@@ -70,14 +71,14 @@ func (u *SeekPaginationOrderBy) UnmarshalJSON(data []byte) error {
 
 func (u SeekPaginationOrderBy) MarshalJSON() ([]byte, error) {
 	if u.Str != nil {
-		return json.Marshal(u.Str)
+		return utils.MarshalJSON(u.Str, "", true)
 	}
 
 	if u.ArrayOfstr != nil {
-		return json.Marshal(u.ArrayOfstr)
+		return utils.MarshalJSON(u.ArrayOfstr, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 type SeekPagination struct {
@@ -86,4 +87,39 @@ type SeekPagination struct {
 	Next    *string                `json:"next,omitempty"`
 	OrderBy *SeekPaginationOrderBy `json:"order_by,omitempty"`
 	Prev    *string                `json:"prev,omitempty"`
+}
+
+func (o *SeekPagination) GetDir() *SeekPaginationDir {
+	if o == nil {
+		return nil
+	}
+	return o.Dir
+}
+
+func (o *SeekPagination) GetLimit() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.Limit
+}
+
+func (o *SeekPagination) GetNext() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Next
+}
+
+func (o *SeekPagination) GetOrderBy() *SeekPaginationOrderBy {
+	if o == nil {
+		return nil
+	}
+	return o.OrderBy
+}
+
+func (o *SeekPagination) GetPrev() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Prev
 }

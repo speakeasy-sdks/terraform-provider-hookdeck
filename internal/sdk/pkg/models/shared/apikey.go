@@ -39,3 +39,17 @@ type APIKey struct {
 	// Type of auth method
 	Type APIKeyType `json:"type"`
 }
+
+func (o *APIKey) GetConfig() *DestinationAuthMethodAPIKeyConfig {
+	if o == nil {
+		return nil
+	}
+	return o.Config
+}
+
+func (o *APIKey) GetType() APIKeyType {
+	if o == nil {
+		return APIKeyType("")
+	}
+	return o.Type
+}

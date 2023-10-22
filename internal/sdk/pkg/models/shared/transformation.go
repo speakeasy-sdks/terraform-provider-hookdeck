@@ -3,10 +3,10 @@
 package shared
 
 import (
+	"hashicups/internal/sdk/pkg/utils"
 	"time"
 )
 
-// Transformation - A single transformation
 type Transformation struct {
 	// JavaScript code to be executed
 	Code string `json:"code"`
@@ -24,4 +24,78 @@ type Transformation struct {
 	TeamID string `json:"team_id"`
 	// Date the transformation was last updated
 	UpdatedAt time.Time `json:"updated_at"`
+}
+
+func (t Transformation) MarshalJSON() ([]byte, error) {
+	return utils.MarshalJSON(t, "", false)
+}
+
+func (t *Transformation) UnmarshalJSON(data []byte) error {
+	if err := utils.UnmarshalJSON(data, &t, "", false, false); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *Transformation) GetCode() string {
+	if o == nil {
+		return ""
+	}
+	return o.Code
+}
+
+func (o *Transformation) GetCreatedAt() time.Time {
+	if o == nil {
+		return time.Time{}
+	}
+	return o.CreatedAt
+}
+
+func (o *Transformation) GetEncryptedEnv() *string {
+	if o == nil {
+		return nil
+	}
+	return o.EncryptedEnv
+}
+
+func (o *Transformation) GetEnv() map[string]string {
+	if o == nil {
+		return nil
+	}
+	return o.Env
+}
+
+func (o *Transformation) GetID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ID
+}
+
+func (o *Transformation) GetIv() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Iv
+}
+
+func (o *Transformation) GetName() string {
+	if o == nil {
+		return ""
+	}
+	return o.Name
+}
+
+func (o *Transformation) GetTeamID() string {
+	if o == nil {
+		return ""
+	}
+	return o.TeamID
+}
+
+func (o *Transformation) GetUpdatedAt() time.Time {
+	if o == nil {
+		return time.Time{}
+	}
+	return o.UpdatedAt
 }

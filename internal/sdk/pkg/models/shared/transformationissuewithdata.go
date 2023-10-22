@@ -5,6 +5,7 @@ package shared
 import (
 	"encoding/json"
 	"fmt"
+	"hashicups/internal/sdk/pkg/utils"
 	"time"
 )
 
@@ -63,4 +64,127 @@ type TransformationIssueWithData struct {
 	Type   TransformationIssueWithDataType `json:"type"`
 	// ISO timestamp for when the issue was last updated
 	UpdatedAt string `json:"updated_at"`
+}
+
+func (t TransformationIssueWithData) MarshalJSON() ([]byte, error) {
+	return utils.MarshalJSON(t, "", false)
+}
+
+func (t *TransformationIssueWithData) UnmarshalJSON(data []byte) error {
+	if err := utils.UnmarshalJSON(data, &t, "", false, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *TransformationIssueWithData) GetAggregationKeys() TransformationIssueAggregationKeys {
+	if o == nil {
+		return TransformationIssueAggregationKeys{}
+	}
+	return o.AggregationKeys
+}
+
+func (o *TransformationIssueWithData) GetAutoResolvedAt() *time.Time {
+	if o == nil {
+		return nil
+	}
+	return o.AutoResolvedAt
+}
+
+func (o *TransformationIssueWithData) GetCreatedAt() string {
+	if o == nil {
+		return ""
+	}
+	return o.CreatedAt
+}
+
+func (o *TransformationIssueWithData) GetData() *TransformationIssueData {
+	if o == nil {
+		return nil
+	}
+	return o.Data
+}
+
+func (o *TransformationIssueWithData) GetDismissedAt() *time.Time {
+	if o == nil {
+		return nil
+	}
+	return o.DismissedAt
+}
+
+func (o *TransformationIssueWithData) GetFirstSeenAt() time.Time {
+	if o == nil {
+		return time.Time{}
+	}
+	return o.FirstSeenAt
+}
+
+func (o *TransformationIssueWithData) GetID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ID
+}
+
+func (o *TransformationIssueWithData) GetLastSeenAt() time.Time {
+	if o == nil {
+		return time.Time{}
+	}
+	return o.LastSeenAt
+}
+
+func (o *TransformationIssueWithData) GetLastUpdatedBy() *string {
+	if o == nil {
+		return nil
+	}
+	return o.LastUpdatedBy
+}
+
+func (o *TransformationIssueWithData) GetMergedWith() *string {
+	if o == nil {
+		return nil
+	}
+	return o.MergedWith
+}
+
+func (o *TransformationIssueWithData) GetOpenedAt() time.Time {
+	if o == nil {
+		return time.Time{}
+	}
+	return o.OpenedAt
+}
+
+func (o *TransformationIssueWithData) GetReference() TransformationIssueReference {
+	if o == nil {
+		return TransformationIssueReference{}
+	}
+	return o.Reference
+}
+
+func (o *TransformationIssueWithData) GetStatus() IssueStatus {
+	if o == nil {
+		return IssueStatus("")
+	}
+	return o.Status
+}
+
+func (o *TransformationIssueWithData) GetTeamID() string {
+	if o == nil {
+		return ""
+	}
+	return o.TeamID
+}
+
+func (o *TransformationIssueWithData) GetType() TransformationIssueWithDataType {
+	if o == nil {
+		return TransformationIssueWithDataType("")
+	}
+	return o.Type
+}
+
+func (o *TransformationIssueWithData) GetUpdatedAt() string {
+	if o == nil {
+		return ""
+	}
+	return o.UpdatedAt
 }

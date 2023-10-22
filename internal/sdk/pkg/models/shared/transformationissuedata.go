@@ -7,3 +7,17 @@ type TransformationIssueData struct {
 	TransformationExecution TransformationExecution `json:"transformation_execution"`
 	TriggerAttempt          *EventAttempt           `json:"trigger_attempt,omitempty"`
 }
+
+func (o *TransformationIssueData) GetTransformationExecution() TransformationExecution {
+	if o == nil {
+		return TransformationExecution{}
+	}
+	return o.TransformationExecution
+}
+
+func (o *TransformationIssueData) GetTriggerAttempt() *EventAttempt {
+	if o == nil {
+		return nil
+	}
+	return o.TriggerAttempt
+}
