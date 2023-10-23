@@ -3,10 +3,10 @@
 package shared
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"hashicups/internal/sdk/pkg/utils"
 	"time"
 )
 
@@ -57,30 +57,23 @@ func CreateRequestDataBodyArrayOfany(arrayOfany []interface{}) RequestDataBody {
 }
 
 func (u *RequestDataBody) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
-
-	str := new(string)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&str); err == nil {
-		u.Str = str
-		u.Type = RequestDataBodyTypeStr
-		return nil
-	}
 
 	requestDataBody2 := new(RequestDataBody2)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&requestDataBody2); err == nil {
+	if err := utils.UnmarshalJSON(data, &requestDataBody2, "", true, true); err == nil {
 		u.RequestDataBody2 = requestDataBody2
 		u.Type = RequestDataBodyTypeRequestDataBody2
 		return nil
 	}
 
+	str := new(string)
+	if err := utils.UnmarshalJSON(data, &str, "", true, true); err == nil {
+		u.Str = str
+		u.Type = RequestDataBodyTypeStr
+		return nil
+	}
+
 	arrayOfany := []interface{}{}
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&arrayOfany); err == nil {
+	if err := utils.UnmarshalJSON(data, &arrayOfany, "", true, true); err == nil {
 		u.ArrayOfany = arrayOfany
 		u.Type = RequestDataBodyTypeArrayOfany
 		return nil
@@ -91,18 +84,18 @@ func (u *RequestDataBody) UnmarshalJSON(data []byte) error {
 
 func (u RequestDataBody) MarshalJSON() ([]byte, error) {
 	if u.Str != nil {
-		return json.Marshal(u.Str)
+		return utils.MarshalJSON(u.Str, "", true)
 	}
 
 	if u.RequestDataBody2 != nil {
-		return json.Marshal(u.RequestDataBody2)
+		return utils.MarshalJSON(u.RequestDataBody2, "", true)
 	}
 
 	if u.ArrayOfany != nil {
-		return json.Marshal(u.ArrayOfany)
+		return utils.MarshalJSON(u.ArrayOfany, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 type RequestDataHeadersType string
@@ -138,21 +131,16 @@ func CreateRequestDataHeadersMapOfstr(mapOfstr map[string]string) RequestDataHea
 }
 
 func (u *RequestDataHeaders) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
 	str := new(string)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&str); err == nil {
+	if err := utils.UnmarshalJSON(data, &str, "", true, true); err == nil {
 		u.Str = str
 		u.Type = RequestDataHeadersTypeStr
 		return nil
 	}
 
 	mapOfstr := map[string]string{}
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&mapOfstr); err == nil {
+	if err := utils.UnmarshalJSON(data, &mapOfstr, "", true, true); err == nil {
 		u.MapOfstr = mapOfstr
 		u.Type = RequestDataHeadersTypeMapOfstr
 		return nil
@@ -163,14 +151,14 @@ func (u *RequestDataHeaders) UnmarshalJSON(data []byte) error {
 
 func (u RequestDataHeaders) MarshalJSON() ([]byte, error) {
 	if u.Str != nil {
-		return json.Marshal(u.Str)
+		return utils.MarshalJSON(u.Str, "", true)
 	}
 
 	if u.MapOfstr != nil {
-		return json.Marshal(u.MapOfstr)
+		return utils.MarshalJSON(u.MapOfstr, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 type RequestDataParsedQuery2 struct {
@@ -209,23 +197,18 @@ func CreateRequestDataParsedQueryRequestDataParsedQuery2(requestDataParsedQuery2
 }
 
 func (u *RequestDataParsedQuery) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
-	str := new(string)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&str); err == nil {
-		u.Str = str
-		u.Type = RequestDataParsedQueryTypeStr
+	requestDataParsedQuery2 := new(RequestDataParsedQuery2)
+	if err := utils.UnmarshalJSON(data, &requestDataParsedQuery2, "", true, true); err == nil {
+		u.RequestDataParsedQuery2 = requestDataParsedQuery2
+		u.Type = RequestDataParsedQueryTypeRequestDataParsedQuery2
 		return nil
 	}
 
-	requestDataParsedQuery2 := new(RequestDataParsedQuery2)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&requestDataParsedQuery2); err == nil {
-		u.RequestDataParsedQuery2 = requestDataParsedQuery2
-		u.Type = RequestDataParsedQueryTypeRequestDataParsedQuery2
+	str := new(string)
+	if err := utils.UnmarshalJSON(data, &str, "", true, true); err == nil {
+		u.Str = str
+		u.Type = RequestDataParsedQueryTypeStr
 		return nil
 	}
 
@@ -234,14 +217,14 @@ func (u *RequestDataParsedQuery) UnmarshalJSON(data []byte) error {
 
 func (u RequestDataParsedQuery) MarshalJSON() ([]byte, error) {
 	if u.Str != nil {
-		return json.Marshal(u.Str)
+		return utils.MarshalJSON(u.Str, "", true)
 	}
 
 	if u.RequestDataParsedQuery2 != nil {
-		return json.Marshal(u.RequestDataParsedQuery2)
+		return utils.MarshalJSON(u.RequestDataParsedQuery2, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 type RequestData struct {
@@ -251,6 +234,48 @@ type RequestData struct {
 	ParsedQuery    *RequestDataParsedQuery `json:"parsed_query,omitempty"`
 	Path           string                  `json:"path"`
 	Query          *string                 `json:"query,omitempty"`
+}
+
+func (o *RequestData) GetBody() *RequestDataBody {
+	if o == nil {
+		return nil
+	}
+	return o.Body
+}
+
+func (o *RequestData) GetHeaders() *RequestDataHeaders {
+	if o == nil {
+		return nil
+	}
+	return o.Headers
+}
+
+func (o *RequestData) GetIsLargePayload() *bool {
+	if o == nil {
+		return nil
+	}
+	return o.IsLargePayload
+}
+
+func (o *RequestData) GetParsedQuery() *RequestDataParsedQuery {
+	if o == nil {
+		return nil
+	}
+	return o.ParsedQuery
+}
+
+func (o *RequestData) GetPath() string {
+	if o == nil {
+		return ""
+	}
+	return o.Path
+}
+
+func (o *RequestData) GetQuery() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Query
 }
 
 // RequestIngestPriority - The priority attributed to the request when received
@@ -284,7 +309,6 @@ func (e *RequestIngestPriority) UnmarshalJSON(data []byte) error {
 	}
 }
 
-// Request - A single request
 type Request struct {
 	// The count of CLI events created from this request
 	CliEventsCount *int64 `json:"cli_events_count,omitempty"`
@@ -316,4 +340,134 @@ type Request struct {
 	UpdatedAt time.Time `json:"updated_at"`
 	// Whether or not the request was verified when received
 	Verified *bool `json:"verified,omitempty"`
+}
+
+func (r Request) MarshalJSON() ([]byte, error) {
+	return utils.MarshalJSON(r, "", false)
+}
+
+func (r *Request) UnmarshalJSON(data []byte) error {
+	if err := utils.UnmarshalJSON(data, &r, "", false, false); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *Request) GetCliEventsCount() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.CliEventsCount
+}
+
+func (o *Request) GetCreatedAt() time.Time {
+	if o == nil {
+		return time.Time{}
+	}
+	return o.CreatedAt
+}
+
+func (o *Request) GetData() *RequestData {
+	if o == nil {
+		return nil
+	}
+	return o.Data
+}
+
+func (o *Request) GetDuplicateHash() *string {
+	if o == nil {
+		return nil
+	}
+	return o.DuplicateHash
+}
+
+func (o *Request) GetDuplicateHits() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.DuplicateHits
+}
+
+func (o *Request) GetEventsCount() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.EventsCount
+}
+
+func (o *Request) GetID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ID
+}
+
+func (o *Request) GetIgnoredCount() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.IgnoredCount
+}
+
+func (o *Request) GetIngestPriority() *RequestIngestPriority {
+	if o == nil {
+		return nil
+	}
+	return o.IngestPriority
+}
+
+func (o *Request) GetIngestedAt() *time.Time {
+	if o == nil {
+		return nil
+	}
+	return o.IngestedAt
+}
+
+func (o *Request) GetIngestedAtID() *string {
+	if o == nil {
+		return nil
+	}
+	return o.IngestedAtID
+}
+
+func (o *Request) GetOriginalEventDataID() *string {
+	if o == nil {
+		return nil
+	}
+	return o.OriginalEventDataID
+}
+
+func (o *Request) GetRejectionCause() *RequestRejectionCause {
+	if o == nil {
+		return nil
+	}
+	return o.RejectionCause
+}
+
+func (o *Request) GetSourceID() string {
+	if o == nil {
+		return ""
+	}
+	return o.SourceID
+}
+
+func (o *Request) GetTeamID() string {
+	if o == nil {
+		return ""
+	}
+	return o.TeamID
+}
+
+func (o *Request) GetUpdatedAt() time.Time {
+	if o == nil {
+		return time.Time{}
+	}
+	return o.UpdatedAt
+}
+
+func (o *Request) GetVerified() *bool {
+	if o == nil {
+		return nil
+	}
+	return o.Verified
 }

@@ -3,11 +3,11 @@
 package operations
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"hashicups/internal/sdk/pkg/models/shared"
+	"hashicups/internal/sdk/pkg/utils"
 	"net/http"
 )
 
@@ -99,21 +99,16 @@ func CreateGetRequestIgnoredEventsDirArrayOfgetRequestIgnoredEventsDir2(arrayOfg
 }
 
 func (u *GetRequestIgnoredEventsDir) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
 	getRequestIgnoredEventsDir1 := new(GetRequestIgnoredEventsDir1)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&getRequestIgnoredEventsDir1); err == nil {
+	if err := utils.UnmarshalJSON(data, &getRequestIgnoredEventsDir1, "", true, true); err == nil {
 		u.GetRequestIgnoredEventsDir1 = getRequestIgnoredEventsDir1
 		u.Type = GetRequestIgnoredEventsDirTypeGetRequestIgnoredEventsDir1
 		return nil
 	}
 
 	arrayOfgetRequestIgnoredEventsDir2 := []GetRequestIgnoredEventsDir2{}
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&arrayOfgetRequestIgnoredEventsDir2); err == nil {
+	if err := utils.UnmarshalJSON(data, &arrayOfgetRequestIgnoredEventsDir2, "", true, true); err == nil {
 		u.ArrayOfgetRequestIgnoredEventsDir2 = arrayOfgetRequestIgnoredEventsDir2
 		u.Type = GetRequestIgnoredEventsDirTypeArrayOfgetRequestIgnoredEventsDir2
 		return nil
@@ -124,14 +119,14 @@ func (u *GetRequestIgnoredEventsDir) UnmarshalJSON(data []byte) error {
 
 func (u GetRequestIgnoredEventsDir) MarshalJSON() ([]byte, error) {
 	if u.GetRequestIgnoredEventsDir1 != nil {
-		return json.Marshal(u.GetRequestIgnoredEventsDir1)
+		return utils.MarshalJSON(u.GetRequestIgnoredEventsDir1, "", true)
 	}
 
 	if u.ArrayOfgetRequestIgnoredEventsDir2 != nil {
-		return json.Marshal(u.ArrayOfgetRequestIgnoredEventsDir2)
+		return utils.MarshalJSON(u.ArrayOfgetRequestIgnoredEventsDir2, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 type GetRequestIgnoredEventsIDType string
@@ -167,21 +162,16 @@ func CreateGetRequestIgnoredEventsIDArrayOfstr(arrayOfstr []string) GetRequestIg
 }
 
 func (u *GetRequestIgnoredEventsID) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
 	str := new(string)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&str); err == nil {
+	if err := utils.UnmarshalJSON(data, &str, "", true, true); err == nil {
 		u.Str = str
 		u.Type = GetRequestIgnoredEventsIDTypeStr
 		return nil
 	}
 
 	arrayOfstr := []string{}
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&arrayOfstr); err == nil {
+	if err := utils.UnmarshalJSON(data, &arrayOfstr, "", true, true); err == nil {
 		u.ArrayOfstr = arrayOfstr
 		u.Type = GetRequestIgnoredEventsIDTypeArrayOfstr
 		return nil
@@ -192,14 +182,14 @@ func (u *GetRequestIgnoredEventsID) UnmarshalJSON(data []byte) error {
 
 func (u GetRequestIgnoredEventsID) MarshalJSON() ([]byte, error) {
 	if u.Str != nil {
-		return json.Marshal(u.Str)
+		return utils.MarshalJSON(u.Str, "", true)
 	}
 
 	if u.ArrayOfstr != nil {
-		return json.Marshal(u.ArrayOfstr)
+		return utils.MarshalJSON(u.ArrayOfstr, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 type GetRequestIgnoredEventsOrderBy2 string
@@ -284,21 +274,16 @@ func CreateGetRequestIgnoredEventsOrderByArrayOfgetRequestIgnoredEventsOrderBy2(
 }
 
 func (u *GetRequestIgnoredEventsOrderBy) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
 	getRequestIgnoredEventsOrderBy1 := new(GetRequestIgnoredEventsOrderBy1)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&getRequestIgnoredEventsOrderBy1); err == nil {
+	if err := utils.UnmarshalJSON(data, &getRequestIgnoredEventsOrderBy1, "", true, true); err == nil {
 		u.GetRequestIgnoredEventsOrderBy1 = getRequestIgnoredEventsOrderBy1
 		u.Type = GetRequestIgnoredEventsOrderByTypeGetRequestIgnoredEventsOrderBy1
 		return nil
 	}
 
 	arrayOfgetRequestIgnoredEventsOrderBy2 := []GetRequestIgnoredEventsOrderBy2{}
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&arrayOfgetRequestIgnoredEventsOrderBy2); err == nil {
+	if err := utils.UnmarshalJSON(data, &arrayOfgetRequestIgnoredEventsOrderBy2, "", true, true); err == nil {
 		u.ArrayOfgetRequestIgnoredEventsOrderBy2 = arrayOfgetRequestIgnoredEventsOrderBy2
 		u.Type = GetRequestIgnoredEventsOrderByTypeArrayOfgetRequestIgnoredEventsOrderBy2
 		return nil
@@ -309,14 +294,14 @@ func (u *GetRequestIgnoredEventsOrderBy) UnmarshalJSON(data []byte) error {
 
 func (u GetRequestIgnoredEventsOrderBy) MarshalJSON() ([]byte, error) {
 	if u.GetRequestIgnoredEventsOrderBy1 != nil {
-		return json.Marshal(u.GetRequestIgnoredEventsOrderBy1)
+		return utils.MarshalJSON(u.GetRequestIgnoredEventsOrderBy1, "", true)
 	}
 
 	if u.ArrayOfgetRequestIgnoredEventsOrderBy2 != nil {
-		return json.Marshal(u.ArrayOfgetRequestIgnoredEventsOrderBy2)
+		return utils.MarshalJSON(u.ArrayOfgetRequestIgnoredEventsOrderBy2, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 type GetRequestIgnoredEventsRequest struct {
@@ -329,12 +314,99 @@ type GetRequestIgnoredEventsRequest struct {
 	Prev             *string                         `queryParam:"style=form,explode=true,name=prev"`
 }
 
+func (o *GetRequestIgnoredEventsRequest) GetDir() *GetRequestIgnoredEventsDir {
+	if o == nil {
+		return nil
+	}
+	return o.Dir
+}
+
+func (o *GetRequestIgnoredEventsRequest) GetIDPathParameter() string {
+	if o == nil {
+		return ""
+	}
+	return o.IDPathParameter
+}
+
+func (o *GetRequestIgnoredEventsRequest) GetIDQueryParameter() *GetRequestIgnoredEventsID {
+	if o == nil {
+		return nil
+	}
+	return o.IDQueryParameter
+}
+
+func (o *GetRequestIgnoredEventsRequest) GetLimit() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.Limit
+}
+
+func (o *GetRequestIgnoredEventsRequest) GetNext() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Next
+}
+
+func (o *GetRequestIgnoredEventsRequest) GetOrderBy() *GetRequestIgnoredEventsOrderBy {
+	if o == nil {
+		return nil
+	}
+	return o.OrderBy
+}
+
+func (o *GetRequestIgnoredEventsRequest) GetPrev() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Prev
+}
+
 type GetRequestIgnoredEventsResponse struct {
 	// Bad Request
 	APIErrorResponse *shared.APIErrorResponse
-	ContentType      string
+	// HTTP response content type for this operation
+	ContentType string
 	// List of ignored events
 	IgnoredEventPaginatedResult *shared.IgnoredEventPaginatedResult
-	StatusCode                  int
-	RawResponse                 *http.Response
+	// HTTP response status code for this operation
+	StatusCode int
+	// Raw HTTP response; suitable for custom response parsing
+	RawResponse *http.Response
+}
+
+func (o *GetRequestIgnoredEventsResponse) GetAPIErrorResponse() *shared.APIErrorResponse {
+	if o == nil {
+		return nil
+	}
+	return o.APIErrorResponse
+}
+
+func (o *GetRequestIgnoredEventsResponse) GetContentType() string {
+	if o == nil {
+		return ""
+	}
+	return o.ContentType
+}
+
+func (o *GetRequestIgnoredEventsResponse) GetIgnoredEventPaginatedResult() *shared.IgnoredEventPaginatedResult {
+	if o == nil {
+		return nil
+	}
+	return o.IgnoredEventPaginatedResult
+}
+
+func (o *GetRequestIgnoredEventsResponse) GetStatusCode() int {
+	if o == nil {
+		return 0
+	}
+	return o.StatusCode
+}
+
+func (o *GetRequestIgnoredEventsResponse) GetRawResponse() *http.Response {
+	if o == nil {
+		return nil
+	}
+	return o.RawResponse
 }

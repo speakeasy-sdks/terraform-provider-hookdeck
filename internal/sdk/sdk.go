@@ -3,6 +3,7 @@
 package sdk
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"hashicups/internal/sdk/pkg/models/shared"
@@ -43,7 +44,7 @@ func Float64(f float64) *float64 { return &f }
 type sdkConfiguration struct {
 	DefaultClient     HTTPClient
 	SecurityClient    HTTPClient
-	Security          *shared.Security
+	Security          func(context.Context) (interface{}, error)
 	ServerURL         string
 	ServerIndex       int
 	ServerDefaults    []map[string]string
@@ -51,6 +52,8 @@ type sdkConfiguration struct {
 	OpenAPIDocVersion string
 	SDKVersion        string
 	GenVersion        string
+	UserAgent         string
+	RetryConfig       *utils.RetryConfig
 }
 
 func (c *sdkConfiguration) GetServerDetails() (string, map[string]string) {
@@ -61,13 +64,12 @@ func (c *sdkConfiguration) GetServerDetails() (string, map[string]string) {
 	return ServerList[c.ServerIndex], c.ServerDefaults[c.ServerIndex]
 }
 
-// SDK
 type SDK struct {
 	Attempt *attempt
-	// Attempts - An attempt is any request that Hookdeck makes on behalf of an event.
+	// An attempt is any request that Hookdeck makes on behalf of an event.
 	Attempts *attempts
 	Bookmark *bookmark
-	// Bookmarks - A bookmark lets you conveniently store and replay a specific request.
+	// A bookmark lets you conveniently store and replay a specific request.
 	Bookmarks              *bookmarks
 	BulkRetryEvent         *bulkRetryEvent
 	BulkRetryIgnoredEvent  *bulkRetryIgnoredEvent
@@ -75,24 +77,24 @@ type SDK struct {
 	BulkRetryRequests      *bulkRetryRequests
 	Connection             *connection
 	ConnectionNumberUpdate *connectionNumberUpdate
-	// Connections - A connection lets you route webhooks from a source to a destination, using a ruleset.
+	// A connection lets you route webhooks from a source to a destination, using a ruleset.
 	Connections   *connections
 	CustomDomain  *customDomain
 	CustomDomains *customDomains
 	Destination   *destination
-	// Destinations - A destination is any endpoint to which your webhooks can be routed.
+	// A destination is any endpoint to which your webhooks can be routed.
 	Destinations *destinations
 	Event        *event
 	EventRawBody *eventRawBody
-	// Events - An event is any request that Hookdeck receives from a source.
+	// An event is any request that Hookdeck receives from a source.
 	Events      *events
 	Integration *integration
-	// Integrations - An integration configures platform-specific behaviors, such as signature verification.
+	// An integration configures platform-specific behaviors, such as signature verification.
 	Integrations  *integrations
 	Issue         *issue
 	IssueTrigger  *issueTrigger
 	IssueTriggers *issueTriggers
-	// Issues - Issues lets you track problems in your workspace and communicate resolution steps with your team.
+	// Issues lets you track problems in your workspace and communicate resolution steps with your team.
 	Issues               *issues
 	IssuesCount          *issuesCount
 	Request              *request
@@ -100,18 +102,18 @@ type SDK struct {
 	RequestEvents        *requestEvents
 	RequestIgnoredEvents *requestIgnoredEvents
 	RequestRawBody       *requestRawBody
-	// Requests - A request represent a webhook received by Hookdeck.
+	// A request represent a webhook received by Hookdeck.
 	Requests *requests
 	Ruleset  *ruleset
-	// Rulesets - A ruleset defines a group of rules that can be used across many connections.
+	// A ruleset defines a group of rules that can be used across many connections.
 	Rulesets *rulesets
 	Source   *source
-	// Sources - A source represents any third party that sends webhooks to Hookdeck.
+	// A source represents any third party that sends webhooks to Hookdeck.
 	Sources                  *sources
 	Transformation           *transformation
 	TransformationExecution  *transformationExecution
 	TransformationExecutions *transformationExecutions
-	// Transformations - A transformation represents JavaScript code that will be executed on a connection's requests. Transformations are applied to connections using Rules.
+	// A transformation represents JavaScript code that will be executed on a connection's requests. Transformations are applied to connections using Rules.
 	Transformations      *transformations
 	WebhookNotifications *webhookNotifications
 
@@ -191,7 +193,7 @@ func (e *ServerVersion) UnmarshalJSON(data []byte) error {
 	}
 }
 
-// WithVersion allows setting the $name variable for url substitution
+// WithVersion allows setting the version variable for url substitution
 func WithVersion(version ServerVersion) SDKOption {
 	return func(sdk *SDK) {
 		for idx := range sdk.sdkConfiguration.ServerDefaults {
@@ -211,10 +213,31 @@ func WithClient(client HTTPClient) SDKOption {
 	}
 }
 
+func withSecurity(security interface{}) func(context.Context) (interface{}, error) {
+	return func(context.Context) (interface{}, error) {
+		return &security, nil
+	}
+}
+
 // WithSecurity configures the SDK to use the provided security details
 func WithSecurity(security shared.Security) SDKOption {
 	return func(sdk *SDK) {
-		sdk.sdkConfiguration.Security = &security
+		sdk.sdkConfiguration.Security = withSecurity(security)
+	}
+}
+
+// WithSecuritySource configures the SDK to invoke the Security Source function on each method call to determine authentication
+func WithSecuritySource(security func(context.Context) (shared.Security, error)) SDKOption {
+	return func(sdk *SDK) {
+		sdk.sdkConfiguration.Security = func(ctx context.Context) (interface{}, error) {
+			return security(ctx)
+		}
+	}
+}
+
+func WithRetryConfig(retryConfig utils.RetryConfig) SDKOption {
+	return func(sdk *SDK) {
+		sdk.sdkConfiguration.RetryConfig = &retryConfig
 	}
 }
 
@@ -222,10 +245,11 @@ func WithSecurity(security shared.Security) SDKOption {
 func New(opts ...SDKOption) *SDK {
 	sdk := &SDK{
 		sdkConfiguration: sdkConfiguration{
-			Language:          "terraform",
+			Language:          "go",
 			OpenAPIDocVersion: "1.0.0",
-			SDKVersion:        "0.0.1",
-			GenVersion:        "2.58.2",
+			SDKVersion:        "0.1.0",
+			GenVersion:        "2.169.0",
+			UserAgent:         "speakeasy-sdk/go 0.1.0 2.169.0 1.0.0 hashicups",
 			ServerDefaults: []map[string]string{
 				{
 					"version": "2023-01-01",

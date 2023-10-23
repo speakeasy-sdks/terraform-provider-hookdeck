@@ -3,9 +3,8 @@
 package shared
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
+	"hashicups/internal/sdk/pkg/utils"
 	"time"
 )
 
@@ -42,21 +41,16 @@ func CreateBatchOperationQueryStr(str string) BatchOperationQuery {
 }
 
 func (u *BatchOperationQuery) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
 	mapOfany := map[string]interface{}{}
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&mapOfany); err == nil {
+	if err := utils.UnmarshalJSON(data, &mapOfany, "", true, true); err == nil {
 		u.MapOfany = mapOfany
 		u.Type = BatchOperationQueryTypeMapOfany
 		return nil
 	}
 
 	str := new(string)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&str); err == nil {
+	if err := utils.UnmarshalJSON(data, &str, "", true, true); err == nil {
 		u.Str = str
 		u.Type = BatchOperationQueryTypeStr
 		return nil
@@ -67,17 +61,16 @@ func (u *BatchOperationQuery) UnmarshalJSON(data []byte) error {
 
 func (u BatchOperationQuery) MarshalJSON() ([]byte, error) {
 	if u.MapOfany != nil {
-		return json.Marshal(u.MapOfany)
+		return utils.MarshalJSON(u.MapOfany, "", true)
 	}
 
 	if u.Str != nil {
-		return json.Marshal(u.Str)
+		return utils.MarshalJSON(u.Str, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
-// BatchOperation - A single events bulk retry
 type BatchOperation struct {
 	// Date the bulk retry was cancelled
 	CancelledAt *time.Time `json:"cancelled_at,omitempty"`
@@ -108,4 +101,120 @@ type BatchOperation struct {
 	TeamID string `json:"team_id"`
 	// Last time the bulk retry was updated
 	UpdatedAt time.Time `json:"updated_at"`
+}
+
+func (b BatchOperation) MarshalJSON() ([]byte, error) {
+	return utils.MarshalJSON(b, "", false)
+}
+
+func (b *BatchOperation) UnmarshalJSON(data []byte) error {
+	if err := utils.UnmarshalJSON(data, &b, "", false, false); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *BatchOperation) GetCancelledAt() *time.Time {
+	if o == nil {
+		return nil
+	}
+	return o.CancelledAt
+}
+
+func (o *BatchOperation) GetCompletedAt() *time.Time {
+	if o == nil {
+		return nil
+	}
+	return o.CompletedAt
+}
+
+func (o *BatchOperation) GetCompletedCount() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.CompletedCount
+}
+
+func (o *BatchOperation) GetCreatedAt() time.Time {
+	if o == nil {
+		return time.Time{}
+	}
+	return o.CreatedAt
+}
+
+func (o *BatchOperation) GetEstimatedBatch() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.EstimatedBatch
+}
+
+func (o *BatchOperation) GetEstimatedCount() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.EstimatedCount
+}
+
+func (o *BatchOperation) GetFailedCount() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.FailedCount
+}
+
+func (o *BatchOperation) GetID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ID
+}
+
+func (o *BatchOperation) GetInProgress() bool {
+	if o == nil {
+		return false
+	}
+	return o.InProgress
+}
+
+func (o *BatchOperation) GetNumber() *float32 {
+	if o == nil {
+		return nil
+	}
+	return o.Number
+}
+
+func (o *BatchOperation) GetProcessedBatch() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.ProcessedBatch
+}
+
+func (o *BatchOperation) GetProgress() *float32 {
+	if o == nil {
+		return nil
+	}
+	return o.Progress
+}
+
+func (o *BatchOperation) GetQuery() *BatchOperationQuery {
+	if o == nil {
+		return nil
+	}
+	return o.Query
+}
+
+func (o *BatchOperation) GetTeamID() string {
+	if o == nil {
+		return ""
+	}
+	return o.TeamID
+}
+
+func (o *BatchOperation) GetUpdatedAt() time.Time {
+	if o == nil {
+		return time.Time{}
+	}
+	return o.UpdatedAt
 }

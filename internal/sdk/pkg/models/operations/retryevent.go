@@ -11,12 +11,57 @@ type RetryEventRequest struct {
 	ID string `pathParam:"style=simple,explode=false,name=id"`
 }
 
+func (o *RetryEventRequest) GetID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ID
+}
+
 type RetryEventResponse struct {
 	// Not Found
 	APIErrorResponse *shared.APIErrorResponse
-	ContentType      string
+	// HTTP response content type for this operation
+	ContentType string
 	// Retried event with event attempt
 	RetriedEvent *shared.RetriedEvent
-	StatusCode   int
-	RawResponse  *http.Response
+	// HTTP response status code for this operation
+	StatusCode int
+	// Raw HTTP response; suitable for custom response parsing
+	RawResponse *http.Response
+}
+
+func (o *RetryEventResponse) GetAPIErrorResponse() *shared.APIErrorResponse {
+	if o == nil {
+		return nil
+	}
+	return o.APIErrorResponse
+}
+
+func (o *RetryEventResponse) GetContentType() string {
+	if o == nil {
+		return ""
+	}
+	return o.ContentType
+}
+
+func (o *RetryEventResponse) GetRetriedEvent() *shared.RetriedEvent {
+	if o == nil {
+		return nil
+	}
+	return o.RetriedEvent
+}
+
+func (o *RetryEventResponse) GetStatusCode() int {
+	if o == nil {
+		return 0
+	}
+	return o.StatusCode
+}
+
+func (o *RetryEventResponse) GetRawResponse() *http.Response {
+	if o == nil {
+		return nil
+	}
+	return o.RawResponse
 }

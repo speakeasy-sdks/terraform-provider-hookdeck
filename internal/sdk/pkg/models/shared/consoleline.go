@@ -47,3 +47,17 @@ type ConsoleLine struct {
 	Message string          `json:"message"`
 	Type    ConsoleLineType `json:"type"`
 }
+
+func (o *ConsoleLine) GetMessage() string {
+	if o == nil {
+		return ""
+	}
+	return o.Message
+}
+
+func (o *ConsoleLine) GetType() ConsoleLineType {
+	if o == nil {
+		return ConsoleLineType("")
+	}
+	return o.Type
+}

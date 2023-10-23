@@ -7,7 +7,6 @@ import (
 	"fmt"
 )
 
-// RequestRejectionCause - Filter by rejection cause
 type RequestRejectionCause string
 
 const (

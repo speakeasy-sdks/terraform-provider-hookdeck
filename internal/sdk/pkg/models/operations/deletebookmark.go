@@ -11,12 +11,57 @@ type DeleteBookmarkRequest struct {
 	ID string `pathParam:"style=simple,explode=false,name=id"`
 }
 
+func (o *DeleteBookmarkRequest) GetID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ID
+}
+
 type DeleteBookmarkResponse struct {
 	// Not Found
 	APIErrorResponse *shared.APIErrorResponse
-	ContentType      string
+	// HTTP response content type for this operation
+	ContentType string
 	// An object with deleted bookmark's id
 	DeletedBookmarkResponse *shared.DeletedBookmarkResponse
-	StatusCode              int
-	RawResponse             *http.Response
+	// HTTP response status code for this operation
+	StatusCode int
+	// Raw HTTP response; suitable for custom response parsing
+	RawResponse *http.Response
+}
+
+func (o *DeleteBookmarkResponse) GetAPIErrorResponse() *shared.APIErrorResponse {
+	if o == nil {
+		return nil
+	}
+	return o.APIErrorResponse
+}
+
+func (o *DeleteBookmarkResponse) GetContentType() string {
+	if o == nil {
+		return ""
+	}
+	return o.ContentType
+}
+
+func (o *DeleteBookmarkResponse) GetDeletedBookmarkResponse() *shared.DeletedBookmarkResponse {
+	if o == nil {
+		return nil
+	}
+	return o.DeletedBookmarkResponse
+}
+
+func (o *DeleteBookmarkResponse) GetStatusCode() int {
+	if o == nil {
+		return 0
+	}
+	return o.StatusCode
+}
+
+func (o *DeleteBookmarkResponse) GetRawResponse() *http.Response {
+	if o == nil {
+		return nil
+	}
+	return o.RawResponse
 }

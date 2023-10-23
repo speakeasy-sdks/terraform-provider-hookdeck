@@ -5,6 +5,7 @@ package shared
 import (
 	"encoding/json"
 	"fmt"
+	"hashicups/internal/sdk/pkg/utils"
 	"time"
 )
 
@@ -63,4 +64,127 @@ type DeliveryIssueWithData struct {
 	Type   DeliveryIssueWithDataType `json:"type"`
 	// ISO timestamp for when the issue was last updated
 	UpdatedAt string `json:"updated_at"`
+}
+
+func (d DeliveryIssueWithData) MarshalJSON() ([]byte, error) {
+	return utils.MarshalJSON(d, "", false)
+}
+
+func (d *DeliveryIssueWithData) UnmarshalJSON(data []byte) error {
+	if err := utils.UnmarshalJSON(data, &d, "", false, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *DeliveryIssueWithData) GetAggregationKeys() DeliveryIssueAggregationKeys {
+	if o == nil {
+		return DeliveryIssueAggregationKeys{}
+	}
+	return o.AggregationKeys
+}
+
+func (o *DeliveryIssueWithData) GetAutoResolvedAt() *time.Time {
+	if o == nil {
+		return nil
+	}
+	return o.AutoResolvedAt
+}
+
+func (o *DeliveryIssueWithData) GetCreatedAt() string {
+	if o == nil {
+		return ""
+	}
+	return o.CreatedAt
+}
+
+func (o *DeliveryIssueWithData) GetData() *DeliveryIssueData {
+	if o == nil {
+		return nil
+	}
+	return o.Data
+}
+
+func (o *DeliveryIssueWithData) GetDismissedAt() *time.Time {
+	if o == nil {
+		return nil
+	}
+	return o.DismissedAt
+}
+
+func (o *DeliveryIssueWithData) GetFirstSeenAt() time.Time {
+	if o == nil {
+		return time.Time{}
+	}
+	return o.FirstSeenAt
+}
+
+func (o *DeliveryIssueWithData) GetID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ID
+}
+
+func (o *DeliveryIssueWithData) GetLastSeenAt() time.Time {
+	if o == nil {
+		return time.Time{}
+	}
+	return o.LastSeenAt
+}
+
+func (o *DeliveryIssueWithData) GetLastUpdatedBy() *string {
+	if o == nil {
+		return nil
+	}
+	return o.LastUpdatedBy
+}
+
+func (o *DeliveryIssueWithData) GetMergedWith() *string {
+	if o == nil {
+		return nil
+	}
+	return o.MergedWith
+}
+
+func (o *DeliveryIssueWithData) GetOpenedAt() time.Time {
+	if o == nil {
+		return time.Time{}
+	}
+	return o.OpenedAt
+}
+
+func (o *DeliveryIssueWithData) GetReference() DeliveryIssueReference {
+	if o == nil {
+		return DeliveryIssueReference{}
+	}
+	return o.Reference
+}
+
+func (o *DeliveryIssueWithData) GetStatus() IssueStatus {
+	if o == nil {
+		return IssueStatus("")
+	}
+	return o.Status
+}
+
+func (o *DeliveryIssueWithData) GetTeamID() string {
+	if o == nil {
+		return ""
+	}
+	return o.TeamID
+}
+
+func (o *DeliveryIssueWithData) GetType() DeliveryIssueWithDataType {
+	if o == nil {
+		return DeliveryIssueWithDataType("")
+	}
+	return o.Type
+}
+
+func (o *DeliveryIssueWithData) GetUpdatedAt() string {
+	if o == nil {
+		return ""
+	}
+	return o.UpdatedAt
 }

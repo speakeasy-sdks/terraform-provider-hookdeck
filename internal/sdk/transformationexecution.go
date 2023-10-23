@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"hashicups/internal/sdk/pkg/models/operations"
+	"hashicups/internal/sdk/pkg/models/sdkerrors"
 	"hashicups/internal/sdk/pkg/models/shared"
 	"hashicups/internal/sdk/pkg/utils"
 	"io"
@@ -23,7 +24,7 @@ func newTransformationExecution(sdkConfig sdkConfiguration) *transformationExecu
 	}
 }
 
-// Get - Get a transformation execution
+// Get a transformation execution
 func (s *transformationExecution) Get(ctx context.Context, request operations.GetTransformationExecutionRequest) (*operations.GetTransformationExecutionResponse, error) {
 	baseURL := utils.ReplaceParameters(s.sdkConfiguration.GetServerDetails())
 	url, err := utils.GenerateURL(ctx, baseURL, "/transformations/{id}/executions/{execution_id}", request, nil)
@@ -35,8 +36,8 @@ func (s *transformationExecution) Get(ctx context.Context, request operations.Ge
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
-	req.Header.Set("Accept", "application/json;q=1, application/json;q=0")
-	req.Header.Set("user-agent", fmt.Sprintf("speakeasy-sdk/%s %s %s %s", s.sdkConfiguration.Language, s.sdkConfiguration.SDKVersion, s.sdkConfiguration.GenVersion, s.sdkConfiguration.OpenAPIDocVersion))
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("user-agent", s.sdkConfiguration.UserAgent)
 
 	client := s.sdkConfiguration.SecurityClient
 
@@ -66,22 +67,26 @@ func (s *transformationExecution) Get(ctx context.Context, request operations.Ge
 	case httpRes.StatusCode == 200:
 		switch {
 		case utils.MatchContentType(contentType, `application/json`):
-			var out *shared.TransformationExecution
-			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
+			var out shared.TransformationExecution
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
 				return nil, err
 			}
 
-			res.TransformationExecution = out
+			res.TransformationExecution = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
 		}
 	case httpRes.StatusCode == 404:
 		switch {
 		case utils.MatchContentType(contentType, `application/json`):
-			var out *shared.APIErrorResponse
-			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out); err != nil {
+			var out shared.APIErrorResponse
+			if err := utils.UnmarshalJsonFromResponseBody(bytes.NewBuffer(rawBody), &out, ""); err != nil {
 				return nil, err
 			}
 
-			res.APIErrorResponse = out
+			res.APIErrorResponse = &out
+		default:
+			return nil, sdkerrors.NewSDKError(fmt.Sprintf("unknown content-type received: %s", contentType), httpRes.StatusCode, string(rawBody), httpRes)
 		}
 	}
 

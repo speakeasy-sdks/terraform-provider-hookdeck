@@ -42,7 +42,7 @@ func (e *UpdateDestinationRequestBodyRateLimitPeriod) UnmarshalJSON(data []byte)
 
 type UpdateDestinationRequestBody struct {
 	// Config for the destination's auth method
-	AuthMethod interface{} `json:"auth_method,omitempty"`
+	AuthMethod *shared.DestinationAuthMethodConfig `json:"auth_method,omitempty"`
 	// Path for the CLI destination
 	CliPath *string `json:"cli_path,omitempty"`
 	// HTTP method used on requests sent to the destination, overrides the method used on requests sent to the source.
@@ -51,11 +51,67 @@ type UpdateDestinationRequestBody struct {
 	Name                   *string `json:"name,omitempty"`
 	PathForwardingDisabled *bool   `json:"path_forwarding_disabled,omitempty"`
 	// Limit event attempts to receive per period
-	RateLimit interface{} `json:"rate_limit,omitempty"`
+	RateLimit *int64 `json:"rate_limit,omitempty"`
 	// Period to rate limit attempts
 	RateLimitPeriod *UpdateDestinationRequestBodyRateLimitPeriod `json:"rate_limit_period,omitempty"`
 	// Endpoint of the destination
 	URL *string `json:"url,omitempty"`
+}
+
+func (o *UpdateDestinationRequestBody) GetAuthMethod() *shared.DestinationAuthMethodConfig {
+	if o == nil {
+		return nil
+	}
+	return o.AuthMethod
+}
+
+func (o *UpdateDestinationRequestBody) GetCliPath() *string {
+	if o == nil {
+		return nil
+	}
+	return o.CliPath
+}
+
+func (o *UpdateDestinationRequestBody) GetHTTPMethod() *shared.DestinationHTTPMethod {
+	if o == nil {
+		return nil
+	}
+	return o.HTTPMethod
+}
+
+func (o *UpdateDestinationRequestBody) GetName() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Name
+}
+
+func (o *UpdateDestinationRequestBody) GetPathForwardingDisabled() *bool {
+	if o == nil {
+		return nil
+	}
+	return o.PathForwardingDisabled
+}
+
+func (o *UpdateDestinationRequestBody) GetRateLimit() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.RateLimit
+}
+
+func (o *UpdateDestinationRequestBody) GetRateLimitPeriod() *UpdateDestinationRequestBodyRateLimitPeriod {
+	if o == nil {
+		return nil
+	}
+	return o.RateLimitPeriod
+}
+
+func (o *UpdateDestinationRequestBody) GetURL() *string {
+	if o == nil {
+		return nil
+	}
+	return o.URL
 }
 
 type UpdateDestinationRequest struct {
@@ -63,12 +119,64 @@ type UpdateDestinationRequest struct {
 	ID          string                       `pathParam:"style=simple,explode=false,name=id"`
 }
 
+func (o *UpdateDestinationRequest) GetRequestBody() UpdateDestinationRequestBody {
+	if o == nil {
+		return UpdateDestinationRequestBody{}
+	}
+	return o.RequestBody
+}
+
+func (o *UpdateDestinationRequest) GetID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ID
+}
+
 type UpdateDestinationResponse struct {
 	// Bad Request
 	APIErrorResponse *shared.APIErrorResponse
-	ContentType      string
+	// HTTP response content type for this operation
+	ContentType string
 	// A single destination
 	Destination *shared.Destination
-	StatusCode  int
+	// HTTP response status code for this operation
+	StatusCode int
+	// Raw HTTP response; suitable for custom response parsing
 	RawResponse *http.Response
+}
+
+func (o *UpdateDestinationResponse) GetAPIErrorResponse() *shared.APIErrorResponse {
+	if o == nil {
+		return nil
+	}
+	return o.APIErrorResponse
+}
+
+func (o *UpdateDestinationResponse) GetContentType() string {
+	if o == nil {
+		return ""
+	}
+	return o.ContentType
+}
+
+func (o *UpdateDestinationResponse) GetDestination() *shared.Destination {
+	if o == nil {
+		return nil
+	}
+	return o.Destination
+}
+
+func (o *UpdateDestinationResponse) GetStatusCode() int {
+	if o == nil {
+		return 0
+	}
+	return o.StatusCode
+}
+
+func (o *UpdateDestinationResponse) GetRawResponse() *http.Response {
+	if o == nil {
+		return nil
+	}
+	return o.RawResponse
 }
