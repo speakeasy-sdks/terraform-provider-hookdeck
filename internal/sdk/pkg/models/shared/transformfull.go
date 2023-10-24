@@ -17,6 +17,27 @@ type TransformFullTransformation struct {
 	Name string `json:"name"`
 }
 
+func (o *TransformFullTransformation) GetCode() string {
+	if o == nil {
+		return ""
+	}
+	return o.Code
+}
+
+func (o *TransformFullTransformation) GetEnv() map[string]string {
+	if o == nil {
+		return nil
+	}
+	return o.Env
+}
+
+func (o *TransformFullTransformation) GetName() string {
+	if o == nil {
+		return ""
+	}
+	return o.Name
+}
+
 // TransformFullType - A transformation rule must be of type `transformation`
 type TransformFullType string
 
@@ -49,4 +70,25 @@ type TransformFull struct {
 	TransformationID *string `json:"transformation_id,omitempty"`
 	// A transformation rule must be of type `transformation`
 	Type TransformFullType `json:"type"`
+}
+
+func (o *TransformFull) GetTransformation() *TransformFullTransformation {
+	if o == nil {
+		return nil
+	}
+	return o.Transformation
+}
+
+func (o *TransformFull) GetTransformationID() *string {
+	if o == nil {
+		return nil
+	}
+	return o.TransformationID
+}
+
+func (o *TransformFull) GetType() TransformFullType {
+	if o == nil {
+		return TransformFullType("")
+	}
+	return o.Type
 }

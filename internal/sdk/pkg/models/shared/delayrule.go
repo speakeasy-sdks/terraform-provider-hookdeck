@@ -38,3 +38,17 @@ type DelayRule struct {
 	// A delay rule must be of type `delay`
 	Type DelayRuleType `json:"type"`
 }
+
+func (o *DelayRule) GetDelay() int64 {
+	if o == nil {
+		return 0
+	}
+	return o.Delay
+}
+
+func (o *DelayRule) GetType() DelayRuleType {
+	if o == nil {
+		return DelayRuleType("")
+	}
+	return o.Type
+}

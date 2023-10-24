@@ -3,9 +3,8 @@
 package shared
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
+	"hashicups/internal/sdk/pkg/utils"
 )
 
 type IssueTriggerBackpressureConfigsDestinationsType string
@@ -41,21 +40,16 @@ func CreateIssueTriggerBackpressureConfigsDestinationsArrayOfstr(arrayOfstr []st
 }
 
 func (u *IssueTriggerBackpressureConfigsDestinations) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
 	str := new(string)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&str); err == nil {
+	if err := utils.UnmarshalJSON(data, &str, "", true, true); err == nil {
 		u.Str = str
 		u.Type = IssueTriggerBackpressureConfigsDestinationsTypeStr
 		return nil
 	}
 
 	arrayOfstr := []string{}
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&arrayOfstr); err == nil {
+	if err := utils.UnmarshalJSON(data, &arrayOfstr, "", true, true); err == nil {
 		u.ArrayOfstr = arrayOfstr
 		u.Type = IssueTriggerBackpressureConfigsDestinationsTypeArrayOfstr
 		return nil
@@ -66,14 +60,14 @@ func (u *IssueTriggerBackpressureConfigsDestinations) UnmarshalJSON(data []byte)
 
 func (u IssueTriggerBackpressureConfigsDestinations) MarshalJSON() ([]byte, error) {
 	if u.Str != nil {
-		return json.Marshal(u.Str)
+		return utils.MarshalJSON(u.Str, "", true)
 	}
 
 	if u.ArrayOfstr != nil {
-		return json.Marshal(u.ArrayOfstr)
+		return utils.MarshalJSON(u.ArrayOfstr, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 // IssueTriggerBackpressureConfigs - Configurations for a 'Backpressure' issue trigger
@@ -82,4 +76,18 @@ type IssueTriggerBackpressureConfigs struct {
 	Delay int64 `json:"delay"`
 	// A pattern to match on the destination name or array of destination IDs. Use `*` as wildcard.
 	Destinations IssueTriggerBackpressureConfigsDestinations `json:"destinations"`
+}
+
+func (o *IssueTriggerBackpressureConfigs) GetDelay() int64 {
+	if o == nil {
+		return 0
+	}
+	return o.Delay
+}
+
+func (o *IssueTriggerBackpressureConfigs) GetDestinations() IssueTriggerBackpressureConfigsDestinations {
+	if o == nil {
+		return IssueTriggerBackpressureConfigsDestinations{}
+	}
+	return o.Destinations
 }

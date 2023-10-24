@@ -39,3 +39,17 @@ type HookdeckSignature struct {
 	// Type of auth method
 	Type HookdeckSignatureType `json:"type"`
 }
+
+func (o *HookdeckSignature) GetConfig() *DestinationAuthMethodSignatureConfig {
+	if o == nil {
+		return nil
+	}
+	return o.Config
+}
+
+func (o *HookdeckSignature) GetType() HookdeckSignatureType {
+	if o == nil {
+		return HookdeckSignatureType("")
+	}
+	return o.Type
+}

@@ -7,3 +7,10 @@ type DestinationAuthMethodBearerTokenConfig struct {
 	// Token for the bearer token auth
 	Token string `json:"token"`
 }
+
+func (o *DestinationAuthMethodBearerTokenConfig) GetToken() string {
+	if o == nil {
+		return ""
+	}
+	return o.Token
+}

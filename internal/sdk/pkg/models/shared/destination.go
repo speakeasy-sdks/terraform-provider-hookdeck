@@ -3,6 +3,7 @@
 package shared
 
 import (
+	"hashicups/internal/sdk/pkg/utils"
 	"time"
 )
 
@@ -11,7 +12,7 @@ type Destination struct {
 	// Date the destination was archived
 	ArchivedAt *time.Time `json:"archived_at,omitempty"`
 	// Config for the destination's auth method
-	AuthMethod interface{} `json:"auth_method,omitempty"`
+	AuthMethod *DestinationAuthMethodConfig `json:"auth_method,omitempty"`
 	// Path for the CLI destination
 	CliPath *string `json:"cli_path,omitempty"`
 	// Date the destination was created
@@ -26,11 +27,113 @@ type Destination struct {
 	// Limit event attempts to receive per period. Max value is workspace plan's max attempts thoughput.
 	RateLimit *int64 `json:"rate_limit,omitempty"`
 	// Period to rate limit attempts
-	RateLimitPeriod *DestinationRateLimitPeriod `json:"rate_limit_period,omitempty"`
+	RateLimitPeriod *DestinationRateLimitPeriod `default:"second" json:"rate_limit_period"`
 	// ID of the workspace
 	TeamID string `json:"team_id"`
 	// Date the destination was last updated
 	UpdatedAt time.Time `json:"updated_at"`
 	// HTTP endpoint of the destination
 	URL *string `json:"url,omitempty"`
+}
+
+func (d Destination) MarshalJSON() ([]byte, error) {
+	return utils.MarshalJSON(d, "", false)
+}
+
+func (d *Destination) UnmarshalJSON(data []byte) error {
+	if err := utils.UnmarshalJSON(data, &d, "", false, false); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *Destination) GetArchivedAt() *time.Time {
+	if o == nil {
+		return nil
+	}
+	return o.ArchivedAt
+}
+
+func (o *Destination) GetAuthMethod() *DestinationAuthMethodConfig {
+	if o == nil {
+		return nil
+	}
+	return o.AuthMethod
+}
+
+func (o *Destination) GetCliPath() *string {
+	if o == nil {
+		return nil
+	}
+	return o.CliPath
+}
+
+func (o *Destination) GetCreatedAt() time.Time {
+	if o == nil {
+		return time.Time{}
+	}
+	return o.CreatedAt
+}
+
+func (o *Destination) GetHTTPMethod() *DestinationHTTPMethod {
+	if o == nil {
+		return nil
+	}
+	return o.HTTPMethod
+}
+
+func (o *Destination) GetID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ID
+}
+
+func (o *Destination) GetName() string {
+	if o == nil {
+		return ""
+	}
+	return o.Name
+}
+
+func (o *Destination) GetPathForwardingDisabled() *bool {
+	if o == nil {
+		return nil
+	}
+	return o.PathForwardingDisabled
+}
+
+func (o *Destination) GetRateLimit() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.RateLimit
+}
+
+func (o *Destination) GetRateLimitPeriod() *DestinationRateLimitPeriod {
+	if o == nil {
+		return nil
+	}
+	return o.RateLimitPeriod
+}
+
+func (o *Destination) GetTeamID() string {
+	if o == nil {
+		return ""
+	}
+	return o.TeamID
+}
+
+func (o *Destination) GetUpdatedAt() time.Time {
+	if o == nil {
+		return time.Time{}
+	}
+	return o.UpdatedAt
+}
+
+func (o *Destination) GetURL() *string {
+	if o == nil {
+		return nil
+	}
+	return o.URL
 }

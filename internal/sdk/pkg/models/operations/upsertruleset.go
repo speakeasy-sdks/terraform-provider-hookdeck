@@ -15,12 +15,71 @@ type UpsertRulesetRequestBody struct {
 	Rules []shared.Rule `json:"rules,omitempty"`
 }
 
+func (o *UpsertRulesetRequestBody) GetIsTeamDefault() *bool {
+	if o == nil {
+		return nil
+	}
+	return o.IsTeamDefault
+}
+
+func (o *UpsertRulesetRequestBody) GetName() string {
+	if o == nil {
+		return ""
+	}
+	return o.Name
+}
+
+func (o *UpsertRulesetRequestBody) GetRules() []shared.Rule {
+	if o == nil {
+		return nil
+	}
+	return o.Rules
+}
+
 type UpsertRulesetResponse struct {
 	// Bad Request
 	APIErrorResponse *shared.APIErrorResponse
-	ContentType      string
+	// HTTP response content type for this operation
+	ContentType string
 	// A single ruleset
-	Ruleset     *shared.Ruleset
-	StatusCode  int
+	Ruleset *shared.Ruleset
+	// HTTP response status code for this operation
+	StatusCode int
+	// Raw HTTP response; suitable for custom response parsing
 	RawResponse *http.Response
+}
+
+func (o *UpsertRulesetResponse) GetAPIErrorResponse() *shared.APIErrorResponse {
+	if o == nil {
+		return nil
+	}
+	return o.APIErrorResponse
+}
+
+func (o *UpsertRulesetResponse) GetContentType() string {
+	if o == nil {
+		return ""
+	}
+	return o.ContentType
+}
+
+func (o *UpsertRulesetResponse) GetRuleset() *shared.Ruleset {
+	if o == nil {
+		return nil
+	}
+	return o.Ruleset
+}
+
+func (o *UpsertRulesetResponse) GetStatusCode() int {
+	if o == nil {
+		return 0
+	}
+	return o.StatusCode
+}
+
+func (o *UpsertRulesetResponse) GetRawResponse() *http.Response {
+	if o == nil {
+		return nil
+	}
+	return o.RawResponse
 }

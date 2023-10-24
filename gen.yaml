@@ -1,10 +1,28 @@
 configVersion: 1.0.0
+management:
+  docChecksum: d830a406b2443ec8c3f767c5da86b8c3
+  docVersion: 1.0.0
+  speakeasyVersion: 1.105.0
+  generationVersion: 2.169.3
 generation:
+  repoURL: https://github.com/speakeasy-sdks/terraform-provider-hookdeck.git
   sdkClassName: SDK
   sdkFlattening: true
   singleTagPerOp: false
   telemetryEnabled: false
+features:
+  terraform:
+    constsAndDefaults: 0.1.1
+    core: 2.93.0
+    globalSecurity: 2.81.1
+    globalServerURLs: 2.82.0
+    groups: 2.81.2
+    ignores: 2.81.1
+    nameOverrides: 2.81.1
+    unions: 2.81.5
 terraform:
-  version: 0.0.1
+  version: 0.1.0
   author: speakeasy
   packageName: hashicups
+  published: true
+  repoSubDirectory: .
