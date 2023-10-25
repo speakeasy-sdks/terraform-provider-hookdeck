@@ -7,3 +7,17 @@ type DeliveryIssueData struct {
 	TriggerAttempt *EventAttempt `json:"trigger_attempt,omitempty"`
 	TriggerEvent   *Event        `json:"trigger_event,omitempty"`
 }
+
+func (o *DeliveryIssueData) GetTriggerAttempt() *EventAttempt {
+	if o == nil {
+		return nil
+	}
+	return o.TriggerAttempt
+}
+
+func (o *DeliveryIssueData) GetTriggerEvent() *Event {
+	if o == nil {
+		return nil
+	}
+	return o.TriggerEvent
+}

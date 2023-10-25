@@ -3,10 +3,10 @@
 package shared
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"hashicups/internal/sdk/pkg/utils"
 	"time"
 )
 
@@ -47,21 +47,16 @@ func CreateEventAttemptBodyStr(str string) EventAttemptBody {
 }
 
 func (u *EventAttemptBody) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
 	eventAttemptBody1 := new(EventAttemptBody1)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&eventAttemptBody1); err == nil {
+	if err := utils.UnmarshalJSON(data, &eventAttemptBody1, "", true, true); err == nil {
 		u.EventAttemptBody1 = eventAttemptBody1
 		u.Type = EventAttemptBodyTypeEventAttemptBody1
 		return nil
 	}
 
 	str := new(string)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&str); err == nil {
+	if err := utils.UnmarshalJSON(data, &str, "", true, true); err == nil {
 		u.Str = str
 		u.Type = EventAttemptBodyTypeStr
 		return nil
@@ -72,14 +67,14 @@ func (u *EventAttemptBody) UnmarshalJSON(data []byte) error {
 
 func (u EventAttemptBody) MarshalJSON() ([]byte, error) {
 	if u.EventAttemptBody1 != nil {
-		return json.Marshal(u.EventAttemptBody1)
+		return utils.MarshalJSON(u.EventAttemptBody1, "", true)
 	}
 
 	if u.Str != nil {
-		return json.Marshal(u.Str)
+		return utils.MarshalJSON(u.Str, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 // EventAttemptHTTPMethod - HTTP method used to deliver the attempt
@@ -122,7 +117,6 @@ func (e *EventAttemptHTTPMethod) UnmarshalJSON(data []byte) error {
 	}
 }
 
-// EventAttempt - A single attempt
 type EventAttempt struct {
 	// Date the attempt was archived
 	ArchivedAt *string `json:"archived_at,omitempty"`
@@ -165,4 +159,169 @@ type EventAttempt struct {
 	Trigger *AttemptTrigger `json:"trigger,omitempty"`
 	// Date the attempt was last updated
 	UpdatedAt time.Time `json:"updated_at"`
+}
+
+func (e EventAttempt) MarshalJSON() ([]byte, error) {
+	return utils.MarshalJSON(e, "", false)
+}
+
+func (e *EventAttempt) UnmarshalJSON(data []byte) error {
+	if err := utils.UnmarshalJSON(data, &e, "", false, false); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *EventAttempt) GetArchivedAt() *string {
+	if o == nil {
+		return nil
+	}
+	return o.ArchivedAt
+}
+
+func (o *EventAttempt) GetAttemptNumber() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.AttemptNumber
+}
+
+func (o *EventAttempt) GetBody() *EventAttemptBody {
+	if o == nil {
+		return nil
+	}
+	return o.Body
+}
+
+func (o *EventAttempt) GetBulkRetryID() *string {
+	if o == nil {
+		return nil
+	}
+	return o.BulkRetryID
+}
+
+func (o *EventAttempt) GetCreatedAt() time.Time {
+	if o == nil {
+		return time.Time{}
+	}
+	return o.CreatedAt
+}
+
+func (o *EventAttempt) GetDeliveredAt() *time.Time {
+	if o == nil {
+		return nil
+	}
+	return o.DeliveredAt
+}
+
+func (o *EventAttempt) GetDeliveryLatency() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.DeliveryLatency
+}
+
+func (o *EventAttempt) GetDestinationID() *string {
+	if o == nil {
+		return nil
+	}
+	return o.DestinationID
+}
+
+func (o *EventAttempt) GetErrorCode() *AttemptErrorCode {
+	if o == nil {
+		return nil
+	}
+	return o.ErrorCode
+}
+
+func (o *EventAttempt) GetEventID() string {
+	if o == nil {
+		return ""
+	}
+	return o.EventID
+}
+
+func (o *EventAttempt) GetHTTPMethod() *EventAttemptHTTPMethod {
+	if o == nil {
+		return nil
+	}
+	return o.HTTPMethod
+}
+
+func (o *EventAttempt) GetID() string {
+	if o == nil {
+		return ""
+	}
+	return o.ID
+}
+
+func (o *EventAttempt) GetRequestedURL() *string {
+	if o == nil {
+		return nil
+	}
+	return o.RequestedURL
+}
+
+func (o *EventAttempt) GetRespondedAt() *time.Time {
+	if o == nil {
+		return nil
+	}
+	return o.RespondedAt
+}
+
+func (o *EventAttempt) GetResponseLatency() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.ResponseLatency
+}
+
+func (o *EventAttempt) GetResponseStatus() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.ResponseStatus
+}
+
+func (o *EventAttempt) GetState() *AttemptState {
+	if o == nil {
+		return nil
+	}
+	return o.State
+}
+
+func (o *EventAttempt) GetStatus() AttemptStatus {
+	if o == nil {
+		return AttemptStatus("")
+	}
+	return o.Status
+}
+
+func (o *EventAttempt) GetSuccessfulAt() *time.Time {
+	if o == nil {
+		return nil
+	}
+	return o.SuccessfulAt
+}
+
+func (o *EventAttempt) GetTeamID() string {
+	if o == nil {
+		return ""
+	}
+	return o.TeamID
+}
+
+func (o *EventAttempt) GetTrigger() *AttemptTrigger {
+	if o == nil {
+		return nil
+	}
+	return o.Trigger
+}
+
+func (o *EventAttempt) GetUpdatedAt() time.Time {
+	if o == nil {
+		return time.Time{}
+	}
+	return o.UpdatedAt
 }

@@ -2,7 +2,6 @@
 
 package shared
 
-// BatchOperationPlan - Ignored events bulk retry plan
 type BatchOperationPlan struct {
 	// Number of batches required to complete the bulk retry
 	EstimatedBatch *int64 `json:"estimated_batch,omitempty"`
@@ -10,4 +9,25 @@ type BatchOperationPlan struct {
 	EstimatedCount *int64 `json:"estimated_count,omitempty"`
 	// Progression of the batch operations, values 0 - 1
 	Progress *float32 `json:"progress,omitempty"`
+}
+
+func (o *BatchOperationPlan) GetEstimatedBatch() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.EstimatedBatch
+}
+
+func (o *BatchOperationPlan) GetEstimatedCount() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.EstimatedCount
+}
+
+func (o *BatchOperationPlan) GetProgress() *float32 {
+	if o == nil {
+		return nil
+	}
+	return o.Progress
 }
