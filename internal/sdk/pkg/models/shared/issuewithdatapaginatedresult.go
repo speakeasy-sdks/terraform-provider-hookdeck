@@ -2,9 +2,29 @@
 
 package shared
 
-// IssueWithDataPaginatedResult - List of issues
 type IssueWithDataPaginatedResult struct {
 	Count      *int64          `json:"count,omitempty"`
-	Models     []interface{}   `json:"models,omitempty"`
+	Models     []IssueWithData `json:"models,omitempty"`
 	Pagination *SeekPagination `json:"pagination,omitempty"`
+}
+
+func (o *IssueWithDataPaginatedResult) GetCount() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.Count
+}
+
+func (o *IssueWithDataPaginatedResult) GetModels() []IssueWithData {
+	if o == nil {
+		return nil
+	}
+	return o.Models
+}
+
+func (o *IssueWithDataPaginatedResult) GetPagination() *SeekPagination {
+	if o == nil {
+		return nil
+	}
+	return o.Pagination
 }

@@ -3,9 +3,8 @@
 package shared
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
+	"hashicups/internal/sdk/pkg/utils"
 )
 
 type TransformationExecutorOutputRequestBody2 struct {
@@ -44,23 +43,18 @@ func CreateTransformationExecutorOutputRequestBodyTransformationExecutorOutputRe
 }
 
 func (u *TransformationExecutorOutputRequestBody) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
-	str := new(string)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&str); err == nil {
-		u.Str = str
-		u.Type = TransformationExecutorOutputRequestBodyTypeStr
+	transformationExecutorOutputRequestBody2 := new(TransformationExecutorOutputRequestBody2)
+	if err := utils.UnmarshalJSON(data, &transformationExecutorOutputRequestBody2, "", true, true); err == nil {
+		u.TransformationExecutorOutputRequestBody2 = transformationExecutorOutputRequestBody2
+		u.Type = TransformationExecutorOutputRequestBodyTypeTransformationExecutorOutputRequestBody2
 		return nil
 	}
 
-	transformationExecutorOutputRequestBody2 := new(TransformationExecutorOutputRequestBody2)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&transformationExecutorOutputRequestBody2); err == nil {
-		u.TransformationExecutorOutputRequestBody2 = transformationExecutorOutputRequestBody2
-		u.Type = TransformationExecutorOutputRequestBodyTypeTransformationExecutorOutputRequestBody2
+	str := new(string)
+	if err := utils.UnmarshalJSON(data, &str, "", true, true); err == nil {
+		u.Str = str
+		u.Type = TransformationExecutorOutputRequestBodyTypeStr
 		return nil
 	}
 
@@ -69,14 +63,14 @@ func (u *TransformationExecutorOutputRequestBody) UnmarshalJSON(data []byte) err
 
 func (u TransformationExecutorOutputRequestBody) MarshalJSON() ([]byte, error) {
 	if u.Str != nil {
-		return json.Marshal(u.Str)
+		return utils.MarshalJSON(u.Str, "", true)
 	}
 
 	if u.TransformationExecutorOutputRequestBody2 != nil {
-		return json.Marshal(u.TransformationExecutorOutputRequestBody2)
+		return utils.MarshalJSON(u.TransformationExecutorOutputRequestBody2, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 type TransformationExecutorOutputRequestHeadersType string
@@ -112,21 +106,16 @@ func CreateTransformationExecutorOutputRequestHeadersMapOfany(mapOfany map[strin
 }
 
 func (u *TransformationExecutorOutputRequestHeaders) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
 	str := new(string)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&str); err == nil {
+	if err := utils.UnmarshalJSON(data, &str, "", true, true); err == nil {
 		u.Str = str
 		u.Type = TransformationExecutorOutputRequestHeadersTypeStr
 		return nil
 	}
 
 	mapOfany := map[string]interface{}{}
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&mapOfany); err == nil {
+	if err := utils.UnmarshalJSON(data, &mapOfany, "", true, true); err == nil {
 		u.MapOfany = mapOfany
 		u.Type = TransformationExecutorOutputRequestHeadersTypeMapOfany
 		return nil
@@ -137,14 +126,14 @@ func (u *TransformationExecutorOutputRequestHeaders) UnmarshalJSON(data []byte) 
 
 func (u TransformationExecutorOutputRequestHeaders) MarshalJSON() ([]byte, error) {
 	if u.Str != nil {
-		return json.Marshal(u.Str)
+		return utils.MarshalJSON(u.Str, "", true)
 	}
 
 	if u.MapOfany != nil {
-		return json.Marshal(u.MapOfany)
+		return utils.MarshalJSON(u.MapOfany, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 type TransformationExecutorOutputRequestParsedQuery2 struct {
@@ -183,23 +172,18 @@ func CreateTransformationExecutorOutputRequestParsedQueryTransformationExecutorO
 }
 
 func (u *TransformationExecutorOutputRequestParsedQuery) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
-	str := new(string)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&str); err == nil {
-		u.Str = str
-		u.Type = TransformationExecutorOutputRequestParsedQueryTypeStr
+	transformationExecutorOutputRequestParsedQuery2 := new(TransformationExecutorOutputRequestParsedQuery2)
+	if err := utils.UnmarshalJSON(data, &transformationExecutorOutputRequestParsedQuery2, "", true, true); err == nil {
+		u.TransformationExecutorOutputRequestParsedQuery2 = transformationExecutorOutputRequestParsedQuery2
+		u.Type = TransformationExecutorOutputRequestParsedQueryTypeTransformationExecutorOutputRequestParsedQuery2
 		return nil
 	}
 
-	transformationExecutorOutputRequestParsedQuery2 := new(TransformationExecutorOutputRequestParsedQuery2)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&transformationExecutorOutputRequestParsedQuery2); err == nil {
-		u.TransformationExecutorOutputRequestParsedQuery2 = transformationExecutorOutputRequestParsedQuery2
-		u.Type = TransformationExecutorOutputRequestParsedQueryTypeTransformationExecutorOutputRequestParsedQuery2
+	str := new(string)
+	if err := utils.UnmarshalJSON(data, &str, "", true, true); err == nil {
+		u.Str = str
+		u.Type = TransformationExecutorOutputRequestParsedQueryTypeStr
 		return nil
 	}
 
@@ -208,14 +192,14 @@ func (u *TransformationExecutorOutputRequestParsedQuery) UnmarshalJSON(data []by
 
 func (u TransformationExecutorOutputRequestParsedQuery) MarshalJSON() ([]byte, error) {
 	if u.Str != nil {
-		return json.Marshal(u.Str)
+		return utils.MarshalJSON(u.Str, "", true)
 	}
 
 	if u.TransformationExecutorOutputRequestParsedQuery2 != nil {
-		return json.Marshal(u.TransformationExecutorOutputRequestParsedQuery2)
+		return utils.MarshalJSON(u.TransformationExecutorOutputRequestParsedQuery2, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 type TransformationExecutorOutputRequestQuery1 struct {
@@ -254,21 +238,16 @@ func CreateTransformationExecutorOutputRequestQueryStr(str string) Transformatio
 }
 
 func (u *TransformationExecutorOutputRequestQuery) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
 	transformationExecutorOutputRequestQuery1 := new(TransformationExecutorOutputRequestQuery1)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&transformationExecutorOutputRequestQuery1); err == nil {
+	if err := utils.UnmarshalJSON(data, &transformationExecutorOutputRequestQuery1, "", true, true); err == nil {
 		u.TransformationExecutorOutputRequestQuery1 = transformationExecutorOutputRequestQuery1
 		u.Type = TransformationExecutorOutputRequestQueryTypeTransformationExecutorOutputRequestQuery1
 		return nil
 	}
 
 	str := new(string)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&str); err == nil {
+	if err := utils.UnmarshalJSON(data, &str, "", true, true); err == nil {
 		u.Str = str
 		u.Type = TransformationExecutorOutputRequestQueryTypeStr
 		return nil
@@ -279,14 +258,14 @@ func (u *TransformationExecutorOutputRequestQuery) UnmarshalJSON(data []byte) er
 
 func (u TransformationExecutorOutputRequestQuery) MarshalJSON() ([]byte, error) {
 	if u.TransformationExecutorOutputRequestQuery1 != nil {
-		return json.Marshal(u.TransformationExecutorOutputRequestQuery1)
+		return utils.MarshalJSON(u.TransformationExecutorOutputRequestQuery1, "", true)
 	}
 
 	if u.Str != nil {
-		return json.Marshal(u.Str)
+		return utils.MarshalJSON(u.Str, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 type TransformationExecutorOutputRequest struct {
@@ -297,7 +276,41 @@ type TransformationExecutorOutputRequest struct {
 	Query       *TransformationExecutorOutputRequestQuery       `json:"query,omitempty"`
 }
 
-// TransformationExecutorOutput - Transformation run output
+func (o *TransformationExecutorOutputRequest) GetBody() *TransformationExecutorOutputRequestBody {
+	if o == nil {
+		return nil
+	}
+	return o.Body
+}
+
+func (o *TransformationExecutorOutputRequest) GetHeaders() *TransformationExecutorOutputRequestHeaders {
+	if o == nil {
+		return nil
+	}
+	return o.Headers
+}
+
+func (o *TransformationExecutorOutputRequest) GetParsedQuery() *TransformationExecutorOutputRequestParsedQuery {
+	if o == nil {
+		return nil
+	}
+	return o.ParsedQuery
+}
+
+func (o *TransformationExecutorOutputRequest) GetPath() string {
+	if o == nil {
+		return ""
+	}
+	return o.Path
+}
+
+func (o *TransformationExecutorOutputRequest) GetQuery() *TransformationExecutorOutputRequestQuery {
+	if o == nil {
+		return nil
+	}
+	return o.Query
+}
+
 type TransformationExecutorOutput struct {
 	Console     []ConsoleLine `json:"console,omitempty"`
 	ExecutionID *string       `json:"execution_id,omitempty"`
@@ -306,4 +319,46 @@ type TransformationExecutorOutput struct {
 	Request          *TransformationExecutorOutputRequest `json:"request,omitempty"`
 	RequestID        *string                              `json:"request_id,omitempty"`
 	TransformationID *string                              `json:"transformation_id,omitempty"`
+}
+
+func (o *TransformationExecutorOutput) GetConsole() []ConsoleLine {
+	if o == nil {
+		return nil
+	}
+	return o.Console
+}
+
+func (o *TransformationExecutorOutput) GetExecutionID() *string {
+	if o == nil {
+		return nil
+	}
+	return o.ExecutionID
+}
+
+func (o *TransformationExecutorOutput) GetLogLevel() TransformationExecutionLogLevel {
+	if o == nil {
+		return TransformationExecutionLogLevel("")
+	}
+	return o.LogLevel
+}
+
+func (o *TransformationExecutorOutput) GetRequest() *TransformationExecutorOutputRequest {
+	if o == nil {
+		return nil
+	}
+	return o.Request
+}
+
+func (o *TransformationExecutorOutput) GetRequestID() *string {
+	if o == nil {
+		return nil
+	}
+	return o.RequestID
+}
+
+func (o *TransformationExecutorOutput) GetTransformationID() *string {
+	if o == nil {
+		return nil
+	}
+	return o.TransformationID
 }

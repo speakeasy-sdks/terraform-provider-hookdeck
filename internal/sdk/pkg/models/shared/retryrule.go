@@ -42,3 +42,31 @@ type RetryRule struct {
 	// A retry rule must be of type `retry`
 	Type RetryRuleType `json:"type"`
 }
+
+func (o *RetryRule) GetCount() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.Count
+}
+
+func (o *RetryRule) GetInterval() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.Interval
+}
+
+func (o *RetryRule) GetStrategy() RetryStrategy {
+	if o == nil {
+		return RetryStrategy("")
+	}
+	return o.Strategy
+}
+
+func (o *RetryRule) GetType() RetryRuleType {
+	if o == nil {
+		return RetryRuleType("")
+	}
+	return o.Type
+}

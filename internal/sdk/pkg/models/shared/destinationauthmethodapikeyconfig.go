@@ -5,6 +5,7 @@ package shared
 import (
 	"encoding/json"
 	"fmt"
+	"hashicups/internal/sdk/pkg/utils"
 )
 
 // DestinationAuthMethodAPIKeyConfigTo - Whether the API key should be sent as a header or a query parameter
@@ -42,5 +43,37 @@ type DestinationAuthMethodAPIKeyConfig struct {
 	// Key for the API key auth
 	Key string `json:"key"`
 	// Whether the API key should be sent as a header or a query parameter
-	To *DestinationAuthMethodAPIKeyConfigTo `json:"to,omitempty"`
+	To *DestinationAuthMethodAPIKeyConfigTo `default:"header" json:"to"`
+}
+
+func (d DestinationAuthMethodAPIKeyConfig) MarshalJSON() ([]byte, error) {
+	return utils.MarshalJSON(d, "", false)
+}
+
+func (d *DestinationAuthMethodAPIKeyConfig) UnmarshalJSON(data []byte) error {
+	if err := utils.UnmarshalJSON(data, &d, "", false, false); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *DestinationAuthMethodAPIKeyConfig) GetAPIKey() string {
+	if o == nil {
+		return ""
+	}
+	return o.APIKey
+}
+
+func (o *DestinationAuthMethodAPIKeyConfig) GetKey() string {
+	if o == nil {
+		return ""
+	}
+	return o.Key
+}
+
+func (o *DestinationAuthMethodAPIKeyConfig) GetTo() *DestinationAuthMethodAPIKeyConfigTo {
+	if o == nil {
+		return nil
+	}
+	return o.To
 }

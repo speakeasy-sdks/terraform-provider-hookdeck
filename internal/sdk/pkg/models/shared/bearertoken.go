@@ -39,3 +39,17 @@ type BearerToken struct {
 	// Type of auth method
 	Type BearerTokenType `json:"type"`
 }
+
+func (o *BearerToken) GetConfig() *DestinationAuthMethodBearerTokenConfig {
+	if o == nil {
+		return nil
+	}
+	return o.Config
+}
+
+func (o *BearerToken) GetType() BearerTokenType {
+	if o == nil {
+		return BearerTokenType("")
+	}
+	return o.Type
+}

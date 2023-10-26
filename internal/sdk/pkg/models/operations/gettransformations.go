@@ -3,11 +3,11 @@
 package operations
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"hashicups/internal/sdk/pkg/models/shared"
+	"hashicups/internal/sdk/pkg/utils"
 	"net/http"
 )
 
@@ -99,21 +99,16 @@ func CreateGetTransformationsDirArrayOfgetTransformationsDir2(arrayOfgetTransfor
 }
 
 func (u *GetTransformationsDir) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
 	getTransformationsDir1 := new(GetTransformationsDir1)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&getTransformationsDir1); err == nil {
+	if err := utils.UnmarshalJSON(data, &getTransformationsDir1, "", true, true); err == nil {
 		u.GetTransformationsDir1 = getTransformationsDir1
 		u.Type = GetTransformationsDirTypeGetTransformationsDir1
 		return nil
 	}
 
 	arrayOfgetTransformationsDir2 := []GetTransformationsDir2{}
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&arrayOfgetTransformationsDir2); err == nil {
+	if err := utils.UnmarshalJSON(data, &arrayOfgetTransformationsDir2, "", true, true); err == nil {
 		u.ArrayOfgetTransformationsDir2 = arrayOfgetTransformationsDir2
 		u.Type = GetTransformationsDirTypeArrayOfgetTransformationsDir2
 		return nil
@@ -124,14 +119,14 @@ func (u *GetTransformationsDir) UnmarshalJSON(data []byte) error {
 
 func (u GetTransformationsDir) MarshalJSON() ([]byte, error) {
 	if u.GetTransformationsDir1 != nil {
-		return json.Marshal(u.GetTransformationsDir1)
+		return utils.MarshalJSON(u.GetTransformationsDir1, "", true)
 	}
 
 	if u.ArrayOfgetTransformationsDir2 != nil {
-		return json.Marshal(u.ArrayOfgetTransformationsDir2)
+		return utils.MarshalJSON(u.ArrayOfgetTransformationsDir2, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 type GetTransformationsIDType string
@@ -167,21 +162,16 @@ func CreateGetTransformationsIDArrayOfstr(arrayOfstr []string) GetTransformation
 }
 
 func (u *GetTransformationsID) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
 	str := new(string)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&str); err == nil {
+	if err := utils.UnmarshalJSON(data, &str, "", true, true); err == nil {
 		u.Str = str
 		u.Type = GetTransformationsIDTypeStr
 		return nil
 	}
 
 	arrayOfstr := []string{}
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&arrayOfstr); err == nil {
+	if err := utils.UnmarshalJSON(data, &arrayOfstr, "", true, true); err == nil {
 		u.ArrayOfstr = arrayOfstr
 		u.Type = GetTransformationsIDTypeArrayOfstr
 		return nil
@@ -192,14 +182,14 @@ func (u *GetTransformationsID) UnmarshalJSON(data []byte) error {
 
 func (u GetTransformationsID) MarshalJSON() ([]byte, error) {
 	if u.Str != nil {
-		return json.Marshal(u.Str)
+		return utils.MarshalJSON(u.Str, "", true)
 	}
 
 	if u.ArrayOfstr != nil {
-		return json.Marshal(u.ArrayOfstr)
+		return utils.MarshalJSON(u.ArrayOfstr, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 type GetTransformationsNameType string
@@ -235,21 +225,16 @@ func CreateGetTransformationsNameArrayOfstr(arrayOfstr []string) GetTransformati
 }
 
 func (u *GetTransformationsName) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
 	str := new(string)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&str); err == nil {
+	if err := utils.UnmarshalJSON(data, &str, "", true, true); err == nil {
 		u.Str = str
 		u.Type = GetTransformationsNameTypeStr
 		return nil
 	}
 
 	arrayOfstr := []string{}
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&arrayOfstr); err == nil {
+	if err := utils.UnmarshalJSON(data, &arrayOfstr, "", true, true); err == nil {
 		u.ArrayOfstr = arrayOfstr
 		u.Type = GetTransformationsNameTypeArrayOfstr
 		return nil
@@ -260,14 +245,14 @@ func (u *GetTransformationsName) UnmarshalJSON(data []byte) error {
 
 func (u GetTransformationsName) MarshalJSON() ([]byte, error) {
 	if u.Str != nil {
-		return json.Marshal(u.Str)
+		return utils.MarshalJSON(u.Str, "", true)
 	}
 
 	if u.ArrayOfstr != nil {
-		return json.Marshal(u.ArrayOfstr)
+		return utils.MarshalJSON(u.ArrayOfstr, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 type GetTransformationsOrderBy2 string
@@ -352,21 +337,16 @@ func CreateGetTransformationsOrderByArrayOfgetTransformationsOrderBy2(arrayOfget
 }
 
 func (u *GetTransformationsOrderBy) UnmarshalJSON(data []byte) error {
-	var d *json.Decoder
 
 	getTransformationsOrderBy1 := new(GetTransformationsOrderBy1)
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&getTransformationsOrderBy1); err == nil {
+	if err := utils.UnmarshalJSON(data, &getTransformationsOrderBy1, "", true, true); err == nil {
 		u.GetTransformationsOrderBy1 = getTransformationsOrderBy1
 		u.Type = GetTransformationsOrderByTypeGetTransformationsOrderBy1
 		return nil
 	}
 
 	arrayOfgetTransformationsOrderBy2 := []GetTransformationsOrderBy2{}
-	d = json.NewDecoder(bytes.NewReader(data))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&arrayOfgetTransformationsOrderBy2); err == nil {
+	if err := utils.UnmarshalJSON(data, &arrayOfgetTransformationsOrderBy2, "", true, true); err == nil {
 		u.ArrayOfgetTransformationsOrderBy2 = arrayOfgetTransformationsOrderBy2
 		u.Type = GetTransformationsOrderByTypeArrayOfgetTransformationsOrderBy2
 		return nil
@@ -377,14 +357,14 @@ func (u *GetTransformationsOrderBy) UnmarshalJSON(data []byte) error {
 
 func (u GetTransformationsOrderBy) MarshalJSON() ([]byte, error) {
 	if u.GetTransformationsOrderBy1 != nil {
-		return json.Marshal(u.GetTransformationsOrderBy1)
+		return utils.MarshalJSON(u.GetTransformationsOrderBy1, "", true)
 	}
 
 	if u.ArrayOfgetTransformationsOrderBy2 != nil {
-		return json.Marshal(u.ArrayOfgetTransformationsOrderBy2)
+		return utils.MarshalJSON(u.ArrayOfgetTransformationsOrderBy2, "", true)
 	}
 
-	return nil, nil
+	return nil, errors.New("could not marshal union type: all fields are null")
 }
 
 type GetTransformationsRequest struct {
@@ -397,12 +377,99 @@ type GetTransformationsRequest struct {
 	Prev    *string                    `queryParam:"style=form,explode=true,name=prev"`
 }
 
+func (o *GetTransformationsRequest) GetDir() *GetTransformationsDir {
+	if o == nil {
+		return nil
+	}
+	return o.Dir
+}
+
+func (o *GetTransformationsRequest) GetID() *GetTransformationsID {
+	if o == nil {
+		return nil
+	}
+	return o.ID
+}
+
+func (o *GetTransformationsRequest) GetLimit() *int64 {
+	if o == nil {
+		return nil
+	}
+	return o.Limit
+}
+
+func (o *GetTransformationsRequest) GetName() *GetTransformationsName {
+	if o == nil {
+		return nil
+	}
+	return o.Name
+}
+
+func (o *GetTransformationsRequest) GetNext() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Next
+}
+
+func (o *GetTransformationsRequest) GetOrderBy() *GetTransformationsOrderBy {
+	if o == nil {
+		return nil
+	}
+	return o.OrderBy
+}
+
+func (o *GetTransformationsRequest) GetPrev() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Prev
+}
+
 type GetTransformationsResponse struct {
 	// Bad Request
 	APIErrorResponse *shared.APIErrorResponse
-	ContentType      string
-	StatusCode       int
-	RawResponse      *http.Response
+	// HTTP response content type for this operation
+	ContentType string
+	// HTTP response status code for this operation
+	StatusCode int
+	// Raw HTTP response; suitable for custom response parsing
+	RawResponse *http.Response
 	// List of transformations
 	TransformationPaginatedResult *shared.TransformationPaginatedResult
+}
+
+func (o *GetTransformationsResponse) GetAPIErrorResponse() *shared.APIErrorResponse {
+	if o == nil {
+		return nil
+	}
+	return o.APIErrorResponse
+}
+
+func (o *GetTransformationsResponse) GetContentType() string {
+	if o == nil {
+		return ""
+	}
+	return o.ContentType
+}
+
+func (o *GetTransformationsResponse) GetStatusCode() int {
+	if o == nil {
+		return 0
+	}
+	return o.StatusCode
+}
+
+func (o *GetTransformationsResponse) GetRawResponse() *http.Response {
+	if o == nil {
+		return nil
+	}
+	return o.RawResponse
+}
+
+func (o *GetTransformationsResponse) GetTransformationPaginatedResult() *shared.TransformationPaginatedResult {
+	if o == nil {
+		return nil
+	}
+	return o.TransformationPaginatedResult
 }

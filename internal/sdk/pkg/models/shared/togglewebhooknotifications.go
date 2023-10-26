@@ -2,9 +2,29 @@
 
 package shared
 
-// ToggleWebhookNotifications - Toggle operation status response
 type ToggleWebhookNotifications struct {
 	Enabled  bool          `json:"enabled"`
 	SourceID string        `json:"source_id"`
 	Topics   []TopicsValue `json:"topics,omitempty"`
+}
+
+func (o *ToggleWebhookNotifications) GetEnabled() bool {
+	if o == nil {
+		return false
+	}
+	return o.Enabled
+}
+
+func (o *ToggleWebhookNotifications) GetSourceID() string {
+	if o == nil {
+		return ""
+	}
+	return o.SourceID
+}
+
+func (o *ToggleWebhookNotifications) GetTopics() []TopicsValue {
+	if o == nil {
+		return nil
+	}
+	return o.Topics
 }

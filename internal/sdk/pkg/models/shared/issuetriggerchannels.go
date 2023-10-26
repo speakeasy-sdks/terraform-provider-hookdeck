@@ -11,3 +11,24 @@ type IssueTriggerChannels struct {
 	// Slack channel for an issue trigger
 	Slack *IssueTriggerSlackChannel `json:"slack,omitempty"`
 }
+
+func (o *IssueTriggerChannels) GetEmail() *IssueTriggerEmailChannel {
+	if o == nil {
+		return nil
+	}
+	return o.Email
+}
+
+func (o *IssueTriggerChannels) GetOpsgenie() *IssueTriggerIntegrationChannel {
+	if o == nil {
+		return nil
+	}
+	return o.Opsgenie
+}
+
+func (o *IssueTriggerChannels) GetSlack() *IssueTriggerSlackChannel {
+	if o == nil {
+		return nil
+	}
+	return o.Slack
+}

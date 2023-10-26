@@ -7,3 +7,10 @@ type IssueTriggerSlackChannel struct {
 	// Channel name
 	ChannelName string `json:"channel_name"`
 }
+
+func (o *IssueTriggerSlackChannel) GetChannelName() string {
+	if o == nil {
+		return ""
+	}
+	return o.ChannelName
+}

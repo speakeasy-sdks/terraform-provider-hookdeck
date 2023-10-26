@@ -8,3 +8,17 @@ type TransformationIssueReference struct {
 	// Deprecated but still found on historical issues
 	TriggerEventRequestTransformationID *string `json:"trigger_event_request_transformation_id,omitempty"`
 }
+
+func (o *TransformationIssueReference) GetTransformationExecutionID() string {
+	if o == nil {
+		return ""
+	}
+	return o.TransformationExecutionID
+}
+
+func (o *TransformationIssueReference) GetTriggerEventRequestTransformationID() *string {
+	if o == nil {
+		return nil
+	}
+	return o.TriggerEventRequestTransformationID
+}

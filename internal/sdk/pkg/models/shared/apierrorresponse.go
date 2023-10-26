@@ -15,3 +15,31 @@ type APIErrorResponse struct {
 	// Status code
 	Status float32 `json:"status"`
 }
+
+func (o *APIErrorResponse) GetCode() string {
+	if o == nil {
+		return ""
+	}
+	return o.Code
+}
+
+func (o *APIErrorResponse) GetData() *APIErrorResponseData {
+	if o == nil {
+		return nil
+	}
+	return o.Data
+}
+
+func (o *APIErrorResponse) GetMessage() string {
+	if o == nil {
+		return ""
+	}
+	return o.Message
+}
+
+func (o *APIErrorResponse) GetStatus() float32 {
+	if o == nil {
+		return 0.0
+	}
+	return o.Status
+}
